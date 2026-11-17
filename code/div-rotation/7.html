@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>股息率区间轮动策略 V1.4 代码</title>
+<meta name="description" content="股息率区间轮动策略 V1.4（22家千亿银行股）">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 22l6-7 5 4 9-11' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="top"><div class="bar"><a class="brand" href="../../index.html">量化策略库</a>
+<nav><a href="../../index.html#dividend">股息率策略</a><a href="../../index.html#trend">趋势策略</a><a href="../../index.html#news">消息股策略</a></nav></div></header>
+<main class="wrap">
+<nav class="crumb"><a href="../../index.html">策略库</a> / <a href="../../index.html#dividend">股息率策略</a> / <a href="../../s/div-rotation.html">股息率区间轮动策略</a></nav>
+<section class="codehead"><h1>股息率区间轮动策略 · V1.4</h1><p class="sub">股息率区间轮动策略 V1.4（22家千亿银行股）</p><p class="sub2">V1.4：在 V1.2 的 20 家基础上新增宁波银行、杭州银行（2026-09-30 市值超千亿），区间手动填入；其余同 V1.2。</p>
+<div class="vers"><a class="vchip" href="1.html">V1.0</a><a class="vchip" href="2.html">V1.1</a><a class="vchip" href="3.html">V1.2</a><a class="vchip" href="4.html">V1.2.1</a><a class="vchip" href="5.html">V1.2.2</a><a class="vchip" href="6.html">V1.3</a><a class="vchip on" href="7.html">V1.4</a><a class="vchip" href="8.html">V2.1</a><a class="vchip" href="9.html">V2.2</a><a class="vchip" href="10.html">V2.3</a><a class="vchip" href="11.html">V2.4</a><a class="vchip" href="12.html">V3.1</a><a class="vchip" href="13.html">V3.2</a><a class="vchip" href="14.html">V3.3</a><a class="vchip" href="15.html">V3.4</a><a class="vchip" href="16.html">全板块 V1.0</a></div>
+<div class="tools"><span class="mono">股息率区间轮动策略_V1.4.py · 211 行 · 10 KB</span><span class="grow"></span>
+<button class="btn" id="copy" type="button">复制代码</button><a class="btn" href="../../files/div-rotation/%E8%82%A1%E6%81%AF%E7%8E%87%E5%8C%BA%E9%97%B4%E8%BD%AE%E5%8A%A8%E7%AD%96%E7%95%A5_V1.4.py" download>下载 .py</a></div></section>
+<div class="codebox"><div class="hl"><table class="hltable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">  1</span>
+<span class="normal">  2</span>
+<span class="normal">  3</span>
+<span class="normal">  4</span>
+<span class="normal">  5</span>
+<span class="normal">  6</span>
+<span class="normal">  7</span>
+<span class="normal">  8</span>
+<span class="normal">  9</span>
+<span class="normal"> 10</span>
+<span class="normal"> 11</span>
+<span class="normal"> 12</span>
+<span class="normal"> 13</span>
+<span class="normal"> 14</span>
+<span class="normal"> 15</span>
+<span class="normal"> 16</span>
+<span class="normal"> 17</span>
+<span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span></pre></div></td><td class="code"><div><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">股息率区间轮动策略 V1.4（22家千亿银行股）</span>
+
+<span class="sd">V1.4：在 V1.2 的 20 家基础上新增宁波银行、杭州银行（2026-09-30 市值超千亿），区间手动填入；其余同 V1.2。</span>
+<span class="sd">V1.2：股息率改为 TTM（滚动 12 个月）口径；其余同 V1.1。</span>
+<span class="sd">V1.1：换仓门槛 SWITCH_MARGIN 默认 0.005（0.5个百分点），减少来回换仓；其余同 V1.0。</span>
+
+<span class="sd">买入：股息率 &gt; 该股「最常见区间」上限（买入线）</span>
+<span class="sd">卖出：股息率 &lt; 该股「最常见区间」下限（卖出线）</span>
+<span class="sd">仓位：每只占当前总资产 50%，最多持有 2 只</span>
+<span class="sd">排序：按「距卖出线距离 = 股息率 - 卖出线」从大到小；</span>
+<span class="sd">      持仓股(未触发卖出) + 买入候选 一起排序取前 2 名，</span>
+<span class="sd">      满仓时若候选比持仓更远，则卖出较近的持仓、换入候选。</span>
+<span class="sd">股息率：TTM 股息率 = 最近 12 个月报告期对应的每股现金分红 ÷ 当前价</span>
+<span class="sd">        （数据：finance.STK_XR_XD；送转股按除权后股本折算）</span>
+<span class="sd">        做法：以已除息分红中最新的报告期 R 为终点，取 (R-12个月, R] 这一年；</span>
+<span class="sd">        每笔分红覆盖「上一笔分红的报告期 ~ 本报告期」，按落在这一年里的比例计入。</span>
+<span class="sd">        例：工行 2026-10 = 2025 年末期(覆盖 2025H2) + 2026 年中期(覆盖 2026H1)。</span>
+<span class="sd">        不用「过去 365 天除息」：除息日每年前后漂移，会出现同年分红算两次(股息率翻倍)</span>
+<span class="sd">        或某笔分红暂时掉出窗口(股息率腰斩)，产生假的买卖信号；</span>
+<span class="sd">        也避免首次实施中期分红的年份，上年全年末期 + 本年中期被叠加。</span>
+<span class="sd">成交：分钟回测，每天 14:55 用当前价近似收盘价，计算信号并下单。</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">builtins</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jqdata</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="c1"># jqdata 会覆盖内置函数，恢复</span>
+<span class="nb">sum</span><span class="p">,</span> <span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="nb">abs</span><span class="p">,</span> <span class="nb">any</span><span class="p">,</span> <span class="nb">all</span><span class="p">,</span> <span class="nb">round</span> <span class="o">=</span> <span class="p">(</span><span class="n">builtins</span><span class="o">.</span><span class="n">sum</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">abs</span><span class="p">,</span>
+                                       <span class="n">builtins</span><span class="o">.</span><span class="n">any</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">all</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">round</span><span class="p">)</span>
+
+<span class="n">VERSION</span> <span class="o">=</span> <span class="s2">&quot;股息率区间轮动策略 V1.4&quot;</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Cfg</span><span class="p">:</span>
+    <span class="c1"># 代码: (名称, 卖出线, 买入线)  —— 近一年(2025-10-29~2026-10-29) TTM 股息率按0.5%分档的最常见区间</span>
+    <span class="n">BANDS</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;601398.XSHG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;工商银行&quot;</span><span class="p">,</span> <span class="mf">0.040</span><span class="p">,</span> <span class="mf">0.045</span><span class="p">),</span>
+        <span class="s2">&quot;601288.XSHG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;农业银行&quot;</span><span class="p">,</span> <span class="mf">0.035</span><span class="p">,</span> <span class="mf">0.040</span><span class="p">),</span>
+        <span class="s2">&quot;601988.XSHG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;中国银行&quot;</span><span class="p">,</span> <span class="mf">0.040</span><span class="p">,</span> <span class="mf">0.045</span><span class="p">),</span>
+        <span class="s2">&quot;601939.XSHG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;建设银行&quot;</span><span class="p">,</span> <span class="mf">0.040</span><span class="p">,</span> <span class="mf">0.045</span><span class="p">),</span>
+        <span class="s2">&quot;601658.XSHG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;邮储银行&quot;</span><span class="p">,</span> <span class="mf">0.045</span><span class="p">,</span> <span class="mf">0.050</span><span class="p">),</span>
+        <span class="s2">&quot;601328.XSHG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;交通银行&quot;</span><span class="p">,</span> <span class="mf">0.050</span><span class="p">,</span> <span class="mf">0.055</span><span class="p">),</span>
+        <span class="s2">&quot;601818.XSHG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;光大银行&quot;</span><span class="p">,</span> <span class="mf">0.055</span><span class="p">,</span> <span class="mf">0.060</span><span class="p">),</span>
+        <span class="s2">&quot;601998.XSHG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;中信银行&quot;</span><span class="p">,</span> <span class="mf">0.045</span><span class="p">,</span> <span class="mf">0.050</span><span class="p">),</span>
+        <span class="s2">&quot;600016.XSHG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;民生银行&quot;</span><span class="p">,</span> <span class="mf">0.050</span><span class="p">,</span> <span class="mf">0.055</span><span class="p">),</span>
+        <span class="s2">&quot;600000.XSHG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;浦发银行&quot;</span><span class="p">,</span> <span class="mf">0.040</span><span class="p">,</span> <span class="mf">0.045</span><span class="p">),</span>
+        <span class="s2">&quot;601916.XSHG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;浙商银行&quot;</span><span class="p">,</span> <span class="mf">0.050</span><span class="p">,</span> <span class="mf">0.055</span><span class="p">),</span>
+        <span class="s2">&quot;600036.XSHG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;招商银行&quot;</span><span class="p">,</span> <span class="mf">0.050</span><span class="p">,</span> <span class="mf">0.055</span><span class="p">),</span>
+        <span class="s2">&quot;601166.XSHG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;兴业银行&quot;</span><span class="p">,</span> <span class="mf">0.055</span><span class="p">,</span> <span class="mf">0.060</span><span class="p">),</span>
+        <span class="s2">&quot;601169.XSHG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;北京银行&quot;</span><span class="p">,</span> <span class="mf">0.055</span><span class="p">,</span> <span class="mf">0.060</span><span class="p">),</span>
+        <span class="s2">&quot;000001.XSHE&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;平安银行&quot;</span><span class="p">,</span> <span class="mf">0.050</span><span class="p">,</span> <span class="mf">0.055</span><span class="p">),</span>
+        <span class="s2">&quot;600919.XSHG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;江苏银行&quot;</span><span class="p">,</span> <span class="mf">0.045</span><span class="p">,</span> <span class="mf">0.050</span><span class="p">),</span>
+        <span class="s2">&quot;600015.XSHG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;华夏银行&quot;</span><span class="p">,</span> <span class="mf">0.055</span><span class="p">,</span> <span class="mf">0.060</span><span class="p">),</span>
+        <span class="s2">&quot;601229.XSHG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;上海银行&quot;</span><span class="p">,</span> <span class="mf">0.050</span><span class="p">,</span> <span class="mf">0.055</span><span class="p">),</span>
+        <span class="s2">&quot;601009.XSHG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;南京银行&quot;</span><span class="p">,</span> <span class="mf">0.045</span><span class="p">,</span> <span class="mf">0.050</span><span class="p">),</span>
+        <span class="s2">&quot;601077.XSHG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;渝农商行&quot;</span><span class="p">,</span> <span class="mf">0.045</span><span class="p">,</span> <span class="mf">0.050</span><span class="p">),</span>
+        <span class="c1"># V1.4 新增（手动填入）：近一年 TTM 最常见区间</span>
+        <span class="s2">&quot;002142.XSHE&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;宁波银行&quot;</span><span class="p">,</span> <span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.030</span><span class="p">),</span>
+        <span class="s2">&quot;600926.XSHG&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;杭州银行&quot;</span><span class="p">,</span> <span class="mf">0.040</span><span class="p">,</span> <span class="mf">0.045</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="n">MAX_HOLD</span> <span class="o">=</span> <span class="mi">2</span>            <span class="c1"># 最多持有只数</span>
+    <span class="n">WEIGHT</span> <span class="o">=</span> <span class="mf">0.5</span>            <span class="c1"># 每只占当前总资产比例</span>
+    <span class="n">RANK_MODE</span> <span class="o">=</span> <span class="s2">&quot;abs&quot;</span>       <span class="c1"># 距卖出线距离: &quot;abs&quot;=股息率-卖出线(百分点)；&quot;rel&quot;=股息率/卖出线-1</span>
+    <span class="n">SWITCH_MARGIN</span> <span class="o">=</span> <span class="mf">0.005</span>   <span class="c1"># 换仓门槛：候选距离需比被换持仓多出 0.5 个百分点才换(0=只要更远就换)</span>
+    <span class="n">TRADE_TIME</span> <span class="o">=</span> <span class="s2">&quot;14:55&quot;</span>
+    <span class="n">DEBUG</span> <span class="o">=</span> <span class="kc">True</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+    <span class="n">set_benchmark</span><span class="p">(</span><span class="s2">&quot;000300.XSHG&quot;</span><span class="p">)</span>
+    <span class="n">set_option</span><span class="p">(</span><span class="s2">&quot;use_real_price&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">set_option</span><span class="p">(</span><span class="s2">&quot;avoid_future_data&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">set_level</span><span class="p">(</span><span class="s2">&quot;order&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">)</span>
+    <span class="n">set_order_cost</span><span class="p">(</span><span class="n">OrderCost</span><span class="p">(</span><span class="n">open_tax</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">close_tax</span><span class="o">=</span><span class="mf">0.0005</span><span class="p">,</span> <span class="n">open_commission</span><span class="o">=</span><span class="mf">0.00025</span><span class="p">,</span>
+                             <span class="n">close_commission</span><span class="o">=</span><span class="mf">0.00025</span><span class="p">,</span> <span class="n">close_today_commission</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">min_commission</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;stock&quot;</span><span class="p">)</span>
+    <span class="n">set_slippage</span><span class="p">(</span><span class="n">FixedSlippage</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">div</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">run_daily</span><span class="p">(</span><span class="n">load_dividends</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="s2">&quot;before_open&quot;</span><span class="p">)</span>
+    <span class="n">run_daily</span><span class="p">(</span><span class="n">trade</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">Cfg</span><span class="o">.</span><span class="n">TRADE_TIME</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">VERSION</span><span class="p">)</span>
+
+
+<span class="c1"># ---------------- 分红数据与股息率 ----------------</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_dividends</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;每天盘前读取股票池的分红送转记录（只保留已除权除息的）。&quot;&quot;&quot;</span>
+    <span class="n">codes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Cfg</span><span class="o">.</span><span class="n">BANDS</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">query</span><span class="p">(</span><span class="n">finance</span><span class="o">.</span><span class="n">STK_XR_XD</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">finance</span><span class="o">.</span><span class="n">STK_XR_XD</span><span class="o">.</span><span class="n">report_date</span><span class="p">,</span> <span class="n">finance</span><span class="o">.</span><span class="n">STK_XR_XD</span><span class="o">.</span><span class="n">a_xr_date</span><span class="p">,</span>
+              <span class="n">finance</span><span class="o">.</span><span class="n">STK_XR_XD</span><span class="o">.</span><span class="n">bonus_ratio_rmb</span><span class="p">,</span> <span class="n">finance</span><span class="o">.</span><span class="n">STK_XR_XD</span><span class="o">.</span><span class="n">dividend_ratio</span><span class="p">,</span>
+              <span class="n">finance</span><span class="o">.</span><span class="n">STK_XR_XD</span><span class="o">.</span><span class="n">transfer_ratio</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+        <span class="n">finance</span><span class="o">.</span><span class="n">STK_XR_XD</span><span class="o">.</span><span class="n">code</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">codes</span><span class="p">),</span>
+        <span class="n">finance</span><span class="o">.</span><span class="n">STK_XR_XD</span><span class="o">.</span><span class="n">a_xr_date</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">finance</span><span class="o">.</span><span class="n">STK_XR_XD</span><span class="o">.</span><span class="n">report_date</span> <span class="o">&gt;=</span> <span class="s2">&quot;2010-01-01&quot;</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">finance</span><span class="o">.</span><span class="n">run_query</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;a_xr_date&quot;</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">current_dt</span><span class="o">.</span><span class="n">date</span><span class="p">())]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;bonus_ratio_rmb&quot;</span><span class="p">,</span> <span class="s2">&quot;dividend_ratio&quot;</span><span class="p">,</span> <span class="s2">&quot;transfer_ratio&quot;</span><span class="p">]:</span>
+        <span class="n">df</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;xr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;a_xr_date&quot;</span><span class="p">])</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;rd&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;report_date&quot;</span><span class="p">])</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;fy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;rd&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">year</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;annual&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;rd&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">12</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;bonus&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;dividend_ratio&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;transfer_ratio&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="mf">10.0</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">div</span> <span class="o">=</span> <span class="n">df</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">ttm_dps</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">today</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;最近 12 个月报告期的每股现金分红（折算为当前股本）。&quot;&quot;&quot;</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">div</span><span class="p">[(</span><span class="n">g</span><span class="o">.</span><span class="n">div</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="n">code</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">div</span><span class="o">.</span><span class="n">bonus_ratio_rmb</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">div</span><span class="o">.</span><span class="n">xr</span> <span class="o">&lt;=</span> <span class="n">today</span><span class="p">)]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;rd&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">allx</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">div</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">div</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="n">code</span><span class="p">]</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">rd</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">pd</span><span class="o">.</span><span class="n">DateOffset</span><span class="p">(</span><span class="n">months</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+    <span class="c1"># 每笔分红覆盖 (上一个分红报告期, 本报告期]；同一报告期多笔分红共用同一覆盖期</span>
+    <span class="n">rds</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">rd</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>     <span class="c1"># 旧版 pandas 的 unique() 返回 numpy datetime64，转成 Timestamp</span>
+    <span class="n">prev</span> <span class="o">=</span> <span class="p">{</span><span class="n">r</span><span class="p">:</span> <span class="p">(</span><span class="n">rds</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">i</span> <span class="k">else</span> <span class="n">r</span> <span class="o">-</span> <span class="n">pd</span><span class="o">.</span><span class="n">DateOffset</span><span class="p">(</span><span class="n">months</span><span class="o">=</span><span class="mi">12</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rds</span><span class="p">)}</span>
+    <span class="n">dps</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">s0</span> <span class="o">=</span> <span class="n">prev</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">rd</span><span class="p">)]</span>
+        <span class="n">span</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">rd</span> <span class="o">-</span> <span class="n">s0</span><span class="p">)</span><span class="o">.</span><span class="n">days</span>
+        <span class="n">part</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">rd</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span> <span class="o">-</span> <span class="nb">max</span><span class="p">(</span><span class="n">s0</span><span class="p">,</span> <span class="n">start</span><span class="p">))</span><span class="o">.</span><span class="n">days</span><span class="p">)</span> <span class="o">/</span> <span class="n">span</span> <span class="k">if</span> <span class="n">span</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">part</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="c1"># 该次及之后的送转会摊薄每股分红</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">allx</span><span class="p">[(</span><span class="n">allx</span><span class="o">.</span><span class="n">xr</span> <span class="o">&gt;=</span> <span class="n">r</span><span class="o">.</span><span class="n">xr</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">allx</span><span class="o">.</span><span class="n">bonus</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)]</span><span class="o">.</span><span class="n">bonus</span><span class="p">:</span>
+            <span class="n">factor</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">b</span>
+        <span class="n">dps</span> <span class="o">+=</span> <span class="n">r</span><span class="o">.</span><span class="n">bonus_ratio_rmb</span> <span class="o">/</span> <span class="mf">10.0</span> <span class="o">/</span> <span class="n">factor</span> <span class="o">*</span> <span class="n">part</span>
+    <span class="k">return</span> <span class="n">dps</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">distance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">low</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">y</span> <span class="o">-</span> <span class="n">low</span> <span class="k">if</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">RANK_MODE</span> <span class="o">==</span> <span class="s2">&quot;abs&quot;</span> <span class="k">else</span> <span class="n">y</span> <span class="o">/</span> <span class="n">low</span> <span class="o">-</span> <span class="mi">1</span>
+
+
+<span class="c1"># ---------------- 交易 ----------------</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">trade</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+    <span class="n">cd</span> <span class="o">=</span> <span class="n">get_current_data</span><span class="p">()</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">positions</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">today</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">current_dt</span><span class="o">.</span><span class="n">date</span><span class="p">())</span>
+    <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span> <span class="ow">in</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">BANDS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">cd</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">paused</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">last_price</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">last_price</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">dps</span> <span class="o">=</span> <span class="n">ttm_dps</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">today</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dps</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">dps</span> <span class="o">/</span> <span class="n">c</span><span class="o">.</span><span class="n">last_price</span>
+        <span class="n">info</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="n">high</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="n">distance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">low</span><span class="p">),</span> <span class="n">price</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">last_price</span><span class="p">)</span>
+
+    <span class="n">held</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">pos</span> <span class="k">if</span> <span class="n">pos</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">total_amount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># 1) 卖出：股息率跌破卖出线</span>
+    <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">held</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;low&quot;</span><span class="p">]:</span>
+            <span class="n">_sell</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;跌破卖出线 股息率</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2%</span><span class="si">}</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;low&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">held</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">held</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">pos</span> <span class="ow">and</span> <span class="n">pos</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">total_amount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># 2) 持仓 + 买入候选 一起按距卖出线排序，取前 MAX_HOLD</span>
+    <span class="n">cands</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">held</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;high&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cd</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">high_limit</span> <span class="o">==</span> <span class="n">cd</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">last_price</span><span class="p">]</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">held</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">info</span><span class="p">]</span> <span class="o">+</span> <span class="n">cands</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="s2">&quot;dist&quot;</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">pool</span><span class="p">[:</span><span class="n">Cfg</span><span class="o">.</span><span class="n">MAX_HOLD</span><span class="p">]</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">held</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">info</span> <span class="ow">and</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">target</span><span class="p">]</span>
+    <span class="n">ins</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">target</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">held</span><span class="p">]</span>
+    <span class="c1"># 换仓防抖：被挤出的持仓，只有最弱的新候选也比它远出 SWITCH_MARGIN 才换</span>
+    <span class="k">while</span> <span class="n">out</span> <span class="ow">and</span> <span class="n">ins</span> <span class="ow">and</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">SWITCH_MARGIN</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">weakest_in</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">ins</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="s2">&quot;dist&quot;</span><span class="p">])</span>
+        <span class="n">strongest_out</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="s2">&quot;dist&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">info</span><span class="p">[</span><span class="n">weakest_in</span><span class="p">][</span><span class="s2">&quot;dist&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">info</span><span class="p">[</span><span class="n">strongest_out</span><span class="p">][</span><span class="s2">&quot;dist&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">SWITCH_MARGIN</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">ins</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">weakest_in</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">strongest_out</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">out</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pos</span><span class="p">[</span><span class="n">code</span><span class="p">]</span><span class="o">.</span><span class="n">closeable_amount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+            <span class="n">_sell</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;换仓让位 距离</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;dist&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2%</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># T+1 无法卖出，则少买一只</span>
+            <span class="n">ins</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="s2">&quot;dist&quot;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">ins</span><span class="p">:</span>
+                <span class="n">ins</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># 3) 买入：每只 = 当前总资产 50%，不超过可用资金</span>
+    <span class="n">slots</span> <span class="o">=</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">MAX_HOLD</span> <span class="o">-</span> <span class="nb">len</span><span class="p">([</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">pos</span> <span class="k">if</span> <span class="n">pos</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">total_amount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ins</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="n">info</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="s2">&quot;dist&quot;</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="nb">max</span><span class="p">(</span><span class="n">slots</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">total_value</span> <span class="o">*</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">WEIGHT</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">available_cash</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;price&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">100</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">o</span> <span class="o">=</span> <span class="n">order_value</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">o</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;买入 </span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">) 价</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;price&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> 股息率</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2%</span><span class="si">}</span><span class="s2">&gt;</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;high&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2"> &quot;</span>
+                     <span class="sa">f</span><span class="s2">&quot;距卖出线</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;dist&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2%</span><span class="si">}</span><span class="s2"> 金额</span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">:</span>
+        <span class="n">hs</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">info</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}{</span><span class="n">info</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2%</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">pos</span> <span class="k">if</span> <span class="n">pos</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">total_amount</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">info</span><span class="p">]</span>
+        <span class="n">cs</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">info</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}{</span><span class="n">info</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2%</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cands</span><span class="p">]</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;持仓:</span><span class="si">{</span><span class="n">hs</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;空&#39;</span><span class="si">}</span><span class="s2"> | 买入候选:</span><span class="si">{</span><span class="n">cs</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">&#39;无&#39;</span><span class="si">}</span><span class="s2"> | 总资产</span><span class="si">{</span><span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">total_value</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_sell</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">why</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">BANDS</span><span class="p">[</span><span class="n">code</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">o</span> <span class="o">=</span> <span class="n">order_target</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">o</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;卖出 </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">) </span><span class="si">{</span><span class="n">why</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div></td></tr></table></div>
+</div>
+<textarea id="raw" hidden># -*- coding: utf-8 -*-
+&quot;&quot;&quot;
+股息率区间轮动策略 V1.4（22家千亿银行股）
+
+V1.4：在 V1.2 的 20 家基础上新增宁波银行、杭州银行（2026-09-30 市值超千亿），区间手动填入；其余同 V1.2。
+V1.2：股息率改为 TTM（滚动 12 个月）口径；其余同 V1.1。
+V1.1：换仓门槛 SWITCH_MARGIN 默认 0.005（0.5个百分点），减少来回换仓；其余同 V1.0。
+
+买入：股息率 &gt; 该股「最常见区间」上限（买入线）
+卖出：股息率 &lt; 该股「最常见区间」下限（卖出线）
+仓位：每只占当前总资产 50%，最多持有 2 只
+排序：按「距卖出线距离 = 股息率 - 卖出线」从大到小；
+      持仓股(未触发卖出) + 买入候选 一起排序取前 2 名，
+      满仓时若候选比持仓更远，则卖出较近的持仓、换入候选。
+股息率：TTM 股息率 = 最近 12 个月报告期对应的每股现金分红 ÷ 当前价
+        （数据：finance.STK_XR_XD；送转股按除权后股本折算）
+        做法：以已除息分红中最新的报告期 R 为终点，取 (R-12个月, R] 这一年；
+        每笔分红覆盖「上一笔分红的报告期 ~ 本报告期」，按落在这一年里的比例计入。
+        例：工行 2026-10 = 2025 年末期(覆盖 2025H2) + 2026 年中期(覆盖 2026H1)。
+        不用「过去 365 天除息」：除息日每年前后漂移，会出现同年分红算两次(股息率翻倍)
+        或某笔分红暂时掉出窗口(股息率腰斩)，产生假的买卖信号；
+        也避免首次实施中期分红的年份，上年全年末期 + 本年中期被叠加。
+成交：分钟回测，每天 14:55 用当前价近似收盘价，计算信号并下单。
+&quot;&quot;&quot;
+import builtins
+from jqdata import *
+import pandas as pd
+# jqdata 会覆盖内置函数，恢复
+sum, min, max, abs, any, all, round = (builtins.sum, builtins.min, builtins.max, builtins.abs,
+                                       builtins.any, builtins.all, builtins.round)
+
+VERSION = &quot;股息率区间轮动策略 V1.4&quot;
+
+
+class Cfg:
+    # 代码: (名称, 卖出线, 买入线)  —— 近一年(2025-10-29~2026-10-29) TTM 股息率按0.5%分档的最常见区间
+    BANDS = {
+        &quot;601398.XSHG&quot;: (&quot;工商银行&quot;, 0.040, 0.045),
+        &quot;601288.XSHG&quot;: (&quot;农业银行&quot;, 0.035, 0.040),
+        &quot;601988.XSHG&quot;: (&quot;中国银行&quot;, 0.040, 0.045),
+        &quot;601939.XSHG&quot;: (&quot;建设银行&quot;, 0.040, 0.045),
+        &quot;601658.XSHG&quot;: (&quot;邮储银行&quot;, 0.045, 0.050),
+        &quot;601328.XSHG&quot;: (&quot;交通银行&quot;, 0.050, 0.055),
+        &quot;601818.XSHG&quot;: (&quot;光大银行&quot;, 0.055, 0.060),
+        &quot;601998.XSHG&quot;: (&quot;中信银行&quot;, 0.045, 0.050),
+        &quot;600016.XSHG&quot;: (&quot;民生银行&quot;, 0.050, 0.055),
+        &quot;600000.XSHG&quot;: (&quot;浦发银行&quot;, 0.040, 0.045),
+        &quot;601916.XSHG&quot;: (&quot;浙商银行&quot;, 0.050, 0.055),
+        &quot;600036.XSHG&quot;: (&quot;招商银行&quot;, 0.050, 0.055),
+        &quot;601166.XSHG&quot;: (&quot;兴业银行&quot;, 0.055, 0.060),
+        &quot;601169.XSHG&quot;: (&quot;北京银行&quot;, 0.055, 0.060),
+        &quot;000001.XSHE&quot;: (&quot;平安银行&quot;, 0.050, 0.055),
+        &quot;600919.XSHG&quot;: (&quot;江苏银行&quot;, 0.045, 0.050),
+        &quot;600015.XSHG&quot;: (&quot;华夏银行&quot;, 0.055, 0.060),
+        &quot;601229.XSHG&quot;: (&quot;上海银行&quot;, 0.050, 0.055),
+        &quot;601009.XSHG&quot;: (&quot;南京银行&quot;, 0.045, 0.050),
+        &quot;601077.XSHG&quot;: (&quot;渝农商行&quot;, 0.045, 0.050),
+        # V1.4 新增（手动填入）：近一年 TTM 最常见区间
+        &quot;002142.XSHE&quot;: (&quot;宁波银行&quot;, 0.025, 0.030),
+        &quot;600926.XSHG&quot;: (&quot;杭州银行&quot;, 0.040, 0.045),
+    }
+    MAX_HOLD = 2            # 最多持有只数
+    WEIGHT = 0.5            # 每只占当前总资产比例
+    RANK_MODE = &quot;abs&quot;       # 距卖出线距离: &quot;abs&quot;=股息率-卖出线(百分点)；&quot;rel&quot;=股息率/卖出线-1
+    SWITCH_MARGIN = 0.005   # 换仓门槛：候选距离需比被换持仓多出 0.5 个百分点才换(0=只要更远就换)
+    TRADE_TIME = &quot;14:55&quot;
+    DEBUG = True
+
+
+def initialize(context):
+    set_benchmark(&quot;000300.XSHG&quot;)
+    set_option(&quot;use_real_price&quot;, True)
+    set_option(&quot;avoid_future_data&quot;, True)
+    log.set_level(&quot;order&quot;, &quot;error&quot;)
+    set_order_cost(OrderCost(open_tax=0, close_tax=0.0005, open_commission=0.00025,
+                             close_commission=0.00025, close_today_commission=0, min_commission=5), type=&quot;stock&quot;)
+    set_slippage(FixedSlippage(0))
+    g.div = None
+    run_daily(load_dividends, time=&quot;before_open&quot;)
+    run_daily(trade, time=Cfg.TRADE_TIME)
+    log.info(VERSION)
+
+
+# ---------------- 分红数据与股息率 ----------------
+def load_dividends(context):
+    &quot;&quot;&quot;每天盘前读取股票池的分红送转记录（只保留已除权除息的）。&quot;&quot;&quot;
+    codes = list(Cfg.BANDS.keys())
+    q = query(finance.STK_XR_XD.code, finance.STK_XR_XD.report_date, finance.STK_XR_XD.a_xr_date,
+              finance.STK_XR_XD.bonus_ratio_rmb, finance.STK_XR_XD.dividend_ratio,
+              finance.STK_XR_XD.transfer_ratio).filter(
+        finance.STK_XR_XD.code.in_(codes),
+        finance.STK_XR_XD.a_xr_date != None,
+        finance.STK_XR_XD.report_date &gt;= &quot;2010-01-01&quot;)
+    df = finance.run_query(q)
+    df = df[pd.to_datetime(df[&quot;a_xr_date&quot;]) &lt;= pd.Timestamp(context.current_dt.date())].copy()
+    for c in [&quot;bonus_ratio_rmb&quot;, &quot;dividend_ratio&quot;, &quot;transfer_ratio&quot;]:
+        df[c] = df[c].fillna(0).astype(float)
+    df[&quot;xr&quot;] = pd.to_datetime(df[&quot;a_xr_date&quot;])
+    df[&quot;rd&quot;] = pd.to_datetime(df[&quot;report_date&quot;])
+    df[&quot;fy&quot;] = df[&quot;rd&quot;].dt.year
+    df[&quot;annual&quot;] = df[&quot;rd&quot;].dt.month == 12
+    df[&quot;bonus&quot;] = (df[&quot;dividend_ratio&quot;] + df[&quot;transfer_ratio&quot;]) / 10.0
+    g.div = df
+
+
+def ttm_dps(code, today):
+    &quot;&quot;&quot;最近 12 个月报告期的每股现金分红（折算为当前股本）。&quot;&quot;&quot;
+    d = g.div[(g.div.code == code) &amp; (g.div.bonus_ratio_rmb &gt; 0) &amp; (g.div.xr &lt;= today)].sort_values(&quot;rd&quot;)
+    if d.empty:
+        return None
+    allx = g.div[g.div.code == code]
+    end = d.rd.max()
+    start = end - pd.DateOffset(months=12)
+    # 每笔分红覆盖 (上一个分红报告期, 本报告期]；同一报告期多笔分红共用同一覆盖期
+    rds = sorted(pd.Timestamp(x) for x in d.rd.unique())     # 旧版 pandas 的 unique() 返回 numpy datetime64，转成 Timestamp
+    prev = {r: (rds[i - 1] if i else r - pd.DateOffset(months=12)) for i, r in enumerate(rds)}
+    dps = 0.0
+    for _, r in d.iterrows():
+        s0 = prev[pd.Timestamp(r.rd)]
+        span = (r.rd - s0).days
+        part = max(0, (min(r.rd, end) - max(s0, start)).days) / span if span &gt; 0 else 0
+        if part &lt;= 0:
+            continue
+        # 该次及之后的送转会摊薄每股分红
+        factor = 1.0
+        for b in allx[(allx.xr &gt;= r.xr) &amp; (allx.bonus &gt; 0)].bonus:
+            factor *= 1 + b
+        dps += r.bonus_ratio_rmb / 10.0 / factor * part
+    return dps
+
+
+def distance(y, low):
+    return y - low if Cfg.RANK_MODE == &quot;abs&quot; else y / low - 1
+
+
+# ---------------- 交易 ----------------
+def trade(context):
+    cd = get_current_data()
+    pos = context.portfolio.positions
+    info = {}
+    today = pd.Timestamp(context.current_dt.date())
+    for code, (name, low, high) in Cfg.BANDS.items():
+        c = cd[code]
+        if c.paused or c.last_price is None or c.last_price &lt;= 0:
+            continue
+        dps = ttm_dps(code, today)
+        if not dps:
+            continue
+        y = dps / c.last_price
+        info[code] = dict(name=name, y=y, low=low, high=high, dist=distance(y, low), price=c.last_price)
+
+    held = [c for c in pos if pos[c].total_amount &gt; 0]
+
+    # 1) 卖出：股息率跌破卖出线
+    for code in held:
+        x = info.get(code)
+        if x and x[&quot;y&quot;] &lt; x[&quot;low&quot;]:
+            _sell(context, code, f&quot;跌破卖出线 股息率{x[&#x27;y&#x27;]:.2%}&lt;{x[&#x27;low&#x27;]:.1%}&quot;)
+    held = [c for c in held if c in pos and pos[c].total_amount &gt; 0]
+
+    # 2) 持仓 + 买入候选 一起按距卖出线排序，取前 MAX_HOLD
+    cands = [c for c, x in info.items() if c not in held and x[&quot;y&quot;] &gt; x[&quot;high&quot;] and not cd[c].high_limit == cd[c].last_price]
+    pool = [c for c in held if c in info] + cands
+    pool.sort(key=lambda c: info[c][&quot;dist&quot;], reverse=True)
+    target = pool[:Cfg.MAX_HOLD]
+
+    out = [c for c in held if c in info and c not in target]
+    ins = [c for c in target if c not in held]
+    # 换仓防抖：被挤出的持仓，只有最弱的新候选也比它远出 SWITCH_MARGIN 才换
+    while out and ins and Cfg.SWITCH_MARGIN &gt; 0:
+        weakest_in = min(ins, key=lambda c: info[c][&quot;dist&quot;])
+        strongest_out = max(out, key=lambda c: info[c][&quot;dist&quot;])
+        if info[weakest_in][&quot;dist&quot;] - info[strongest_out][&quot;dist&quot;] &gt;= Cfg.SWITCH_MARGIN:
+            break
+        ins.remove(weakest_in)
+        out.remove(strongest_out)
+
+    for code in out:
+        if pos[code].closeable_amount &gt; 0:
+            x = info[code]
+            _sell(context, code, f&quot;换仓让位 距离{x[&#x27;dist&#x27;]:.2%}&quot;)
+        else:
+            # T+1 无法卖出，则少买一只
+            ins.sort(key=lambda c: info[c][&quot;dist&quot;])
+            if ins:
+                ins.pop(0)
+
+    # 3) 买入：每只 = 当前总资产 50%，不超过可用资金
+    slots = Cfg.MAX_HOLD - len([c for c in pos if pos[c].total_amount &gt; 0])
+    for code in sorted(ins, key=lambda c: info[c][&quot;dist&quot;], reverse=True)[:max(slots, 0)]:
+        x = info[code]
+        value = min(context.portfolio.total_value * Cfg.WEIGHT, context.portfolio.available_cash)
+        if value &lt; x[&quot;price&quot;] * 100:
+            continue
+        o = order_value(code, value)
+        if o is not None:
+            log.info(f&quot;买入 {x[&#x27;name&#x27;]}({code}) 价{x[&#x27;price&#x27;]:.2f} 股息率{x[&#x27;y&#x27;]:.2%}&gt;{x[&#x27;high&#x27;]:.1%} &quot;
+                     f&quot;距卖出线{x[&#x27;dist&#x27;]:.2%} 金额{value:,.0f}&quot;)
+
+    if Cfg.DEBUG:
+        hs = [f&quot;{info[c][&#x27;name&#x27;]}{info[c][&#x27;y&#x27;]:.2%}&quot; for c in pos if pos[c].total_amount &gt; 0 and c in info]
+        cs = [f&quot;{info[c][&#x27;name&#x27;]}{info[c][&#x27;y&#x27;]:.2%}&quot; for c in cands]
+        log.info(f&quot;持仓:{hs or &#x27;空&#x27;} | 买入候选:{cs or &#x27;无&#x27;} | 总资产{context.portfolio.total_value:,.0f}&quot;)
+
+
+def _sell(context, code, why):
+    name = Cfg.BANDS[code][0]
+    o = order_target(code, 0)
+    if o is not None:
+        log.info(f&quot;卖出 {name}({code}) {why}&quot;)
+</textarea>
+<script>
+document.getElementById("copy").addEventListener("click", async e => { const b = e.currentTarget, t = document.getElementById("raw").value;
+  try { await navigator.clipboard.writeText(t); } catch (err) { const a = document.getElementById("raw"); a.hidden = false; a.select(); document.execCommand("copy"); a.hidden = true; }
+  b.textContent = "已复制"; setTimeout(() => b.textContent = "复制代码", 1500); });
+</script>
+</main>
+<footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-16</div></footer>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>短线交易规则手册：买卖点交易计划 · 消息股轮换调仓策略</title>
+<meta name="description" content="短线交易规则手册：买卖点交易计划">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 22l6-7 5 4 9-11' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="top"><div class="bar"><a class="brand" href="../../index.html">量化策略库</a>
+<nav><a href="../../index.html#dividend">股息率策略</a><a href="../../index.html#trend">趋势策略</a><a href="../../index.html#news">消息股策略</a></nav></div></header>
+<main class="wrap">
+<nav class="crumb"><a href="../../index.html">策略库</a> / <a href="../../s/news-rotation.html">消息股轮换调仓策略</a></nav>
+<div class="tools"><span class="mono">短线交易规则手册买卖点交易计划.docx · 76 KB</span><span class="grow"></span><a class="btn" href="../../files/news-rotation/%E7%9F%AD%E7%BA%BF%E4%BA%A4%E6%98%93%E8%A7%84%E5%88%99%E6%89%8B%E5%86%8C%E4%B9%B0%E5%8D%96%E7%82%B9%E4%BA%A4%E6%98%93%E8%AE%A1%E5%88%92.docx" download>下载原文件</a></div>
+<article class="doc"><p><strong>系统化交易规则手册买卖点交易计划</strong></p>
+<p>内容目录</p>
+<p><strong>系统化交易规则手册买卖点交易计划</strong></p>
+<p>现在我已加载技能，根据您的需求，这是一套<strong>系统化的交易规则体系</strong>，涵盖选股、调仓、空仓与减仓四大模块，我将为您设计完整的可执行交易计划框架。</p>
+<p><strong>📋 系统化交易规则手册</strong></p>
+<p><strong>定位</strong>：短线/波段轮动策略 | 股票池内部切换 | 量价 + 均线 + RSI 三维过滤</p>
+<h3>【1. 选股规则 — 入场资格过滤】</h3>
+<p><strong>核心原则：没有量的票不参与</strong></p>
+<div class="tbl"><table><thead><tr><th><strong>过滤条件</strong></th><th><strong>具体标准</strong></th><th><strong>操作</strong></th></tr></thead><tbody><tr><td>换手率门槛</td><td>换手率&lt; 3%</td><td>❌ 直接排除，不参与</td></tr><tr><td>换手率达标</td><td>换手率≥ 3%</td><td>✅ 进入候选池，继续下一步过滤</td></tr></tbody></table></div>
+<p><strong>执行逻辑：</strong></p>
+<ul><li>每日开盘前或盘中，扫描股票池内所有标的的换手率</li><li>换手率不足3%说明市场参与度低、主力未介入，强行参与容易被套在无流动性的位置</li><li>换手率达标是必要条件，不是充分条件，还需结合后续规则</li></ul>
+<h3>【2. 调仓规则 — 轮动切换机制】</h3>
+<p><strong>核心原则：追强不追弱，在池内做相对收益</strong></p>
+<p><strong>触发调仓的两个条件（满足任一即触发）：</strong></p>
+<p><strong>条件A：当日持仓标的大涨超过5个点</strong></p>
+<p>当日涨幅 &gt; +5%  →  触发调仓评估</p>
+<p><strong>条件B：股票池内涨跌幅分化超过5个点</strong></p>
+<p>池内最强票涨幅 - 池内最弱票涨幅 &gt; 5%  →  触发调仓评估</p>
+<p><strong>调仓决策树：</strong></p>
+<p>触发调仓评估</p>
+<p>    │</p>
+<p>    ├─ 池内存在未涨/涨幅较小的标的？</p>
+<p>    │       │</p>
+<p>    │       ├─ YES → 切换到未涨标的（优先换手率≥3%、未破5日线的）</p>
+<p>    │       │         ⚠️ 注意：切换前确认目标标的未破5日均线</p>
+<p>    │       │</p>
+<p>    │       └─ NO（全部上涨）→ 两种选择：</p>
+<p>    │                           ① 不动，持仓不变</p>
+<p>    │                           ② 减仓（若RSI同步偏高，优先减仓）</p>
+<p>    │</p>
+<p>    └─ 全部上涨且RSI &gt; 80 → 执行减仓规则（见第四模块）</p>
+<p><strong>执行细节：</strong></p>
+<ul><li>切换时机：尾盘14:30后评估，避免日内假突破干扰</li><li>切换目标：优先选择池内换手率≥3%、站上5日线、涨幅相对落后的标的</li><li>切换仓位：原仓位的50%~100%转移，视目标标的确定性决定</li></ul>
+<h3>【3. 空仓规则 — 5日均线防守体系】</h3>
+<p><strong>核心原则：跌破均线不持仓，突破均线再考虑</strong></p>
+<p><strong>空仓触发条件：</strong></p>
+<p>当日收盘价 &lt; 5日均线  →  当日收盘前卖出</p>
+<p><strong>关键判断：收盘是否修复</strong></p>
+<div class="tbl"><table><thead><tr><th><strong>盘中情况</strong></th><th><strong>收盘情况</strong></th><th><strong>操作</strong></th></tr></thead><tbody><tr><td>盘中跌破5日线</td><td>收盘回到5日线上方</td><td>✅ 修复成功，继续持有</td></tr><tr><td>盘中跌破5日线</td><td>收盘仍在5日线下方</td><td>❌ 未修复，收盘前卖出</td></tr><tr><td>开盘即跌破5日线</td><td>全天未修复</td><td>❌当日收盘前清仓</td></tr></tbody></table></div>
+<p><strong>再次买入条件：</strong></p>
+<p>后续收盘价重新站上5日均线</p>
+<p>    +  换手率 ≥ 3%</p>
+<p>    +  当日无大幅放量下跌（非恐慌性反弹）</p>
+<p>    →  重新考虑买入</p>
+<p><strong>执行细节：</strong></p>
+<ul><li>5日均线以收盘价为准，不以盘中价为准</li><li>跌破后的反弹突破，需观察量能配合（缩量突破谨慎，放量突破优先）</li><li>若连续2日站上5日线，确认性更强，可适当加大仓位</li></ul>
+<h3>【4. 减仓规则 — RSI超买信号】</h3>
+<p><strong>核心原则：RSI超买是情绪过热信号，主动降低风险敞口（如当日涨停则不考虑RSI）</strong></p>
+<p><strong>减仓触发条件：</strong></p>
+<p>RSI（14日）&gt; 80 且未涨停 →  仓位减半</p>
+<div class="tbl"><table><thead><tr><th><strong>RSI区间</strong></th><th><strong>信号含义</strong></th><th><strong>操作</strong></th></tr></thead><tbody><tr><td>RSI &lt; 70</td><td>正常区间</td><td>持仓不变</td></tr><tr><td>70 ≤ RSI ≤ 80</td><td>偏热，注意观察</td><td>保持警惕</td></tr><tr><td>RSI &gt; 80且未涨停</td><td>超买，情绪过热</td><td>仓位减半</td></tr><tr><td>RSI &gt; 90且未涨停</td><td>极度超买</td><td>清仓</td></tr></tbody></table></div>
+<p><strong>执行细节：</strong></p>
+<ul><li>RSI以日线14周期为标准</li><li>减仓后若RSI回落至70以下，且股价仍站上5日线，可择机补回仓位</li><li>减仓不等于清仓，保留底仓以防踏空强势行情</li></ul>
+<h3>【完整交易决策流程图】</h3>
+<p>每日收盘后 / 次日开盘前 执行以下检查：</p>
+<p>STEP 1：换手率过滤</p>
+<p>    换手率 &lt; 3%？→ 排除，不参与</p>
+<p>    换手率 ≥ 3%？→ 进入STEP 2</p>
+<p>STEP 2：5日均线检查</p>
+<p>    收盘跌破5日线且未修复？→ 卖出，空仓等待</p>
+<p>    站上5日线？→ 进入STEP 3</p>
+<p>STEP 3：RSI检查</p>
+<p>    RSI &gt; 80？→ 仓位减半，进入STEP 4</p>
+<p>    RSI ≤ 80？→ 正常持仓，进入STEP 4</p>
+<p>STEP 4：调仓评估</p>
+<p>    当日涨幅 &gt; 5% 或 池内分化 &gt; 5%？</p>
+<p>        → 有未涨标的（且符合STEP1+2）？→ 切换</p>
+<p>        → 全部上涨？→ 不动 或 减仓</p>
+<p>    无触发条件？→ 维持现状</p>
+<h3>【执行纪律与风险提示】</h3>
+<div class="tbl"><table><thead><tr><th><strong>纪律条款</strong></th><th><strong>说明</strong></th></tr></thead><tbody><tr><td>不追高</td><td>调仓切换的目标标的，当日涨幅不超过3%，避免追高</td></tr><tr><td>不死扛</td><td>跌破5日线收盘未修复，必须执行卖出，不允许&quot;再等一天&quot;</td></tr><tr><td>不满仓切换</td><td>调仓时分批操作，先卖出50%，确认目标标的走势后再转移剩余</td></tr><tr><td>RSI减仓后不急补</td><td>减仓后等RSI回落确认，不因短期反弹急于补回</td></tr><tr><td>量是前提</td><td>任何操作前，换手率必须达标，无量不参与是铁律</td></tr></tbody></table></div>
+<h3>【策略适用场景说明】</h3>
+<ul><li>✅适合：震荡市、结构性行情、板块轮动明显的市场环境</li><li>✅适合：有明确股票池（如行业ETF成分股、主题概念股）的投资者</li><li>⚠️注意：单边下跌市中，5日线频繁跌破，需提高空仓比例，减少操作频率</li><li>⚠️注意：RSI在强趋势中可长期维持高位，需结合价格结构综合判断，避免过早减仓踏空</li></ul>
+<p>💡<strong>策略核心逻辑总结</strong>：用<strong>换手率</strong>筛选有效标的 → 用<strong>5日均线</strong>控制持仓风险 → 用<strong>涨跌幅分化</strong>驱动轮动切换 → 用<strong>RSI</strong>管理情绪过热风险。四个维度相互配合，构成完整的进出场体系。</p></article>
+</main>
+<footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-16</div></footer>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>热点板块交易策略框架 V2.0 · 热点板块交易策略</title>
+<meta name="description" content="热点板块交易策略框架 V2.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 22l6-7 5 4 9-11' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="top"><div class="bar"><a class="brand" href="../../index.html">量化策略库</a>
+<nav><a href="../../index.html#dividend">股息率策略</a><a href="../../index.html#trend">趋势策略</a><a href="../../index.html#news">消息股策略</a></nav></div></header>
+<main class="wrap">
+<nav class="crumb"><a href="../../index.html">策略库</a> / <a href="../../s/hot-sector.html">热点板块交易策略</a></nav>
+<div class="tools"><span class="mono">热点板块交易策略框架_V2.0.docx · 44 KB</span><span class="grow"></span><a class="btn" href="../../files/hot-sector/%E7%83%AD%E7%82%B9%E6%9D%BF%E5%9D%97%E4%BA%A4%E6%98%93%E7%AD%96%E7%95%A5%E6%A1%86%E6%9E%B6_V2.0.docx" download>下载原文件</a></div>
+<article class="doc"><p><strong>热点板块交易策略框架</strong></p>
+<p>Hot Sector Trading Strategy Framework</p>
+<p>版本：V2.0（更新版）</p>
+<p>更新日期：2026年8月6日</p>
+<p>适用市场：A股</p>
+<p>策略类型：中短线热点交易</p>
+<h2>设计理念</h2>
+<p>热点板块（如CPO、存储、MLCC等）具有高波动、快轮动、情绪驱动的特征。本策略在&quot;均线金叉+大盘风控&quot;双层架构基础上，叠加热点生命周期识别和加速撤退机制，专门适配热点板块交易场景。</p>
+<p><strong>与基础策略的继承关系：</strong></p>
+<ul><li>保留了均线金叉（MA5/MA10）+ 大盘顶背离的双层架构</li><li>保留了25%/50%两阶段仓位管理和2只持仓上限</li><li>保留了换手率过滤、ST过滤等基础规则</li></ul>
+<p><strong>针对热点板块的新增设计：</strong></p>
+<ul><li>板块环境过滤——买入时增加板块指数MA5确认，避免逆板块操作</li><li>五维评分新增&quot;热点强度&quot;维度——识别板块内真正的领涨股而非跟风股</li><li>热点生命周期识别——启动/扩散/高潮/退潮/冰点五阶段，高潮期禁止开仓</li><li>四重退潮信号（D1-D4）——龙头破位、扩散失败、量能萎缩、板块破位，任一触发即撤退</li><li>分批撤退机制——三阶段减仓（50%→25%→清仓），平衡锁定利润与避免踏空</li><li>四类特殊止损——时间止损（5日不涨）、加速止损（退潮期10%）、隔夜止损（涨停次日低开）、板块崩盘止损</li><li>大盘顶背离冷静期——触发后10个交易日内禁止买入</li><li>大盘共振差异化——科技/小市值股不考核大盘相关性，蓝筹股正常考核</li></ul>
+<h2>第一部分：板块内选股策略</h2>
+<h3>1.1 前置过滤（硬性门槛）</h3>
+<div class="tbl"><table><thead><tr><th><strong>过滤条件</strong></th><th><strong>规则</strong></th><th><strong>逻辑</strong></th></tr></thead><tbody><tr><td>ST/退市风险</td><td>剔除ST、*ST、退市整理期个股</td><td>延续现有规则</td></tr><tr><td>流动性过滤</td><td>近5日日均换手率 &lt; 3% → 剔除</td><td>延续现有规则</td></tr><tr><td>板块纯度</td><td>主营业务与热点板块关联度 &lt; 30% → 剔除</td><td>剔除蹭概念个股</td></tr><tr><td>涨停板过滤</td><td>当日一字涨停（无法买入）→ 剔除</td><td>确保可交易性</td></tr></tbody></table></div>
+<h3>1.2 五维评分体系（总分100分）</h3>
+<p>选股采用五维加权评分体系，从趋势、量能、位置、热点强度、大盘共振五个维度对板块内个股进行综合评估。每日盘后重新评分排序，取前2名作为候选买入池。</p>
+<div class="tbl"><table><thead><tr><th><strong>维度</strong></th><th><strong>权重</strong></th><th><strong>核心指标</strong></th><th><strong>评分逻辑</strong></th></tr></thead><tbody><tr><td>趋势强度</td><td>25%</td><td>MA5/MA10/MA20 多头排列状态、股价相对MA20偏离度</td><td>完全多头排列得满分；偏离度 &gt; 15% 扣分（追高风险）</td></tr><tr><td>量能配合</td><td>20%</td><td>近5日量比均值、量价配合度（价涨量增/价跌量缩）</td><td>量比 &gt; 1.5 且量价配合良好得满分</td></tr><tr><td>位置安全</td><td>20%</td><td>近20日涨幅分位数、距离近20日最高点回撤幅度</td><td>近20日涨幅处于板块内中位（非末排也非过度透支）得满分</td></tr><tr><td>热点强度</td><td>20%</td><td>近5日累计涨幅、涨停次数、板块内涨幅排名</td><td>板块内涨幅前30%且非最高得满分（龙头溢价但回避末班车）</td></tr><tr><td>大盘共振</td><td>15%</td><td>个股与上证指数近10日相关性</td><td>见下方差异化规则</td></tr></tbody></table></div>
+<h3>1.3 大盘共振维度差异化规则</h3>
+<p>核心逻辑：科技股/小市值股票走势由自身产业周期和题材驱动，与大盘相关性天然偏低，不应因此扣分；蓝筹股/大市值股票与宏观流动性关联紧密，大盘走势是重要参考。</p>
+<div class="tbl"><table><thead><tr><th><strong>股票类型</strong></th><th><strong>判断标准</strong></th><th><strong>大盘共振评分规则</strong></th></tr></thead><tbody><tr><td>科技/成长股</td><td>申万一级行业为电子、计算机、通信、传媒；或总市值 &lt; 200亿</td><td>不考核大盘相关性，该15%权重并入&quot;热点强度&quot;维度（热点强度升至35%）。仅保留&quot;上证是否站上MA5&quot;作为买入前置条件中的开关（通过/不通过），不参与评分</td></tr><tr><td>蓝筹/价值股</td><td>申万一级行业为银行、食品饮料、家电、非银金融；或总市值 &gt; 1000亿</td><td>正常考核大盘共振：近10日个股与上证相关系数 &gt; 0.6 得满分，0.3-0.6 得一半分，&lt; 0.3 不得分</td></tr><tr><td>中间类型</td><td>不属于以上两类的股票</td><td>宽松考核：仅在大盘单边下跌（上证连续3日收于MA5下方）时扣分，其余情况默认满分</td></tr></tbody></table></div>
+<p>设计依据：热点板块（CPO、存储、MLCC等）以科技股和小市值为主，取消大盘共振考核后，选股更聚焦于板块内相对强弱和题材驱动力，避免因&quot;大盘不好&quot;而错失结构性机会。</p>
+<h3>1.4 排序与持仓规则</h3>
+<ul><li>每日盘后重新评分排序，取前2名作为候选买入池</li><li>已持仓股票不参与排序（延续现有规则）</li><li>若持仓股票跌出前5名：触发预警，进入&quot;重点关注&quot;状态</li></ul>
+<h2>第二部分：买入机制</h2>
+<h3>2.1 买入前置条件（必须全部满足）</h3>
+<div class="tbl"><table><thead><tr><th><strong>条件</strong></th><th><strong>规则</strong></th></tr></thead><tbody><tr><td>大盘环境</td><td>上证指数站上5日均线（延续现有规则）</td></tr><tr><td>板块环境</td><td>热点板块指数（或板块内涨幅中位数）站上5日均线</td></tr><tr><td>个股信号</td><td>目标个股股价站上5日均线</td></tr><tr><td>冷静期检查</td><td>大盘顶背离卖出发生后10个交易日内，禁止任何买入操作，仅允许卖出</td></tr></tbody></table></div>
+<h4>2.1.1 大盘顶背离冷静期规则</h4>
+<div class="tbl"><table><thead><tr><th><strong>规则项</strong></th><th><strong>内容</strong></th></tr></thead><tbody><tr><td>触发条件</td><td>大盘顶背离四条件全部满足，触发半仓卖出</td></tr><tr><td>冷静期长度</td><td>自顶背离触发日起，往后10个交易日</td></tr><tr><td>期间禁止行为</td><td>禁止任何新开仓买入（包括试探买入）；禁止对已有持仓加仓（确认加仓也不允许）</td></tr><tr><td>期间允许行为</td><td>允许卖出（包括清仓）；允许持有现有仓位不动</td></tr><tr><td>冷静期结束</td><td>第11个交易日起恢复正常买入权限，但仍需满足所有买入前置条件</td></tr><tr><td>冷静期内再次触发顶背离</td><td>冷静期重新计时，从最新一次触发日起再延10个交易日</td></tr></tbody></table></div>
+<p>设计逻辑：大盘顶背离是系统性风险的强烈信号，此后市场往往进入普跌或剧烈分化。热点板块在大盘调整初期可能逆势逞强，但随后补跌概率极高。10个交易日冷静期强制交易者&quot;管住手&quot;，避免在危险区域接飞刀。</p>
+<h3>2.2 两阶段买入</h3>
+<div class="tbl"><table><thead><tr><th><strong>阶段</strong></th><th><strong>触发条件</strong></th><th><strong>仓位</strong></th><th><strong>说明</strong></th></tr></thead><tbody><tr><td>试探买入</td><td>① 不在冷静期内 ② 上证站上MA5 ③ 板块指数站上MA5 ④ 个股站上MA5 ⑤ 个股评分排名板块前2</td><td>25%</td><td>延续半仓试探逻辑</td></tr><tr><td>确认加仓</td><td>① 不在冷静期内 ② 个股MA5 &gt; MA10 ③ 连续2个交易日收盘价维持在MA10上方 ④ 板块指数未跌破MA5</td><td>加至50%</td><td>延续全仓确认逻辑，新增板块确认条件</td></tr></tbody></table></div>
+<h3>2.3 热点板块特殊买入规则</h3>
+<div class="tbl"><table><thead><tr><th><strong>场景</strong></th><th><strong>规则</strong></th></tr></thead><tbody><tr><td>板块启动初期（板块近5日涨幅 &lt; 8%）</td><td>正常执行两阶段买入</td></tr><tr><td>板块加速期（板块近5日涨幅 8%-15%）</td><td>试探仓位降至15%，确认加仓条件增加&quot;个股近3日未出现单日涨幅 &gt; 7%的透支信号&quot;</td></tr><tr><td>板块高潮期（板块近5日涨幅 &gt; 15%）</td><td>禁止新开仓，仅持有现有仓位，进入&quot;只卖不买&quot;模式</td></tr></tbody></table></div>
+<h2>第三部分：卖出机制（含热点退潮识别）</h2>
+<p><strong>核心原则：热点板块交易中，卖出比买入更重要。热点退潮往往快速而剧烈，&quot;会买的是徒弟，会卖的是师傅&quot;在热点交易中尤为关键。</strong></p>
+<h3>3.1 热点生命周期与对应策略</h3>
+<div class="tbl"><table><thead><tr><th><strong>阶段</strong></th><th><strong>识别信号</strong></th><th><strong>策略动作</strong></th></tr></thead><tbody><tr><td>启动期</td><td>板块首次放量上涨、龙头股率先涨停</td><td>正常买入</td></tr><tr><td>扩散期</td><td>板块内个股普涨、二三线标的补涨</td><td>正常买入/持有</td></tr><tr><td>高潮期</td><td>板块单日涨幅 &gt; 3%、媒体密集报道、散户大幅涌入</td><td>禁止新开仓，准备撤退</td></tr><tr><td>退潮期</td><td>龙头股滞涨/回落、板块内分化加剧、成交量萎缩</td><td>分批撤退</td></tr><tr><td>冰点期</td><td>板块持续缩量下跌、龙头股破位</td><td>清仓观望</td></tr></tbody></table></div>
+<h3>3.2 卖出触发条件（按优先级排序）</h3>
+<p><strong>第一优先级：热点退潮信号（最高优先级）</strong></p>
+<div class="tbl"><table><thead><tr><th><strong>编号</strong></th><th><strong>退潮信号</strong></th><th><strong>触发动作</strong></th></tr></thead><tbody><tr><td>D1</td><td>板块内龙头股（近10日涨幅第一）单日跌幅 &gt; 5% 且跌破MA10</td><td>立即卖出50%仓位（半仓）</td></tr><tr><td>D2</td><td>板块内涨幅排名前5的个股中，3只以上当日收跌且跌幅 &gt; 3%</td><td>立即卖出50%仓位（半仓）</td></tr><tr><td>D3</td><td>板块近5日日均成交额较前5日萎缩 &gt; 30%</td><td>卖出50%仓位（半仓）</td></tr><tr><td>D4</td><td>板块指数连续2个交易日收于MA5下方</td><td>卖出50%仓位（半仓）</td></tr></tbody></table></div>
+<p>D1-D4 为独立触发条件，任一满足即执行。若多个同时触发，直接清仓。</p>
+<p><strong>第二优先级：大盘顶背离（延续现有规则）</strong></p>
+<div class="tbl"><table><thead><tr><th><strong>条件</strong></th><th><strong>规则</strong></th></tr></thead><tbody><tr><td>条件①</td><td>上证指数当日上涨</td></tr><tr><td>条件②</td><td>上证收盘价严格高于此前9个交易日最高收盘价（创10日收盘新高）</td></tr><tr><td>条件③</td><td>全市场收盘价低于各自MA5的个股占比 &gt; 50%</td></tr><tr><td>条件④</td><td>近3日累计下跌的个股占比 &gt; 50%</td></tr></tbody></table></div>
+<p><strong>四条件全部满足 → 减至单票25%仓位（半仓卖出）→ 同时启动10交易日冷静期</strong></p>
+<p><strong>第三优先级：个股技术破位</strong></p>
+<div class="tbl"><table><thead><tr><th><strong>编号</strong></th><th><strong>破位信号</strong></th><th><strong>触发动作</strong></th></tr></thead><tbody><tr><td>G1</td><td>个股收盘价跌破MA10</td><td>卖出50%仓位</td></tr><tr><td>G2</td><td>个股MA5下穿MA10（死叉）</td><td>卖出剩余全部仓位</td></tr><tr><td>G3</td><td>个股单日跌幅 &gt; 7% 且成交量放大 &gt; 2倍</td><td>卖出50%仓位</td></tr></tbody></table></div>
+<h3>3.3 分批撤退机制</h3>
+<p>热点板块退潮时采用三阶段撤退法，避免一次性清仓的流动性冲击和踏空风险：</p>
+<p><strong>阶段一（预警）：退潮信号D1-D4任一触发</strong></p>
+<ul><li>卖出50%仓位，锁定利润</li><li>剩余50%仓位设置更紧的止损（回撤容忍度从20%降至10%）</li></ul>
+<p><strong>阶段二（确认）：退潮信号触发后，次日板块指数继续下跌 &gt; 1%</strong></p>
+<ul><li>再卖出剩余仓位的50%（即总仓位降至25%）</li></ul>
+<p><strong>阶段三（清仓）：以下任一触发</strong></p>
+<ul><li>板块指数跌破MA20</li><li>个股跌破MA20</li><li>大盘顶背离四条件全部满足</li><li>清仓</li></ul>
+<h2>第四部分：止损机制</h2>
+<h3>4.1 基础止损（延续现有规则）</h3>
+<div class="tbl"><table><thead><tr><th><strong>止损类型</strong></th><th><strong>触发条件</strong></th><th><strong>动作</strong></th></tr></thead><tbody><tr><td>回撤止损</td><td>单只股票距离买入点或买入后最高点回撤 &gt; 20%</td><td>清仓该股票</td></tr></tbody></table></div>
+<h3>4.2 热点板块特殊止损规则</h3>
+<div class="tbl"><table><thead><tr><th><strong>止损类型</strong></th><th><strong>触发条件</strong></th><th><strong>动作</strong></th><th><strong>设计逻辑</strong></th></tr></thead><tbody><tr><td>时间止损</td><td>买入后5个交易日内未实现盈利（始终在成本线下方）</td><td>清仓</td><td>热点交易讲究效率，长时间不涨说明判断错误或热点已过</td></tr><tr><td>加速止损</td><td>板块进入退潮期后，个股回撤 &gt; 10%（而非20%）</td><td>清仓</td><td>退潮期容忍度减半，防止利润大幅回吐</td></tr><tr><td>隔夜风险止损</td><td>持仓个股前一日涨停、次日低开 &gt; 3%</td><td>开盘即卖出50%</td><td>热点股涨停次日低开是典型的&quot;闷杀&quot;信号</td></tr><tr><td>板块崩盘止损</td><td>板块指数单日跌幅 &gt; 5%</td><td>无论个股盈亏，清仓</td><td>板块系统性风险，个股无法独善其身</td></tr></tbody></table></div>
+<h3>4.3 止损优先级</h3>
+<ul><li>热点退潮卖出（第一优先级）</li><li>大盘顶背离卖出（第二优先级）→ 触发后启动10日冷静期</li><li>个股技术破位卖出（第三优先级）</li><li>热点特殊止损（时间止损/加速止损/隔夜止损/板块崩盘止损）</li><li>基础回撤止损（20%）</li></ul>
+<h2>第五部分：仓位与资金管理</h2>
+<div class="tbl"><table><thead><tr><th><strong>规则</strong></th><th><strong>内容</strong></th></tr></thead><tbody><tr><td>总持仓上限</td><td>不超过2只股票</td></tr><tr><td>单票上限</td><td>每只股票仓位上限 50%</td></tr><tr><td>试探仓位</td><td>25%（正常期）/ 15%（加速期）</td></tr><tr><td>确认仓位</td><td>50%</td></tr><tr><td>总仓位上限</td><td>热点加速期总仓位 ≤ 50%；高潮期总仓位 ≤ 25%（仅持有，不开新仓）</td></tr><tr><td>冷静期仓位</td><td>顶背离后10个交易日内，总仓位只减不增，不设下限（可降至0%）</td></tr></tbody></table></div>
+<h2>第六部分：每日执行流程</h2>
+<p><strong>盘前（9:00前）</strong></p>
+<ul><li>检查是否处于冷静期（距上次顶背离是否 ≤ 10个交易日）</li><li>若是 → 今日禁止买入，仅监控卖出信号</li><li>检查持仓个股隔夜消息（公告、新闻、研报评级变化）</li><li>确认今日是否处于&quot;只卖不买&quot;模式（板块高潮期 或 冷静期）</li></ul>
+<p><strong>盘中（9:30-15:00）</strong></p>
+<ul><li>监控退潮信号 D1-D4（实时或每30分钟检查）</li><li>监控止损触发（时间止损、隔夜止损、板块崩盘止损）</li><li>触发卖出条件 → 立即执行</li></ul>
+<p><strong>盘后（15:00后）</strong></p>
+<ul><li>检查今日是否触发大盘顶背离 → 若是，标记冷静期起始日</li><li>更新板块内个股五维评分排名（科技/小市值股跳过&quot;大盘共振&quot;维度）</li><li>检查持仓是否跌出前5名 → 标记预警</li><li>判断热点生命周期阶段（启动/扩散/高潮/退潮/冰点）</li><li>若不在冷静期，生成次日候选买入池（前2名）</li><li>记录当日交易日志（盈亏、触发信号、执行情况）</li></ul>
+<h2>第七部分：策略参数汇总</h2>
+<div class="tbl"><table><thead><tr><th><strong>参数</strong></th><th><strong>数值</strong></th><th><strong>类型</strong></th></tr></thead><tbody><tr><td>流动性过滤阈值</td><td>近5日日均换手率 ≥ 3%</td><td>选股</td></tr><tr><td>板块纯度阈值</td><td>≥ 30%</td><td>选股</td></tr><tr><td>评分排名取前N</td><td>2</td><td>选股</td></tr><tr><td>持仓预警排名</td><td>跌出前5</td><td>持仓管理</td></tr><tr><td>试探仓位（正常期）</td><td>25%</td><td>仓位</td></tr><tr><td>试探仓位（加速期）</td><td>15%</td><td>仓位</td></tr><tr><td>确认仓位</td><td>50%</td><td>仓位</td></tr><tr><td>板块加速阈值</td><td>近5日涨幅 8%-15%</td><td>阶段判断</td></tr><tr><td>板块高潮阈值</td><td>近5日涨幅 &gt; 15%</td><td>阶段判断</td></tr><tr><td>顶背离冷静期</td><td>10个交易日</td><td>买入限制</td></tr><tr><td>科技/小市值大盘共振</td><td>不考核，权重并入热点强度</td><td>评分</td></tr><tr><td>蓝筹大盘共振阈值</td><td>相关系数 &gt; 0.6</td><td>评分</td></tr><tr><td>退潮-龙头跌幅</td><td>单日 &gt; 5% 且跌破MA10</td><td>卖出</td></tr><tr><td>退潮-扩散失败</td><td>前5中3只以上跌幅 &gt; 3%</td><td>卖出</td></tr><tr><td>退潮-量能萎缩</td><td>近5日均量较前5日萎缩 &gt; 30%</td><td>卖出</td></tr><tr><td>退潮-板块破位</td><td>连续2日收于MA5下方</td><td>卖出</td></tr><tr><td>时间止损</td><td>5个交易日未盈利</td><td>止损</td></tr><tr><td>加速止损</td><td>退潮期回撤 &gt; 10%</td><td>止损</td></tr><tr><td>隔夜止损</td><td>涨停次日低开 &gt; 3%</td><td>止损</td></tr><tr><td>板块崩盘止损</td><td>板块单日跌幅 &gt; 5%</td><td>止损</td></tr><tr><td>基础回撤止损</td><td>20%</td><td>止损</td></tr></tbody></table></div>
+<h2>第八部分：策略核心逻辑总结</h2>
+<p><strong>热点板块交易策略决策树（更新版）</strong></p>
+<p><strong>0. 冷静期检查（最高优先级）</strong></p>
+<ul><li>距上次顶背离 ≤ 10个交易日 → 禁止买入，仅监控卖出</li><li>不在冷静期 → 继续</li></ul>
+<p><strong>1. 判断板块生命周期阶段</strong></p>
+<ul><li>高潮期 → 只卖不买，跳过选股</li><li>启动/扩散期 → 进入选股流程</li></ul>
+<p><strong>2. 五维评分选股</strong></p>
+<ul><li>科技/小市值：趋势25% + 量能20% + 位置20% + 热点35%</li><li>蓝筹/大市值：趋势25% + 量能20% + 位置20% + 热点20% + 大盘15%</li><li>取前2名 → 进入买入判断</li></ul>
+<p><strong>3. 买入：大盘+板块+个股三重MA5确认</strong></p>
+<ul><li>试探25% → MA5&gt;MA10连续2日 → 确认加至50%</li></ul>
+<p><strong>4. 持仓监控（优先级从高到低）</strong></p>
+<ul><li>热点退潮信号 D1-D4 → 分批撤退</li><li>大盘顶背离四条件 → 减半仓 + 启动10日冷静期</li><li>个股技术破位 → 减仓/清仓</li><li>热点特殊止损 → 清仓</li><li>基础回撤20%止损 → 清仓</li></ul>
+<h2>免责声明</h2>
+<p>本策略框架为方法论层面的设计，不构成任何具体投资建议。策略中的参数（如阈值、仓位比例等）为建议值，实际使用时应根据个人风险偏好和市场环境进行调整。热点板块交易具有高波动、高风险的特性，历史表现不代表未来收益。投资者应充分了解相关风险，独立做出投资决策。</p>
+<p>报告生成时间：2026年8月6日</p></article>
+</main>
+<footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-16</div></footer>
+</body>
+</html>

@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>海龟交易法则 选股模块 代码</title>
+<meta name="description" content="海龟交易法则策略（Turtle Trading）—— 第一部分：选股策略 (聚宽 JoinQuant)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 22l6-7 5 4 9-11' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="top"><div class="bar"><a class="brand" href="../../index.html">量化策略库</a>
+<nav><a href="../../index.html#dividend">股息率策略</a><a href="../../index.html#trend">趋势策略</a><a href="../../index.html#news">消息股策略</a></nav></div></header>
+<main class="wrap">
+<nav class="crumb"><a href="../../index.html">策略库</a> / <a href="../../index.html#trend">趋势策略</a> / <a href="../../s/turtle.html">海龟交易法则</a></nav>
+<section class="codehead"><h1>海龟交易法则 · 选股模块</h1><p class="sub">海龟交易法则策略（Turtle Trading）—— 第一部分：选股策略 (聚宽 JoinQuant)</p><p class="sub2">职责：构建/更新候选股票池 g.turtle_pool（每周五盘后运行一次）。</p>
+<div class="vers"><a class="vchip" href="1.html">交易模块</a><a class="vchip on" href="2.html">选股模块</a><a class="vchip" href="3.html">风控模块</a></div>
+<div class="tools"><span class="mono">海龟_选股策略.py · 178 行 · 8 KB</span><span class="grow"></span>
+<button class="btn" id="copy" type="button">复制代码</button><a class="btn" href="../../files/turtle/%E6%B5%B7%E9%BE%9F_%E9%80%89%E8%82%A1%E7%AD%96%E7%95%A5.py" download>下载 .py</a></div></section>
+<div class="codebox"><div class="hl"><table class="hltable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">  1</span>
+<span class="normal">  2</span>
+<span class="normal">  3</span>
+<span class="normal">  4</span>
+<span class="normal">  5</span>
+<span class="normal">  6</span>
+<span class="normal">  7</span>
+<span class="normal">  8</span>
+<span class="normal">  9</span>
+<span class="normal"> 10</span>
+<span class="normal"> 11</span>
+<span class="normal"> 12</span>
+<span class="normal"> 13</span>
+<span class="normal"> 14</span>
+<span class="normal"> 15</span>
+<span class="normal"> 16</span>
+<span class="normal"> 17</span>
+<span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span></pre></div></td><td class="code"><div><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">海龟交易法则策略（Turtle Trading）—— 第一部分：选股策略 (聚宽 JoinQuant)</span>
+<span class="sd">========================================================================</span>
+<span class="sd">职责：构建/更新候选股票池 g.turtle_pool（每周五盘后运行一次）。</span>
+<span class="sd">本文件同时提供 ATR / 唐奇安通道 等【公共指标函数】，供交易、风控模块调用。</span>
+
+<span class="sd">选股三层过滤（对应文字版第一部分）：</span>
+<span class="sd">  第一层 基础过滤 : 非ST、上市≥250交易日、近20日日均成交额≥2亿、收盘价≥5元</span>
+<span class="sd">  第二层 波动率筛选: ATR(50) &gt; ATR(300)（波动趋势）、|近20日涨跌幅| &gt; 10%（方向确认）</span>
+<span class="sd">  第三层 多品种分散: 同一申万一级行业≤2只，最终池 10~20 只，按波动趋势比排序</span>
+
+<span class="sd">组合方式（三选一）：</span>
+<span class="sd">  A. 聚宽【研究环境】上传本文件与&quot;风控&quot;文件，交易文件顶部</span>
+<span class="sd">     `from 海龟_选股策略 import *` / `from 海龟_风控策略 import *`。</span>
+<span class="sd">  B. 直接把三个文件内容按【选股→风控→交易】顺序拼进同一个策略文件（函数名无冲突）。</span>
+<span class="sd">  说明：本文件不含 initialize，导入无副作用。</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jqdata</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+
+<span class="c1"># ============================ 公共指标函数 ============================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">true_range</span><span class="p">(</span><span class="n">high</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">prev_close</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;真实波幅 TR = Max(高-低, |高-昨收|, |低-昨收|)。&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">prev_close</span><span class="p">),</span> <span class="nb">abs</span><span class="p">(</span><span class="n">low</span> <span class="o">-</span> <span class="n">prev_close</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">calc_atr</span><span class="p">(</span><span class="n">highs</span><span class="p">,</span> <span class="n">lows</span><span class="p">,</span> <span class="n">closes</span><span class="p">,</span> <span class="n">period</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wilder ATR(period)。highs/lows/closes 为等长序列（含足够历史）。&quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">closes</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">period</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">trs</span> <span class="o">=</span> <span class="p">[</span><span class="n">true_range</span><span class="p">(</span><span class="n">highs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">lows</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">closes</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">trs</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">period</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">atr</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">trs</span><span class="p">[:</span><span class="n">period</span><span class="p">]))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">period</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">trs</span><span class="p">)):</span>
+        <span class="n">atr</span> <span class="o">=</span> <span class="p">(</span><span class="n">atr</span> <span class="o">*</span> <span class="p">(</span><span class="n">period</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">trs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">period</span>
+    <span class="k">return</span> <span class="n">atr</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">donchian_high</span><span class="p">(</span><span class="n">highs</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">exclude_today</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;唐奇安上轨：过去 period 日最高价的最大值。exclude_today=True 表示不含当日。&quot;&quot;&quot;</span>
+    <span class="n">seq</span> <span class="o">=</span> <span class="n">highs</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">exclude_today</span> <span class="k">else</span> <span class="n">highs</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">period</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">seq</span><span class="p">[</span><span class="o">-</span><span class="n">period</span><span class="p">:]))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">donchian_low</span><span class="p">(</span><span class="n">lows</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">exclude_today</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;唐奇安下轨：过去 period 日最低价的最小值。exclude_today=True 表示不含当日。&quot;&quot;&quot;</span>
+    <span class="n">seq</span> <span class="o">=</span> <span class="n">lows</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">exclude_today</span> <span class="k">else</span> <span class="n">lows</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">period</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">seq</span><span class="p">[</span><span class="o">-</span><span class="n">period</span><span class="p">:]))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_daily_arrays</span><span class="p">(</span><span class="n">security</span><span class="p">,</span> <span class="n">end_dt</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;high&#39;</span><span class="p">,</span> <span class="s1">&#39;low&#39;</span><span class="p">,</span> <span class="s1">&#39;close&#39;</span><span class="p">)):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;取日线数组，返回 dict{field: np.array}；数据不足返回 None。&quot;&quot;&quot;</span>
+    <span class="n">bars</span> <span class="o">=</span> <span class="n">get_bars</span><span class="p">(</span><span class="n">security</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">count</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;1d&#39;</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">fields</span><span class="p">),</span>
+                    <span class="n">include_now</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">end_dt</span><span class="o">=</span><span class="n">end_dt</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">bars</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">bars</span><span class="p">[</span><span class="s1">&#39;close&#39;</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">f</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bars</span><span class="p">[</span><span class="n">f</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">}</span>
+
+
+<span class="c1"># ============================ 选股主流程 ============================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">select_universe</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;每周五盘后：重建候选池 g.turtle_pool，并缓存每只标的的行业与指标信息。&quot;&quot;&quot;</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sel</span>
+    <span class="n">prev</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">previous_date</span>
+
+    <span class="c1"># ---- 基础票池：默认取中证800成分（可在 initialize 里改 g.base_index=None 用全市场）----</span>
+    <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">base_index</span><span class="p">:</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">get_index_stocks</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">base_index</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">prev</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">get_all_securities</span><span class="p">(</span><span class="n">types</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;stock&#39;</span><span class="p">],</span> <span class="n">date</span><span class="o">=</span><span class="n">prev</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="c1"># ---- 一次性算好&quot;上市≥250交易日&quot;的门槛日：第251个交易日之前上市即合格 ----</span>
+    <span class="n">td</span> <span class="o">=</span> <span class="n">get_trade_days</span><span class="p">(</span><span class="n">end_date</span><span class="o">=</span><span class="n">prev</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_list_days&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">list_cutoff</span> <span class="o">=</span> <span class="n">td</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">td</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">prev</span>
+
+    <span class="n">cd</span> <span class="o">=</span> <span class="n">get_current_data</span><span class="p">()</span>
+
+    <span class="c1"># 第一层：基础过滤（ST / 上市时长 / 停牌）</span>
+    <span class="n">stage1</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">base</span><span class="p">:</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">cd</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">paused</span> <span class="ow">or</span> <span class="n">info</span><span class="o">.</span><span class="n">is_st</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;ST&#39;</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;退&#39;</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="n">sec_info</span> <span class="o">=</span> <span class="n">get_security_info</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sec_info</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">sec_info</span><span class="o">.</span><span class="n">start_date</span> <span class="o">&gt;</span> <span class="n">list_cutoff</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">stage1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+    <span class="c1"># 行业映射（申万一级），供分散约束 &amp; 风控行业敞口使用</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="n">get_industry</span><span class="p">(</span><span class="n">stage1</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">prev</span><span class="p">)</span>
+
+    <span class="c1"># 第一层(续) + 第二层：流动性 / 价格 / 波动率 / 方向</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># (security, vol_trend, info_dict)</span>
+    <span class="n">need</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;atr_slow&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">320</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">stage1</span><span class="p">:</span>
+        <span class="n">arr</span> <span class="o">=</span> <span class="n">get_daily_arrays</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">current_dt</span><span class="p">,</span> <span class="n">need</span><span class="p">,</span>
+                               <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;high&#39;</span><span class="p">,</span> <span class="s1">&#39;low&#39;</span><span class="p">,</span> <span class="s1">&#39;close&#39;</span><span class="p">,</span> <span class="s1">&#39;money&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">arr</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="s1">&#39;close&#39;</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;atr_slow&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">highs</span><span class="p">,</span> <span class="n">lows</span><span class="p">,</span> <span class="n">closes</span><span class="p">,</span> <span class="n">money</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="s1">&#39;high&#39;</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="s1">&#39;low&#39;</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="s1">&#39;close&#39;</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="s1">&#39;money&#39;</span><span class="p">]</span>
+
+        <span class="c1"># S4 价格 ≥ 5元</span>
+        <span class="n">price</span> <span class="o">=</span> <span class="n">closes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">price</span> <span class="o">&lt;</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_price&#39;</span><span class="p">]:</span>
+            <span class="k">continue</span>
+        <span class="c1"># S3 流动性：近20日日均成交额 ≥ 2亿</span>
+        <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">money</span><span class="p">[</span><span class="o">-</span><span class="mi">20</span><span class="p">:]))</span> <span class="o">&lt;</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_amount&#39;</span><span class="p">]:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># 第二层：波动趋势 ATR(50) &gt; ATR(300)</span>
+        <span class="n">atr_fast</span> <span class="o">=</span> <span class="n">calc_atr</span><span class="p">(</span><span class="n">highs</span><span class="p">,</span> <span class="n">lows</span><span class="p">,</span> <span class="n">closes</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;atr_fast&#39;</span><span class="p">])</span>
+        <span class="n">atr_slow</span> <span class="o">=</span> <span class="n">calc_atr</span><span class="p">(</span><span class="n">highs</span><span class="p">,</span> <span class="n">lows</span><span class="p">,</span> <span class="n">closes</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;atr_slow&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">atr_fast</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">atr_slow</span> <span class="ow">or</span> <span class="n">atr_slow</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">atr_fast</span> <span class="o">&lt;=</span> <span class="n">atr_slow</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="c1"># 第二层：方向确认 |近20日涨跌幅| &gt; 10%</span>
+        <span class="n">base_close</span> <span class="o">=</span> <span class="n">closes</span><span class="p">[</span><span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;mom_days&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">base_close</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">momentum</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">price</span> <span class="o">/</span> <span class="n">base_close</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">momentum</span> <span class="o">&lt;</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;mom_thresh&#39;</span><span class="p">]:</span>
+            <span class="k">continue</span>
+
+        <span class="n">atr20</span> <span class="o">=</span> <span class="n">calc_atr</span><span class="p">(</span><span class="n">highs</span><span class="p">,</span> <span class="n">lows</span><span class="p">,</span> <span class="n">closes</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">atr_period</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">atr20</span> <span class="ow">or</span> <span class="n">atr20</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;atr20&#39;</span><span class="p">:</span> <span class="n">atr20</span><span class="p">,</span>                                   <span class="c1"># 即 N 值</span>
+            <span class="s1">&#39;vol_trend&#39;</span><span class="p">:</span> <span class="n">atr_fast</span> <span class="o">/</span> <span class="n">atr_slow</span><span class="p">,</span>                 <span class="c1"># 波动趋势比</span>
+            <span class="s1">&#39;don_up_20&#39;</span><span class="p">:</span> <span class="n">donchian_high</span><span class="p">(</span><span class="n">highs</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>      <span class="c1"># 系统1 上轨</span>
+            <span class="s1">&#39;don_up_55&#39;</span><span class="p">:</span> <span class="n">donchian_high</span><span class="p">(</span><span class="n">highs</span><span class="p">,</span> <span class="mi">55</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>      <span class="c1"># 系统2 上轨</span>
+            <span class="s1">&#39;don_dn_10&#39;</span><span class="p">:</span> <span class="n">donchian_low</span><span class="p">(</span><span class="n">lows</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>        <span class="c1"># 系统1 退出下轨</span>
+            <span class="s1">&#39;don_dn_20&#39;</span><span class="p">:</span> <span class="n">donchian_low</span><span class="p">(</span><span class="n">lows</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>        <span class="c1"># 系统2 退出下轨</span>
+            <span class="s1">&#39;sector&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">ind</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="p">{})</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sw_l1&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;industry_code&#39;</span><span class="p">,</span> <span class="s1">&#39;NA&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="n">price</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">s</span><span class="p">,</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;vol_trend&#39;</span><span class="p">],</span> <span class="n">info</span><span class="p">))</span>
+
+    <span class="c1"># 第三层：多品种分散（同行业≤2）+ 池容量 10~20，按波动趋势比降序优选</span>
+    <span class="n">candidates</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">pool</span><span class="p">,</span> <span class="n">pool_info</span><span class="p">,</span> <span class="n">sector_count</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">{},</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+        <span class="n">sec</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;sector&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">sector_count</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sec</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;per_industry_max&#39;</span><span class="p">]:</span>
+            <span class="k">continue</span>
+        <span class="n">pool</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="n">pool_info</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span>
+        <span class="n">sector_count</span><span class="p">[</span><span class="n">sec</span><span class="p">]</span> <span class="o">=</span> <span class="n">sector_count</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sec</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;pool_max&#39;</span><span class="p">]:</span>
+            <span class="k">break</span>
+
+    <span class="n">g</span><span class="o">.</span><span class="n">turtle_pool</span> <span class="o">=</span> <span class="n">pool</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">pool_info</span> <span class="o">=</span> <span class="n">pool_info</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;[选股] 候选池更新：</span><span class="si">%d</span><span class="s1">只（合格候选</span><span class="si">%d</span><span class="s1">，行业分布</span><span class="si">%s</span><span class="s1">）&#39;</span> <span class="o">%</span>
+             <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pool</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidates</span><span class="p">),</span> <span class="n">sector_count</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;pool_min&#39;</span><span class="p">]:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;[选股] 候选池不足</span><span class="si">%d</span><span class="s1">只，当前仅</span><span class="si">%d</span><span class="s1">只（可放宽过滤或扩大基础票池）&#39;</span> <span class="o">%</span>
+                 <span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;pool_min&#39;</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">pool</span><span class="p">)))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_sector</span><span class="p">(</span><span class="n">security</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;取某标的申万一级行业代码（优先用选股缓存，缺失时实时查询）。&quot;&quot;&quot;</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="s1">&#39;pool_info&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">security</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">info</span> <span class="ow">and</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sector&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;sector&#39;</span><span class="p">]</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="n">get_industry</span><span class="p">(</span><span class="n">security</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">ind</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">security</span><span class="p">,</span> <span class="p">{})</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sw_l1&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;industry_code&#39;</span><span class="p">,</span> <span class="s1">&#39;NA&#39;</span><span class="p">)</span>
+</pre></div></td></tr></table></div>
+</div>
+<textarea id="raw" hidden># -*- coding: utf-8 -*-
+&quot;&quot;&quot;
+海龟交易法则策略（Turtle Trading）—— 第一部分：选股策略 (聚宽 JoinQuant)
+========================================================================
+职责：构建/更新候选股票池 g.turtle_pool（每周五盘后运行一次）。
+本文件同时提供 ATR / 唐奇安通道 等【公共指标函数】，供交易、风控模块调用。
+
+选股三层过滤（对应文字版第一部分）：
+  第一层 基础过滤 : 非ST、上市≥250交易日、近20日日均成交额≥2亿、收盘价≥5元
+  第二层 波动率筛选: ATR(50) &gt; ATR(300)（波动趋势）、|近20日涨跌幅| &gt; 10%（方向确认）
+  第三层 多品种分散: 同一申万一级行业≤2只，最终池 10~20 只，按波动趋势比排序
+
+组合方式（三选一）：
+  A. 聚宽【研究环境】上传本文件与&quot;风控&quot;文件，交易文件顶部
+     `from 海龟_选股策略 import *` / `from 海龟_风控策略 import *`。
+  B. 直接把三个文件内容按【选股→风控→交易】顺序拼进同一个策略文件（函数名无冲突）。
+  说明：本文件不含 initialize，导入无副作用。
+&quot;&quot;&quot;
+import numpy as np
+from jqdata import *
+
+
+# ============================ 公共指标函数 ============================
+def true_range(high, low, prev_close):
+    &quot;&quot;&quot;真实波幅 TR = Max(高-低, |高-昨收|, |低-昨收|)。&quot;&quot;&quot;
+    return max(high - low, abs(high - prev_close), abs(low - prev_close))
+
+
+def calc_atr(highs, lows, closes, period):
+    &quot;&quot;&quot;Wilder ATR(period)。highs/lows/closes 为等长序列（含足够历史）。&quot;&quot;&quot;
+    n = len(closes)
+    if n &lt; period + 1:
+        return None
+    trs = [true_range(highs[i], lows[i], closes[i - 1]) for i in range(1, n)]
+    if len(trs) &lt; period:
+        return None
+    atr = float(np.mean(trs[:period]))
+    for i in range(period, len(trs)):
+        atr = (atr * (period - 1) + trs[i]) / period
+    return atr
+
+
+def donchian_high(highs, period, exclude_today=True):
+    &quot;&quot;&quot;唐奇安上轨：过去 period 日最高价的最大值。exclude_today=True 表示不含当日。&quot;&quot;&quot;
+    seq = highs[:-1] if exclude_today else highs
+    if len(seq) &lt; period:
+        return None
+    return float(np.max(seq[-period:]))
+
+
+def donchian_low(lows, period, exclude_today=True):
+    &quot;&quot;&quot;唐奇安下轨：过去 period 日最低价的最小值。exclude_today=True 表示不含当日。&quot;&quot;&quot;
+    seq = lows[:-1] if exclude_today else lows
+    if len(seq) &lt; period:
+        return None
+    return float(np.min(seq[-period:]))
+
+
+def get_daily_arrays(security, end_dt, count, fields=(&#x27;high&#x27;, &#x27;low&#x27;, &#x27;close&#x27;)):
+    &quot;&quot;&quot;取日线数组，返回 dict{field: np.array}；数据不足返回 None。&quot;&quot;&quot;
+    bars = get_bars(security, count=count, unit=&#x27;1d&#x27;, fields=list(fields),
+                    include_now=True, end_dt=end_dt, df=False)
+    if bars is None or len(bars[&#x27;close&#x27;]) &lt; 2:
+        return None
+    return {f: np.array(bars[f], dtype=float) for f in fields}
+
+
+# ============================ 选股主流程 ============================
+def select_universe(context):
+    &quot;&quot;&quot;每周五盘后：重建候选池 g.turtle_pool，并缓存每只标的的行业与指标信息。&quot;&quot;&quot;
+    p = g.sel
+    prev = context.previous_date
+
+    # ---- 基础票池：默认取中证800成分（可在 initialize 里改 g.base_index=None 用全市场）----
+    if g.base_index:
+        base = get_index_stocks(g.base_index, date=prev)
+    else:
+        base = list(get_all_securities(types=[&#x27;stock&#x27;], date=prev).index)
+
+    # ---- 一次性算好&quot;上市≥250交易日&quot;的门槛日：第251个交易日之前上市即合格 ----
+    td = get_trade_days(end_date=prev, count=p[&#x27;min_list_days&#x27;] + 1)
+    list_cutoff = td[0] if len(td) &gt; 0 else prev
+
+    cd = get_current_data()
+
+    # 第一层：基础过滤（ST / 上市时长 / 停牌）
+    stage1 = []
+    for s in base:
+        info = cd[s]
+        if info.paused or info.is_st or (&#x27;ST&#x27; in info.name) or (&#x27;退&#x27; in info.name):
+            continue
+        sec_info = get_security_info(s)
+        if sec_info is None or sec_info.start_date &gt; list_cutoff:
+            continue
+        stage1.append(s)
+
+    # 行业映射（申万一级），供分散约束 &amp; 风控行业敞口使用
+    ind = get_industry(stage1, date=prev)
+
+    # 第一层(续) + 第二层：流动性 / 价格 / 波动率 / 方向
+    candidates = []  # (security, vol_trend, info_dict)
+    need = max(p[&#x27;atr_slow&#x27;] + 5, 320)
+    for s in stage1:
+        arr = get_daily_arrays(s, context.current_dt, need,
+                               fields=(&#x27;high&#x27;, &#x27;low&#x27;, &#x27;close&#x27;, &#x27;money&#x27;))
+        if arr is None or len(arr[&#x27;close&#x27;]) &lt; p[&#x27;atr_slow&#x27;] + 1:
+            continue
+        highs, lows, closes, money = arr[&#x27;high&#x27;], arr[&#x27;low&#x27;], arr[&#x27;close&#x27;], arr[&#x27;money&#x27;]
+
+        # S4 价格 ≥ 5元
+        price = closes[-1]
+        if price &lt; p[&#x27;min_price&#x27;]:
+            continue
+        # S3 流动性：近20日日均成交额 ≥ 2亿
+        if float(np.mean(money[-20:])) &lt; p[&#x27;min_amount&#x27;]:
+            continue
+
+        # 第二层：波动趋势 ATR(50) &gt; ATR(300)
+        atr_fast = calc_atr(highs, lows, closes, p[&#x27;atr_fast&#x27;])
+        atr_slow = calc_atr(highs, lows, closes, p[&#x27;atr_slow&#x27;])
+        if not atr_fast or not atr_slow or atr_slow &lt;= 0:
+            continue
+        if atr_fast &lt;= atr_slow:
+            continue
+        # 第二层：方向确认 |近20日涨跌幅| &gt; 10%
+        base_close = closes[-(p[&#x27;mom_days&#x27;] + 1)]
+        if base_close &lt;= 0:
+            continue
+        momentum = abs(price / base_close - 1.0)
+        if momentum &lt; p[&#x27;mom_thresh&#x27;]:
+            continue
+
+        atr20 = calc_atr(highs, lows, closes, g.atr_period)
+        if not atr20 or atr20 &lt;= 0:
+            continue
+
+        info = {
+            &#x27;atr20&#x27;: atr20,                                   # 即 N 值
+            &#x27;vol_trend&#x27;: atr_fast / atr_slow,                 # 波动趋势比
+            &#x27;don_up_20&#x27;: donchian_high(highs, 20, True),      # 系统1 上轨
+            &#x27;don_up_55&#x27;: donchian_high(highs, 55, True),      # 系统2 上轨
+            &#x27;don_dn_10&#x27;: donchian_low(lows, 10, True),        # 系统1 退出下轨
+            &#x27;don_dn_20&#x27;: donchian_low(lows, 20, True),        # 系统2 退出下轨
+            &#x27;sector&#x27;: (ind.get(s, {}) or {}).get(&#x27;sw_l1&#x27;, {}).get(&#x27;industry_code&#x27;, &#x27;NA&#x27;),
+            &#x27;price&#x27;: price,
+        }
+        candidates.append((s, info[&#x27;vol_trend&#x27;], info))
+
+    # 第三层：多品种分散（同行业≤2）+ 池容量 10~20，按波动趋势比降序优选
+    candidates.sort(key=lambda x: x[1], reverse=True)
+    pool, pool_info, sector_count = [], {}, {}
+    for s, _, info in candidates:
+        sec = info[&#x27;sector&#x27;]
+        if sector_count.get(sec, 0) &gt;= p[&#x27;per_industry_max&#x27;]:
+            continue
+        pool.append(s)
+        pool_info[s] = info
+        sector_count[sec] = sector_count.get(sec, 0) + 1
+        if len(pool) &gt;= p[&#x27;pool_max&#x27;]:
+            break
+
+    g.turtle_pool = pool
+    g.pool_info = pool_info
+    log.info(&#x27;[选股] 候选池更新：%d只（合格候选%d，行业分布%s）&#x27; %
+             (len(pool), len(candidates), sector_count))
+    if len(pool) &lt; p[&#x27;pool_min&#x27;]:
+        log.warn(&#x27;[选股] 候选池不足%d只，当前仅%d只（可放宽过滤或扩大基础票池）&#x27; %
+                 (p[&#x27;pool_min&#x27;], len(pool)))
+
+
+def get_sector(security):
+    &quot;&quot;&quot;取某标的申万一级行业代码（优先用选股缓存，缺失时实时查询）。&quot;&quot;&quot;
+    info = getattr(g, &#x27;pool_info&#x27;, {}).get(security)
+    if info and info.get(&#x27;sector&#x27;):
+        return info[&#x27;sector&#x27;]
+    ind = get_industry(security)
+    return (ind.get(security, {}) or {}).get(&#x27;sw_l1&#x27;, {}).get(&#x27;industry_code&#x27;, &#x27;NA&#x27;)
+</textarea>
+<script>
+document.getElementById("copy").addEventListener("click", async e => { const b = e.currentTarget, t = document.getElementById("raw").value;
+  try { await navigator.clipboard.writeText(t); } catch (err) { const a = document.getElementById("raw"); a.hidden = false; a.select(); document.execCommand("copy"); a.hidden = true; }
+  b.textContent = "已复制"; setTimeout(() => b.textContent = "复制代码", 1500); });
+</script>
+</main>
+<footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-16</div></footer>
+</body>
+</html>

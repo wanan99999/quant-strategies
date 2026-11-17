@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>银行股顺势策略 · 量化策略库</title>
+<meta name="description" content="银行股里强者恒强：持有离一年高点最近的 4 只，掉出前 6 名才卖，不追近期已大涨的。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 22l6-7 5 4 9-11' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="top"><div class="bar"><a class="brand" href="../index.html">量化策略库</a>
+<nav><a href="../index.html#dividend">股息率策略</a><a href="../index.html#trend">趋势策略</a><a href="../index.html#news">消息股策略</a></nav></div></header>
+<main class="wrap">
+<nav class="crumb"><a href="../index.html">策略库</a> / <a href="../index.html#trend">趋势策略</a></nav>
+<header class="shead"><div class="chips"><span class="chip c-trend">趋势策略</span><span class="chip">本地测算 · 最终版</span></div>
+<h1>银行股顺势策略</h1><p class="lede">银行股里强者恒强：持有离一年高点最近的 4 只，掉出前 6 名才卖，不追近期已大涨的。</p></header>
+<div class="kpis"><div class="kpi"><div class="k">2019 年起年化</div><div class="v">+17.4%</div><div class="s">池内 20 家等权 +10.3% · 最大回撤 -22%</div></div><div class="kpi"><div class="k">2017 年起年化</div><div class="v">+13.9%</div><div class="s">等权 +7.7%</div></div><div class="kpi"><div class="k">2008–2016 年化</div><div class="v">-2.8%</div><div class="s">这段时间顺势无效</div></div></div>
+<div class="cols">
+<section class="blk"><h2>规则要点</h2><ul class='bul'><li>股票池：每年初取上年末总市值前 20 的银行股（申万一级 银行），全年不变</li><li>排名：当前价 ÷ 最近 250 个交易日最高收盘价 − 1，越接近 0 越强（复权价）</li><li>持 4 只，每只 1/4；持仓掉出前 6 名才卖</li><li>新买入要求近 20 个交易日涨幅 ≤10%（防追高）；涨停、停牌跳过</li><li>每 5 个交易日调仓，14:50 下单</li></ul></section>
+<section class="blk"><h2>结论与注意</h2><ul class='bul'><li>规律只在 2017 年以后出现，2008–2016 年所有板块都无效。</li><li>结果对调仓起始日敏感，看结果要取多个起始日的中位数；每 5 天调仓比每 20 天稳定得多。</li><li>PDF 报告基于每 20 个交易日调仓的旧版本；网站上的代码已改为每 5 个交易日调仓。</li><li>个股止损、移动止损、板块空仓风控都让收益变差。</li></ul></section>
+</div>
+<section class="blk"><h2>报告 <small>3</small></h2><div class="files"><a class="file" href="../files/bank-momentum/%E9%93%B6%E8%A1%8C%E8%82%A1%E9%A1%BA%E5%8A%BF%E7%AD%96%E7%95%A5_%E6%9C%80%E7%BB%88%E7%89%88%E5%88%86%E6%9E%90%E6%80%BB%E7%BB%93.pdf" target="_blank" rel="noopener"><span class="ftype t-pdf">PDF</span><span class="fmain"><b>最终版分析总结</b><span>规则、逐年收益、调仓起始日敏感度（20 日调仓版）</span></span><span class="fsize">376 KB</span></a><a class="file" href="../files/bank-momentum/%E9%93%B6%E8%A1%8C%E8%82%A1%E9%A1%BA%E5%8A%BF%E7%AD%96%E7%95%A5_%E8%A7%84%E5%88%99%E8%AF%B4%E6%98%8E%E4%B8%8E%E6%94%B9%E8%BF%9B%E6%B5%8B%E8%AF%95.pdf" target="_blank" rel="noopener"><span class="ftype t-pdf">PDF</span><span class="fmain"><b>规则说明与改进测试</b><span>防追高、缓冲区、止损等 22 种改进</span></span><span class="fsize">228 KB</span></a><a class="file" href="../files/bank-momentum/%E9%93%B6%E8%A1%8C%E8%82%A1%E6%9D%BF%E5%9D%97%E6%8A%84%E5%BA%95%E4%B8%8E%E9%A1%BA%E5%8A%BF%E7%AD%96%E7%95%A5_%E9%95%BF%E5%8E%86%E5%8F%B2%E6%A3%80%E9%AA%8C%E6%8A%A5%E5%91%8A.pdf" target="_blank" rel="noopener"><span class="ftype t-pdf">PDF</span><span class="fmain"><b>板块抄底与顺势：长历史检验</b><span>2008–2026，抄底无效、顺势 2017 后有效</span></span><span class="fsize">500 KB</span></a></div></section>
+<section class="blk"><h2>策略代码 <small>1 个文件 · 聚宽 JoinQuant</small></h2><div class="tblwrap"><table class="ctbl"><thead><tr><th>版本</th><th>说明</th><th>长度</th><th></th></tr></thead><tbody><tr><td><a href="../code/bank-momentum/1.html"><b>最终版（5 日调仓）</b></a></td><td class="cn">股票池：每年第一个交易日，取「上一年最后一个交易日」总市值前 20 的银行股（申万一级 银行 801780），全年不变</td><td class="num">134 行</td><td class="act"><a href="../code/bank-momentum/1.html">查看</a><a href="../files/bank-momentum/%E9%93%B6%E8%A1%8C%E8%82%A1%E9%A1%BA%E5%8A%BF%E7%AD%96%E7%95%A5.py" download>下载</a></td></tr></tbody></table></div></section>
+
+<section class="blk"><h2>数据 <small>2</small></h2><div class="files"><a class="file" href="../files/bank-momentum/%E9%93%B6%E8%A1%8C%E8%82%A1%E9%A1%BA%E5%8A%BF%E7%AD%96%E7%95%A5%E7%BB%84%E5%90%88A_%E9%80%90%E5%B9%B4%E6%94%B6%E7%9B%8A%E4%B8%8E%E8%82%A1%E7%A5%A8%E6%B1%A0%E5%AF%B9%E6%AF%94.xlsx" download><span class="ftype t-xlsx">Excel</span><span class="fmain"><b>逐年收益与股票池对比</b><span>下载</span></span><span class="fsize">14 KB</span></a><a class="file" href="../files/bank-momentum/%E9%A1%BA%E5%8A%BF%E7%AD%96%E7%95%A5_%E8%B7%A8%E6%9D%BF%E5%9D%97%E6%B5%8B%E8%AF%95.xlsx" download><span class="ftype t-xlsx">Excel</span><span class="fmain"><b>跨板块测试（20 日调仓版）</b><span>下载</span></span><span class="fsize">14 KB</span></a></div></section>
+</main>
+<footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-16</div></footer>
+</body>
+</html>

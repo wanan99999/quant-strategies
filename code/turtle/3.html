@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>海龟交易法则 风控模块 代码</title>
+<meta name="description" content="海龟交易法则策略（Turtle Trading）—— 第三部分：风控策略 (聚宽 JoinQuant)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 22l6-7 5 4 9-11' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="top"><div class="bar"><a class="brand" href="../../index.html">量化策略库</a>
+<nav><a href="../../index.html#dividend">股息率策略</a><a href="../../index.html#trend">趋势策略</a><a href="../../index.html#news">消息股策略</a></nav></div></header>
+<main class="wrap">
+<nav class="crumb"><a href="../../index.html">策略库</a> / <a href="../../index.html#trend">趋势策略</a> / <a href="../../s/turtle.html">海龟交易法则</a></nav>
+<section class="codehead"><h1>海龟交易法则 · 风控模块</h1><p class="sub">海龟交易法则策略（Turtle Trading）—— 第三部分：风控策略 (聚宽 JoinQuant)</p><p class="sub2">职责：提供仓位额度、账户/市场级熔断、止损追踪等风控函数，供交易模块调用。</p>
+<div class="vers"><a class="vchip" href="1.html">交易模块</a><a class="vchip" href="2.html">选股模块</a><a class="vchip on" href="3.html">风控模块</a></div>
+<div class="tools"><span class="mono">海龟_风控策略.py · 139 行 · 6 KB</span><span class="grow"></span>
+<button class="btn" id="copy" type="button">复制代码</button><a class="btn" href="../../files/turtle/%E6%B5%B7%E9%BE%9F_%E9%A3%8E%E6%8E%A7%E7%AD%96%E7%95%A5.py" download>下载 .py</a></div></section>
+<div class="codebox"><div class="hl"><table class="hltable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">  1</span>
+<span class="normal">  2</span>
+<span class="normal">  3</span>
+<span class="normal">  4</span>
+<span class="normal">  5</span>
+<span class="normal">  6</span>
+<span class="normal">  7</span>
+<span class="normal">  8</span>
+<span class="normal">  9</span>
+<span class="normal"> 10</span>
+<span class="normal"> 11</span>
+<span class="normal"> 12</span>
+<span class="normal"> 13</span>
+<span class="normal"> 14</span>
+<span class="normal"> 15</span>
+<span class="normal"> 16</span>
+<span class="normal"> 17</span>
+<span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span></pre></div></td><td class="code"><div><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">海龟交易法则策略（Turtle Trading）—— 第三部分：风控策略 (聚宽 JoinQuant)</span>
+<span class="sd">========================================================================</span>
+<span class="sd">职责：提供仓位额度、账户/市场级熔断、止损追踪等风控函数，供交易模块调用。</span>
+<span class="sd">本文件不含 initialize，导入无副作用。</span>
+
+<span class="sd">风控要点（对应文字版第三部分）：</span>
+<span class="sd">  3.1 单笔风险 : 1单位=2N止损≈总资金2% → 单票≤4单位(8%)，同行业≤6单位(12%)</span>
+<span class="sd">  3.2 账户风险 : 总敞口≤10单位(20%)；回撤&gt;20%暂停开仓；月亏&gt;10%当月停开新仓</span>
+<span class="sd">  3.3 市场环境 : 指数波动萎缩(ATR50&lt;ATR300)→仅系统2；极端波动→新开单位数减半；</span>
+<span class="sd">                 持仓跌停无法卖出→次日开盘清仓（在交易模块执行）</span>
+<span class="sd">  3.4 资金曲线 : 盈利复利(1单位=最新总资金×1%/N)；每周五更新N并【上移】止损</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jqdata</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">try</span><span class="p">:</span>  <span class="c1"># 研究环境模块化导入；若三文件已拼进同一策略文件则此行忽略</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">海龟_选股策略</span><span class="w"> </span><span class="kn">import</span> <span class="n">calc_atr</span><span class="p">,</span> <span class="n">get_daily_arrays</span><span class="p">,</span> <span class="n">get_sector</span>
+<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+
+<span class="c1"># ============================ 账户级状态维护 ============================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">init_risk_state</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+    <span class="n">tv</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">total_value</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">peak_value</span> <span class="o">=</span> <span class="n">tv</span>                                   <span class="c1"># 资金曲线峰值（算回撤）</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">month_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">current_dt</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">current_dt</span><span class="o">.</span><span class="n">month</span><span class="p">)</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">month_start_value</span> <span class="o">=</span> <span class="n">tv</span>                            <span class="c1"># 当月初始资金（算月亏）</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">update_risk_state</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;每日评估前调用：更新资金峰值与当月基准。&quot;&quot;&quot;</span>
+    <span class="n">tv</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">total_value</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">peak_value</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="s1">&#39;peak_value&#39;</span><span class="p">,</span> <span class="n">tv</span><span class="p">),</span> <span class="n">tv</span><span class="p">)</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">current_dt</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">current_dt</span><span class="o">.</span><span class="n">month</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="s1">&#39;month_key&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">month_key</span> <span class="o">=</span> <span class="n">key</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">month_start_value</span> <span class="o">=</span> <span class="n">tv</span>
+
+
+<span class="c1"># ============================ 市场环境判断 ============================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">market_vol_shrink</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;指数波动萎缩：ATR(50) &lt; ATR(300) → 仅允许系统2。&quot;&quot;&quot;</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">get_daily_arrays</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">market_index</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">current_dt</span><span class="p">,</span> <span class="mi">320</span><span class="p">,</span>
+                           <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;high&#39;</span><span class="p">,</span> <span class="s1">&#39;low&#39;</span><span class="p">,</span> <span class="s1">&#39;close&#39;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">arr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">fast</span> <span class="o">=</span> <span class="n">calc_atr</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="s1">&#39;high&#39;</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="s1">&#39;low&#39;</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="s1">&#39;close&#39;</span><span class="p">],</span> <span class="n">g</span><span class="o">.</span><span class="n">sel</span><span class="p">[</span><span class="s1">&#39;atr_fast&#39;</span><span class="p">])</span>
+    <span class="n">slow</span> <span class="o">=</span> <span class="n">calc_atr</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="s1">&#39;high&#39;</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="s1">&#39;low&#39;</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="s1">&#39;close&#39;</span><span class="p">],</span> <span class="n">g</span><span class="o">.</span><span class="n">sel</span><span class="p">[</span><span class="s1">&#39;atr_slow&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">fast</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">slow</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">fast</span> <span class="o">&lt;</span> <span class="n">slow</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">market_extreme_vol</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;极端波动：指数近20日已实现波动率 &gt; 近1年90%分位 → 新开单位数减半。</span>
+<span class="sd">    （A股无VIX，用指数20日收益率标准差的历史分位近似）&quot;&quot;&quot;</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">get_daily_arrays</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">market_index</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">current_dt</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;close&#39;</span><span class="p">,))</span>
+    <span class="k">if</span> <span class="n">arr</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="s1">&#39;close&#39;</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">260</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">closes</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="s1">&#39;close&#39;</span><span class="p">]</span>
+    <span class="n">rets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">closes</span><span class="p">)</span> <span class="o">/</span> <span class="n">closes</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">win</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">roll</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">rets</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="n">win</span><span class="p">:</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">win</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">rets</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)])</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">roll</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">60</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">roll</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">roll</span><span class="p">[</span><span class="o">-</span><span class="mi">250</span><span class="p">:],</span> <span class="mi">90</span><span class="p">)</span>
+
+
+<span class="c1"># ============================ 开仓许可 &amp; 单位数额度 ============================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">new_open_permission</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;返回是否允许新开仓、是否仅系统2、新开单位乘数。&quot;&quot;&quot;</span>
+    <span class="n">tv</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">total_value</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;allow&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;only_system2&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;unit_mult&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;reason&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">}</span>
+
+    <span class="c1"># 3.2 账户回撤 &gt; 20% → 暂停一切新开仓（仅允许平仓）</span>
+    <span class="n">peak</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="s1">&#39;peak_value&#39;</span><span class="p">,</span> <span class="n">tv</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">peak</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">peak</span> <span class="o">-</span> <span class="n">tv</span><span class="p">)</span> <span class="o">/</span> <span class="n">peak</span> <span class="o">&gt;</span> <span class="n">g</span><span class="o">.</span><span class="n">risk</span><span class="p">[</span><span class="s1">&#39;dd_pause&#39;</span><span class="p">]:</span>
+        <span class="n">res</span><span class="p">[</span><span class="s1">&#39;allow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">res</span><span class="p">[</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;账户回撤</span><span class="si">%.1f%%</span><span class="s1">&gt;20</span><span class="si">%%</span><span class="s1">，暂停开仓&#39;</span> <span class="o">%</span> <span class="p">((</span><span class="n">peak</span> <span class="o">-</span> <span class="n">tv</span><span class="p">)</span> <span class="o">/</span> <span class="n">peak</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+    <span class="c1"># 3.2 当月累计亏损 &gt; 10% → 当月停开新仓</span>
+    <span class="n">ms</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="s1">&#39;month_start_value&#39;</span><span class="p">,</span> <span class="n">tv</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ms</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">tv</span> <span class="o">-</span> <span class="n">ms</span><span class="p">)</span> <span class="o">/</span> <span class="n">ms</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">g</span><span class="o">.</span><span class="n">risk</span><span class="p">[</span><span class="s1">&#39;month_loss_pause&#39;</span><span class="p">]:</span>
+        <span class="n">res</span><span class="p">[</span><span class="s1">&#39;allow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">res</span><span class="p">[</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;当月亏损</span><span class="si">%.1f%%</span><span class="s1">&gt;10</span><span class="si">%%</span><span class="s1">，当月停开新仓&#39;</span> <span class="o">%</span> <span class="p">((</span><span class="n">tv</span> <span class="o">-</span> <span class="n">ms</span><span class="p">)</span> <span class="o">/</span> <span class="n">ms</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+    <span class="c1"># 3.3 市场环境</span>
+    <span class="k">if</span> <span class="n">market_vol_shrink</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+        <span class="n">res</span><span class="p">[</span><span class="s1">&#39;only_system2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">res</span><span class="p">[</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;指数波动萎缩，仅系统2&#39;</span>
+    <span class="k">if</span> <span class="n">market_extreme_vol</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+        <span class="n">res</span><span class="p">[</span><span class="s1">&#39;unit_mult&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="n">res</span><span class="p">[</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;；&#39;</span> <span class="k">if</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;极端波动，新开单位减半&#39;</span>
+    <span class="k">return</span> <span class="n">res</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">units_available</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">security</span><span class="p">,</span> <span class="n">sector</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;在【单票≤4 / 同行业≤6 / 全账户≤10】约束下，该标的还能新增的单位数。&quot;&quot;&quot;</span>
+    <span class="n">trades</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="s1">&#39;trades&#39;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">cur_total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">trades</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">cur_stock</span> <span class="o">=</span> <span class="n">trades</span><span class="p">[</span><span class="n">security</span><span class="p">][</span><span class="s1">&#39;units&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">security</span> <span class="ow">in</span> <span class="n">trades</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="n">cur_sector</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">trades</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sector&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="n">sector</span><span class="p">)</span>
+
+    <span class="n">avail</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">risk</span><span class="p">[</span><span class="s1">&#39;max_units_per_stock&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">cur_stock</span><span class="p">,</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">risk</span><span class="p">[</span><span class="s1">&#39;max_units_per_sector&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">cur_sector</span><span class="p">,</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">risk</span><span class="p">[</span><span class="s1">&#39;max_units_total&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">cur_total</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">avail</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">unit_shares</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;1个单位的股数 = 账户总资金×1% / N，向下取整到100股。</span>
+<span class="sd">    （盈利复利：用最新 total_value；这里以总资金为基准，天然实现复利/缩仓）&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">N</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="n">raw</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">total_value</span> <span class="o">*</span> <span class="n">g</span><span class="o">.</span><span class="n">risk</span><span class="p">[</span><span class="s1">&#39;unit_risk_pct&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">N</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw</span> <span class="o">//</span> <span class="mi">100</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+
+
+<span class="c1"># ============================ 止损维护（每周五盘后） ============================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">weekly_trailing_stop</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;每周重算持仓N值，将止损价【仅上移】：new_stop = 最新收盘 - 2N(当前)。&quot;&quot;&quot;</span>
+    <span class="n">trades</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="s1">&#39;trades&#39;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">trades</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">arr</span> <span class="o">=</span> <span class="n">get_daily_arrays</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">current_dt</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">atr_period</span> <span class="o">+</span> <span class="mi">5</span><span class="p">,</span>
+                               <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;high&#39;</span><span class="p">,</span> <span class="s1">&#39;low&#39;</span><span class="p">,</span> <span class="s1">&#39;close&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">arr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">N_now</span> <span class="o">=</span> <span class="n">calc_atr</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="s1">&#39;high&#39;</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="s1">&#39;low&#39;</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="s1">&#39;close&#39;</span><span class="p">],</span> <span class="n">g</span><span class="o">.</span><span class="n">atr_period</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">N_now</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">trailing</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="s1">&#39;close&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">g</span><span class="o">.</span><span class="n">risk</span><span class="p">[</span><span class="s1">&#39;stop_atr&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">N_now</span>
+        <span class="k">if</span> <span class="n">trailing</span> <span class="o">&gt;</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;stop_price&#39;</span><span class="p">]:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;[风控 止损上移] </span><span class="si">%s</span><span class="s1"> </span><span class="si">%.2f</span><span class="s1"> → </span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;stop_price&#39;</span><span class="p">],</span> <span class="n">trailing</span><span class="p">))</span>
+            <span class="n">t</span><span class="p">[</span><span class="s1">&#39;stop_price&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">trailing</span>
+</pre></div></td></tr></table></div>
+</div>
+<textarea id="raw" hidden># -*- coding: utf-8 -*-
+&quot;&quot;&quot;
+海龟交易法则策略（Turtle Trading）—— 第三部分：风控策略 (聚宽 JoinQuant)
+========================================================================
+职责：提供仓位额度、账户/市场级熔断、止损追踪等风控函数，供交易模块调用。
+本文件不含 initialize，导入无副作用。
+
+风控要点（对应文字版第三部分）：
+  3.1 单笔风险 : 1单位=2N止损≈总资金2% → 单票≤4单位(8%)，同行业≤6单位(12%)
+  3.2 账户风险 : 总敞口≤10单位(20%)；回撤&gt;20%暂停开仓；月亏&gt;10%当月停开新仓
+  3.3 市场环境 : 指数波动萎缩(ATR50&lt;ATR300)→仅系统2；极端波动→新开单位数减半；
+                 持仓跌停无法卖出→次日开盘清仓（在交易模块执行）
+  3.4 资金曲线 : 盈利复利(1单位=最新总资金×1%/N)；每周五更新N并【上移】止损
+&quot;&quot;&quot;
+import numpy as np
+from jqdata import *
+
+try:  # 研究环境模块化导入；若三文件已拼进同一策略文件则此行忽略
+    from 海龟_选股策略 import calc_atr, get_daily_arrays, get_sector
+except Exception:
+    pass
+
+
+# ============================ 账户级状态维护 ============================
+def init_risk_state(context):
+    tv = context.portfolio.total_value
+    g.peak_value = tv                                   # 资金曲线峰值（算回撤）
+    g.month_key = (context.current_dt.year, context.current_dt.month)
+    g.month_start_value = tv                            # 当月初始资金（算月亏）
+
+
+def update_risk_state(context):
+    &quot;&quot;&quot;每日评估前调用：更新资金峰值与当月基准。&quot;&quot;&quot;
+    tv = context.portfolio.total_value
+    g.peak_value = max(getattr(g, &#x27;peak_value&#x27;, tv), tv)
+    key = (context.current_dt.year, context.current_dt.month)
+    if key != getattr(g, &#x27;month_key&#x27;, None):
+        g.month_key = key
+        g.month_start_value = tv
+
+
+# ============================ 市场环境判断 ============================
+def market_vol_shrink(context):
+    &quot;&quot;&quot;指数波动萎缩：ATR(50) &lt; ATR(300) → 仅允许系统2。&quot;&quot;&quot;
+    arr = get_daily_arrays(g.market_index, context.current_dt, 320,
+                           fields=(&#x27;high&#x27;, &#x27;low&#x27;, &#x27;close&#x27;))
+    if arr is None:
+        return False
+    fast = calc_atr(arr[&#x27;high&#x27;], arr[&#x27;low&#x27;], arr[&#x27;close&#x27;], g.sel[&#x27;atr_fast&#x27;])
+    slow = calc_atr(arr[&#x27;high&#x27;], arr[&#x27;low&#x27;], arr[&#x27;close&#x27;], g.sel[&#x27;atr_slow&#x27;])
+    if not fast or not slow:
+        return False
+    return fast &lt; slow
+
+
+def market_extreme_vol(context):
+    &quot;&quot;&quot;极端波动：指数近20日已实现波动率 &gt; 近1年90%分位 → 新开单位数减半。
+    （A股无VIX，用指数20日收益率标准差的历史分位近似）&quot;&quot;&quot;
+    arr = get_daily_arrays(g.market_index, context.current_dt, 300, fields=(&#x27;close&#x27;,))
+    if arr is None or len(arr[&#x27;close&#x27;]) &lt; 260:
+        return False
+    closes = arr[&#x27;close&#x27;]
+    rets = np.diff(closes) / closes[:-1]
+    win = 20
+    roll = np.array([rets[i - win:i].std() for i in range(win, len(rets) + 1)])
+    if len(roll) &lt; 60:
+        return False
+    return roll[-1] &gt; np.percentile(roll[-250:], 90)
+
+
+# ============================ 开仓许可 &amp; 单位数额度 ============================
+def new_open_permission(context):
+    &quot;&quot;&quot;返回是否允许新开仓、是否仅系统2、新开单位乘数。&quot;&quot;&quot;
+    tv = context.portfolio.total_value
+    res = {&#x27;allow&#x27;: True, &#x27;only_system2&#x27;: False, &#x27;unit_mult&#x27;: 1.0, &#x27;reason&#x27;: &#x27;&#x27;}
+
+    # 3.2 账户回撤 &gt; 20% → 暂停一切新开仓（仅允许平仓）
+    peak = getattr(g, &#x27;peak_value&#x27;, tv)
+    if peak &gt; 0 and (peak - tv) / peak &gt; g.risk[&#x27;dd_pause&#x27;]:
+        res[&#x27;allow&#x27;] = False
+        res[&#x27;reason&#x27;] = &#x27;账户回撤%.1f%%&gt;20%%，暂停开仓&#x27; % ((peak - tv) / peak * 100)
+        return res
+
+    # 3.2 当月累计亏损 &gt; 10% → 当月停开新仓
+    ms = getattr(g, &#x27;month_start_value&#x27;, tv)
+    if ms &gt; 0 and (tv - ms) / ms &lt; -g.risk[&#x27;month_loss_pause&#x27;]:
+        res[&#x27;allow&#x27;] = False
+        res[&#x27;reason&#x27;] = &#x27;当月亏损%.1f%%&gt;10%%，当月停开新仓&#x27; % ((tv - ms) / ms * 100)
+        return res
+
+    # 3.3 市场环境
+    if market_vol_shrink(context):
+        res[&#x27;only_system2&#x27;] = True
+        res[&#x27;reason&#x27;] = &#x27;指数波动萎缩，仅系统2&#x27;
+    if market_extreme_vol(context):
+        res[&#x27;unit_mult&#x27;] = 0.5
+        res[&#x27;reason&#x27;] = (res[&#x27;reason&#x27;] + &#x27;；&#x27; if res[&#x27;reason&#x27;] else &#x27;&#x27;) + &#x27;极端波动，新开单位减半&#x27;
+    return res
+
+
+def units_available(context, security, sector):
+    &quot;&quot;&quot;在【单票≤4 / 同行业≤6 / 全账户≤10】约束下，该标的还能新增的单位数。&quot;&quot;&quot;
+    trades = getattr(g, &#x27;trades&#x27;, {})
+    cur_total = sum(t[&#x27;units&#x27;] for t in trades.values())
+    cur_stock = trades[security][&#x27;units&#x27;] if security in trades else 0
+    cur_sector = sum(t[&#x27;units&#x27;] for t in trades.values() if t.get(&#x27;sector&#x27;) == sector)
+
+    avail = min(g.risk[&#x27;max_units_per_stock&#x27;] - cur_stock,
+                g.risk[&#x27;max_units_per_sector&#x27;] - cur_sector,
+                g.risk[&#x27;max_units_total&#x27;] - cur_total)
+    return max(0, int(avail))
+
+
+def unit_shares(context, N):
+    &quot;&quot;&quot;1个单位的股数 = 账户总资金×1% / N，向下取整到100股。
+    （盈利复利：用最新 total_value；这里以总资金为基准，天然实现复利/缩仓）&quot;&quot;&quot;
+    if N &lt;= 0:
+        return 0
+    raw = context.portfolio.total_value * g.risk[&#x27;unit_risk_pct&#x27;] / N
+    return int(raw // 100 * 100)
+
+
+# ============================ 止损维护（每周五盘后） ============================
+def weekly_trailing_stop(context):
+    &quot;&quot;&quot;每周重算持仓N值，将止损价【仅上移】：new_stop = 最新收盘 - 2N(当前)。&quot;&quot;&quot;
+    trades = getattr(g, &#x27;trades&#x27;, {})
+    for s, t in trades.items():
+        arr = get_daily_arrays(s, context.current_dt, g.atr_period + 5,
+                               fields=(&#x27;high&#x27;, &#x27;low&#x27;, &#x27;close&#x27;))
+        if arr is None:
+            continue
+        N_now = calc_atr(arr[&#x27;high&#x27;], arr[&#x27;low&#x27;], arr[&#x27;close&#x27;], g.atr_period)
+        if not N_now:
+            continue
+        trailing = arr[&#x27;close&#x27;][-1] - g.risk[&#x27;stop_atr&#x27;] * N_now
+        if trailing &gt; t[&#x27;stop_price&#x27;]:
+            log.info(&#x27;[风控 止损上移] %s %.2f → %.2f&#x27; % (s, t[&#x27;stop_price&#x27;], trailing))
+            t[&#x27;stop_price&#x27;] = trailing
+</textarea>
+<script>
+document.getElementById("copy").addEventListener("click", async e => { const b = e.currentTarget, t = document.getElementById("raw").value;
+  try { await navigator.clipboard.writeText(t); } catch (err) { const a = document.getElementById("raw"); a.hidden = false; a.select(); document.execCommand("copy"); a.hidden = true; }
+  b.textContent = "已复制"; setTimeout(() => b.textContent = "复制代码", 1500); });
+</script>
+</main>
+<footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-16</div></footer>
+</body>
+</html>

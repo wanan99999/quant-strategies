@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>策略说明书 · 海龟交易法则</title>
+<meta name="description" content="策略说明书">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 22l6-7 5 4 9-11' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="top"><div class="bar"><a class="brand" href="../../index.html">量化策略库</a>
+<nav><a href="../../index.html#dividend">股息率策略</a><a href="../../index.html#trend">趋势策略</a><a href="../../index.html#news">消息股策略</a></nav></div></header>
+<main class="wrap">
+<nav class="crumb"><a href="../../index.html">策略库</a> / <a href="../../s/turtle.html">海龟交易法则</a></nav>
+<div class="tools"><span class="mono">海龟交易法则策略_Turtle_Trading.md · 10 KB</span><span class="grow"></span><a class="btn" href="../../files/turtle/%E6%B5%B7%E9%BE%9F%E4%BA%A4%E6%98%93%E6%B3%95%E5%88%99%E7%AD%96%E7%95%A5_Turtle_Trading.md" download>下载原文件</a></div>
+<article class="doc"><h2>海龟交易法则策略（Turtle Trading Strategy）</h2>
+<blockquote>设计日期：2026-08-10<br>策略类型：趋势跟踪 / 通道突破<br>适用环境：强趋势市、单边行情<br>调仓频率：日频监控<br>来源：Richard Dennis &amp; William Eckhardt（1983），适配A股市场</blockquote>
+<hr>
+<h3>第一部分：选股策略</h3>
+<h4>1.1 选股理念</h4>
+<p>海龟交易法则的核心理念是<strong>&quot;不预测，只跟随&quot;</strong>。选股不依赖基本面判断，而是通过<strong>波动率标准化</strong>筛选出适合趋势跟踪的标的，再通过<strong>通道突破信号</strong>决定入场时机。</p>
+<h4>1.2 选股池构建</h4>
+<h5>第一层：基础过滤</h5>
+<div class="tbl"><table><thead><tr><th>序号</th><th>条件</th><th>参数</th><th>逻辑</th></tr></thead><tbody><tr><td>S1</td><td>风险警示</td><td>排除 ST、*ST</td><td>避免退市风险</td></tr><tr><td>S2</td><td>上市时间</td><td>上市满250个交易日（约1年）</td><td>确保有足够历史数据计算通道</td></tr><tr><td>S3</td><td>流动性</td><td>近20日日均成交额 ≥ 2亿</td><td>保证大资金可进出</td></tr><tr><td>S4</td><td>价格</td><td>收盘价 ≥ 5元</td><td>排除低价股（波动率失真）</td></tr></tbody></table></div>
+<h5>第二层：波动率筛选（趋势市场过滤器）</h5>
+<p>海龟交易法则的核心选股逻辑：<strong>只交易有&quot;波动趋势&quot;的标的</strong>。</p>
+<div class="tbl"><table><thead><tr><th>条件</th><th>量化规则</th><th>逻辑</th></tr></thead><tbody><tr><td><strong>波动趋势</strong></td><td>近50日ATR均值 &gt; 近300日ATR均值</td><td>当前波动率高于历史均值，说明市场在&quot;动&quot;</td></tr><tr><td><strong>方向确认</strong></td><td>近20日价格变化率绝对值 &gt; 10%</td><td>价格确实在朝某个方向运行</td></tr></tbody></table></div>
+<blockquote>ATR（Average True Range，平均真实波幅）：衡量波动率的指标。<br>- True Range = Max(当日最高-当日最低, |当日最高-昨日收盘|, |当日最低-昨日收盘|)<br>- ATR(N) = True Range的N日简单移动平均</blockquote>
+<h5>第三层：多品种分散</h5>
+<p>海龟交易法则强调<strong>同时监控多个不相关标的</strong>，通过分散化提高整体策略稳定性。</p>
+<div class="tbl"><table><thead><tr><th>约束</th><th>规则</th></tr></thead><tbody><tr><td>行业分散</td><td>同一申万一级行业最多入选2只</td></tr><tr><td>最终候选池</td><td>保持10-20只通过筛选的标的</td></tr><tr><td>更新频率</td><td>每周重新计算一次（每周五盘后）</td></tr></tbody></table></div>
+<h4>1.3 选股输出</h4>
+<p>每只候选标的输出以下信息：</p>
+<div class="tbl"><table><thead><tr><th>输出项</th><th>计算方式</th></tr></thead><tbody><tr><td>ATR(20)</td><td>近20日平均真实波幅</td></tr><tr><td>波动趋势比</td><td>ATR(50) / ATR(300)</td></tr><tr><td>唐奇安上轨</td><td>近20日最高价的最大值</td></tr><tr><td>唐奇安下轨</td><td>近10日最低价的最小值</td></tr><tr><td>当前状态</td><td>价格在通道内/突破上轨/跌破下轨</td></tr></tbody></table></div>
+<hr>
+<h3>第二部分：交易策略</h3>
+<h4>2.1 核心交易系统</h4>
+<p>海龟交易法则包含两套并行的交易系统：</p>
+<div class="tbl"><table><thead><tr><th>系统</th><th>突破周期</th><th>退出周期</th><th>定位</th></tr></thead><tbody><tr><td><strong>系统1（短周期）</strong></td><td>20日高点突破</td><td>10日低点跌破</td><td>捕捉中级趋势，更灵敏</td></tr><tr><td><strong>系统2（长周期）</strong></td><td>55日高点突破</td><td>20日低点跌破</td><td>捕捉大级别趋势，更稳定</td></tr></tbody></table></div>
+<blockquote>A股适配说明：原版海龟使用20/10和55/20，考虑到A股波动更大、趋势持续性较弱，系统1参数保持不变，系统2参数从55/20调整为55/20（保持原版）。</blockquote>
+<h4>2.2 入场规则</h4>
+<h5>做多入场</h5>
+<div class="tbl"><table><thead><tr><th>系统</th><th>入场条件</th><th>执行</th></tr></thead><tbody><tr><td><strong>系统1</strong></td><td>当日最高价 &gt; 过去20个交易日最高价（不含当日）</td><td>次日开盘买入</td></tr><tr><td><strong>系统2</strong></td><td>当日最高价 &gt; 过去55个交易日最高价（不含当日）</td><td>次日开盘买入</td></tr></tbody></table></div>
+<h5>做空入场（如支持融券）</h5>
+<div class="tbl"><table><thead><tr><th>系统</th><th>入场条件</th><th>执行</th></tr></thead><tbody><tr><td><strong>系统1</strong></td><td>当日最低价 &lt; 过去20个交易日最低价（不含当日）</td><td>次日开盘卖出</td></tr><tr><td><strong>系统2</strong></td><td>当日最低价 &lt; 过去55个交易日最低价（不含当日）</td><td>次日开盘卖出</td></tr></tbody></table></div>
+<h5>入场过滤规则</h5>
+<div class="tbl"><table><thead><tr><th>过滤条件</th><th>规则</th></tr></thead><tbody><tr><td><strong>上次突破失败</strong></td><td>如果系统1上一次突破是假突破（最终以2N止损退出），则<strong>跳过本次系统1信号</strong>，仅执行系统2信号</td></tr><tr><td><strong>连续突破</strong></td><td>同一方向连续突破时，仅在第一次突破时入场，后续突破不加仓（除非价格朝有利方向移动了0.5N以上）</td></tr></tbody></table></div>
+<h4>2.3 仓位管理（核心特色）</h4>
+<p>海龟交易法则的仓位管理是其最独特的贡献——<strong>基于波动率标准化（N值）的仓位计算</strong>。</p>
+<h5>N值（即ATR(20)）定义</h5>
+<pre class="plain"><code>N = ATR(20) = 近20日真实波幅的指数移动平均</code></pre>
+<h5>单笔仓位计算</h5>
+<div class="tbl"><table><thead><tr><th>参数</th><th>公式</th><th>说明</th></tr></thead><tbody><tr><td><strong>1个单位</strong></td><td>账户总资金的 1% / N</td><td>N越大（波动越大），仓位越小</td></tr><tr><td><strong>单票上限</strong></td><td>最多4个单位</td><td>分4次加仓</td></tr><tr><td><strong>总持仓上限</strong></td><td>最多10个单位（所有持仓合计）</td><td>分散风险</td></tr></tbody></table></div>
+<blockquote>示例：账户100万，某股票N=2元。<br>1个单位 = 100万 × 1% / 2 = 5000股（约10万元）<br>单票最多4个单位 = 20000股（约40万元，占总资金40%）</blockquote>
+<h5>金字塔加仓</h5>
+<div class="tbl"><table><thead><tr><th>加仓次数</th><th>触发条件</th><th>仓位</th></tr></thead><tbody><tr><td>首次入场</td><td>突破信号触发</td><td>1个单位</td></tr><tr><td>第1次加仓</td><td>价格朝有利方向移动 0.5N</td><td>+1个单位（共2个）</td></tr><tr><td>第2次加仓</td><td>价格再移动 0.5N</td><td>+1个单位（共3个）</td></tr><tr><td>第3次加仓</td><td>价格再移动 0.5N</td><td>+1个单位（共4个）</td></tr></tbody></table></div>
+<blockquote>加仓间距 = 0.5N。例如N=2元，每上涨1元加仓一次。</blockquote>
+<h4>2.4 出场规则</h4>
+<h5>止损出场（硬止损）</h5>
+<div class="tbl"><table><thead><tr><th>规则</th><th>公式</th><th>说明</th></tr></thead><tbody><tr><td><strong>2N止损</strong></td><td>止损价 = 入场价 - 2 × N</td><td>任何持仓，亏损达到2N立即退出</td></tr></tbody></table></div>
+<blockquote>这是海龟法则最核心的风控规则。N值每天更新，但止损价以入场时的N值为基准，不随N值变化而调整。</blockquote>
+<h5>趋势结束出场</h5>
+<div class="tbl"><table><thead><tr><th>系统</th><th>做多出场条件</th><th>做空出场条件</th></tr></thead><tbody><tr><td><strong>系统1</strong></td><td>当日最低价 &lt; 过去10日最低价</td><td>当日最高价 &gt; 过去10日最高价</td></tr><tr><td><strong>系统2</strong></td><td>当日最低价 &lt; 过去20日最低价</td><td>当日最高价 &gt; 过去20日最高价</td></tr></tbody></table></div>
+<blockquote>系统1和系统2的持仓独立管理。同一标的可能同时持有系统1和系统2的仓位。</blockquote>
+<hr>
+<h3>第三部分：风控策略</h3>
+<h4>3.1 单笔风险控制</h4>
+<div class="tbl"><table><thead><tr><th>风控项</th><th>规则</th><th>逻辑</th></tr></thead><tbody><tr><td><strong>单笔最大风险</strong></td><td>账户总资金的 2%（2N止损 × 1单位 = 2%）</td><td>任何单笔交易最多亏损总资金的2%</td></tr><tr><td><strong>单票最大风险</strong></td><td>账户总资金的 8%（4单位 × 2% = 8%）</td><td>单票满仓4单位后，最大亏损8%</td></tr><tr><td><strong>相关性合并</strong></td><td>同一行业板块的所有持仓，合计风险敞口 ≤ 总资金的12%</td><td>防止行业集中风险</td></tr></tbody></table></div>
+<h4>3.2 账户级风险控制</h4>
+<div class="tbl"><table><thead><tr><th>风控项</th><th>规则</th></tr></thead><tbody><tr><td><strong>总风险敞口</strong></td><td>所有持仓的（单位数 × 2N）合计 ≤ 账户总资金的 20%</td></tr><tr><td><strong>最大持仓数</strong></td><td>同时持仓不超过10个单位（所有标的合计）</td></tr><tr><td><strong>连续亏损熔断</strong></td><td>账户从近期高点回撤 &gt; 20%，暂停所有新开仓，仅允许平仓</td></tr><tr><td><strong>月度亏损熔断</strong></td><td>当月累计亏损 &gt; 账户总资金的 10%，当月剩余交易日不再开新仓</td></tr></tbody></table></div>
+<h4>3.3 市场环境风控</h4>
+<div class="tbl"><table><thead><tr><th>风控项</th><th>条件</th><th>动作</th></tr></thead><tbody><tr><td><strong>趋势市场过滤器</strong></td><td>全市场近50日ATR均值 &lt; 近300日ATR均值（波动率萎缩）</td><td>仅允许系统2信号，系统1信号暂停</td></tr><tr><td><strong>极端波动</strong></td><td>VIX/波动率指数 &gt; 近1年90%分位</td><td>所有新开仓单位数减半（0.5单位起）</td></tr><tr><td><strong>流动性危机</strong></td><td>持仓标的当日跌停无法卖出</td><td>次日开盘市价清仓该标的</td></tr></tbody></table></div>
+<h4>3.4 资金曲线管理</h4>
+<div class="tbl"><table><thead><tr><th>规则</th><th>说明</th></tr></thead><tbody><tr><td><strong>复利/缩仓</strong></td><td>账户盈利时，1单位 = 最新总资金 × 1% / N（复利）；账户亏损时，1单位 = 原始资金 × 1% / N（不缩仓）</td></tr><tr><td><strong>再平衡</strong></td><td>每周五盘后重新计算所有持仓的N值，更新止损价（仅可上移，不可下移）</td></tr></tbody></table></div>
+<hr>
+<h3>策略速查卡</h3>
+<pre class="plain"><code>┌──────────────────────────────────────────────────────┐
+│              海龟交易法则 速查卡                        │
+├──────────────┬───────────────────────────────────────┤
+│ 选股          │ 成交额≥2亿 价格≥5元 非ST 上市&gt;250日     │
+│              │ ATR(50) &gt; ATR(300)（波动趋势）          │
+│              │ 同行业≤2只 候选池10-20只 每周更新        │
+├──────────────┼───────────────────────────────────────┤
+│ 入场          │ 系统1：突破20日高点做多/跌破20日低点做空 │
+│              │ 系统2：突破55日高点做多/跌破55日低点做空 │
+│              │ 假突破过滤：上次失败则跳过系统1          │
+├──────────────┼───────────────────────────────────────┤
+│ 仓位          │ 1单位 = 总资金×1% / N                  │
+│              │ 金字塔加仓：每0.5N加1单位，最多4单位     │
+│              │ 总持仓 ≤ 10单位                         │
+├──────────────┼───────────────────────────────────────┤
+│ 出场          │ 硬止损：入场价 - 2N                     │
+│              │ 系统1：跌破10日低点 / 突破10日高点       │
+│              │ 系统2：跌破20日低点 / 突破20日高点       │
+├──────────────┼───────────────────────────────────────┤
+│ 风控          │ 单笔风险 ≤ 2%  单票风险 ≤ 8%            │
+│              │ 账户回撤&gt;20% → 暂停开仓                 │
+│              │ 月亏损&gt;10% → 当月停开新仓               │
+│              │ 波动率萎缩 → 仅系统2                     │
+└──────────────┴───────────────────────────────────────┘</code></pre>
+<hr>
+<h3>风险提示</h3>
+<ul><li>海龟策略在<strong>震荡市表现不佳</strong>，会频繁触发假突破和2N止损，这是策略的固有特征（&quot;试错成本&quot;）</li><li>策略胜率通常只有35%-40%，依赖少数大趋势交易的巨大盈利覆盖多次小亏损</li><li>A股T+1和涨跌停制度会影响止损执行，实际亏损可能超过2N</li><li>本策略需要严格的纪律执行，连续亏损时最容易放弃，而放弃往往发生在趋势来临前夕</li></ul></article>
+</main>
+<footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-16</div></footer>
+</body>
+</html>

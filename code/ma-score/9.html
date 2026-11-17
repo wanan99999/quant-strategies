@@ -1,0 +1,1352 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>均线多头评分策略 V1.9 代码</title>
+<meta name="description" content="均线多头 + 六维评分 选股交易策略 V1.9（聚宽 JoinQuant）">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 22l6-7 5 4 9-11' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="top"><div class="bar"><a class="brand" href="../../index.html">量化策略库</a>
+<nav><a href="../../index.html#dividend">股息率策略</a><a href="../../index.html#trend">趋势策略</a><a href="../../index.html#news">消息股策略</a></nav></div></header>
+<main class="wrap">
+<nav class="crumb"><a href="../../index.html">策略库</a> / <a href="../../index.html#trend">趋势策略</a> / <a href="../../s/ma-score.html">均线多头评分策略</a></nav>
+<section class="codehead"><h1>均线多头评分策略 · V1.9</h1><p class="sub">均线多头 + 六维评分 选股交易策略 V1.9（聚宽 JoinQuant）</p><p class="sub2">V1.6 = V1.0 + 评分第 3 项「日均影线率」拆成两项（各占半项权重，合计仍按 6 项平分）：</p>
+<div class="vers"><a class="vchip" href="1.html">V1.0</a><a class="vchip" href="2.html">V1.1</a><a class="vchip" href="3.html">V1.2</a><a class="vchip" href="4.html">V1.3</a><a class="vchip" href="5.html">V1.5</a><a class="vchip" href="6.html">V1.6</a><a class="vchip" href="7.html">V1.7</a><a class="vchip" href="8.html">V1.8</a><a class="vchip on" href="9.html">V1.9</a><a class="vchip" href="10.html">V2.0</a><a class="vchip" href="11.html">V2.1</a><a class="vchip" href="12.html">V2.2</a><a class="vchip" href="13.html">V2.3</a><a class="vchip" href="14.html">V2.4</a></div>
+<div class="tools"><span class="mono">均线多头评分策略_V1.9.py · 441 行 · 20 KB</span><span class="grow"></span>
+<button class="btn" id="copy" type="button">复制代码</button><a class="btn" href="../../files/ma-score/%E5%9D%87%E7%BA%BF%E5%A4%9A%E5%A4%B4%E8%AF%84%E5%88%86%E7%AD%96%E7%95%A5_V1.9.py" download>下载 .py</a></div></section>
+<div class="codebox"><div class="hl"><table class="hltable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">  1</span>
+<span class="normal">  2</span>
+<span class="normal">  3</span>
+<span class="normal">  4</span>
+<span class="normal">  5</span>
+<span class="normal">  6</span>
+<span class="normal">  7</span>
+<span class="normal">  8</span>
+<span class="normal">  9</span>
+<span class="normal"> 10</span>
+<span class="normal"> 11</span>
+<span class="normal"> 12</span>
+<span class="normal"> 13</span>
+<span class="normal"> 14</span>
+<span class="normal"> 15</span>
+<span class="normal"> 16</span>
+<span class="normal"> 17</span>
+<span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span>
+<span class="normal">440</span></pre></div></td><td class="code"><div><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">均线多头 + 六维评分 选股交易策略 V1.9（聚宽 JoinQuant）</span>
+
+<span class="sd">V1.6 = V1.0 + 评分第 3 项「日均影线率」拆成两项（各占半项权重，合计仍按 6 项平分）：</span>
+<span class="sd">       3a 振幅水平：t-5..t-1 日均单日振幅，&lt;=4% 满分，&gt;=8% 0 分</span>
+<span class="sd">       3b 最大振幅倍数：最大单日振幅 / max(其余4日均值, 1%)，&lt;=1.5 满分，&gt;=3.0 0 分</span>
+<span class="sd">       单日振幅 = (当日最高 - 当日最低) / 前一交易日收盘。其余与 V1.0 完全一致。</span>
+<span class="sd">V1.7 = V1.6 + 评分第 6 项「爆发后滞涨」替换为「上行后平台期」：</span>
+<span class="sd">       t-30..t-1 最高收盘 Hc 在 D 日；上行段 = Hc / (D 及之前 20 日最低收盘) - 1；</span>
+<span class="sd">       上行段 &lt; 20% 满分（无一波上行，不受影响）；否则 停滞天数 k = (t-1) - D，</span>
+<span class="sd">       k&lt;=3 满分，k&gt;=10 0 分，中间线性。其余与 V1.6 完全一致。</span>
+<span class="sd">V1.8 = V1.7 + 评分第 1 项改为「路径效率2.0」：窗口 10 日并包含当日，分子去掉绝对值：</span>
+<span class="sd">       ER = (C(t) - C(t-10)) / Σ|C(k) - C(k-1)|，k = t-9..t，C(t) 用 14:55 实时价；</span>
+<span class="sd">       ER 取值 -1..1（下跌为负），ER &lt;= 0.2 得 0 分，&gt;= 0.7 满分，中间线性。其余与 V1.7 完全一致。</span>
+<span class="sd">V1.9 = V1.8 + 一票否决「距启动低点涨幅过大」按市值分档：</span>
+<span class="sd">       现价 / (t-20..t-1 最低价) - 1，总市值 &gt; 500 亿的大盘股超 30% 直接 0 分，其余股票超 50% 直接 0 分。</span>
+<span class="sd">       总市值取前一交易日（聚宽 valuation.market_cap，单位亿元）。其余与 V1.8 完全一致。</span>
+
+<span class="sd">回测设置：频率必须选「分钟」。每日 14:55 用实时价近似收盘价，完成 选股 -&gt; 评分 -&gt; 卖出 -&gt; 买入。</span>
+<span class="sd">  * 选股/评分里的「当日」= 截至 14:55 的当日 K 线（get_bars include_now=True），</span>
+<span class="sd">    当日成交量为 14:55 时的累计量（约为全天 95%）。</span>
+<span class="sd">  * 换手率 = 当日累计成交量 / 前一交易日流通股本（聚宽当日换手率需收盘后才有）。</span>
+
+<span class="sd">流程：</span>
+<span class="sd">  1. 选股：全 A（剔除 ST/停牌/北交所/上市不足）跑 select()，选中即加入选股池并跨日保留，</span>
+<span class="sd">     池内评分 &lt; 50 才移出</span>
+<span class="sd">  2. 评分：选股池 + 持仓 逐只 score()，三条一票否决 + 六项子分加权</span>
+<span class="sd">  3. 卖出：持仓满足任一卖出条件即清仓</span>
+<span class="sd">  4. 买入：选股池中评分 &gt;= 90 的，按评分从高到低填补空位，每只 20% 总资产，最多 5 只</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jqdata</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">builtins</span>
+
+<span class="c1"># jqdata 的 import * 会覆盖同名内置函数（sum 已确认被覆盖），这里恢复为 Python 内置版本</span>
+<span class="nb">sum</span><span class="p">,</span> <span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="nb">abs</span> <span class="o">=</span> <span class="n">builtins</span><span class="o">.</span><span class="n">sum</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">abs</span>
+
+
+<span class="c1"># ==================================================================</span>
+<span class="c1"># 一、参数</span>
+<span class="c1"># ==================================================================</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Cfg</span><span class="p">:</span>
+    <span class="n">BENCHMARK</span> <span class="o">=</span> <span class="s1">&#39;000300.XSHG&#39;</span>
+    <span class="n">RUN_TIME</span> <span class="o">=</span> <span class="s1">&#39;14:55&#39;</span>
+    <span class="n">EXCLUDE_BJ</span> <span class="o">=</span> <span class="kc">True</span>           <span class="c1"># 剔除北交所</span>
+    <span class="n">EXCLUDE_KCB</span> <span class="o">=</span> <span class="kc">False</span>         <span class="c1"># 剔除科创板（688）</span>
+    <span class="n">EXCLUDE_CYB</span> <span class="o">=</span> <span class="kc">False</span>         <span class="c1"># 剔除创业板（300/301）</span>
+    <span class="n">MIN_LIST_DAYS</span> <span class="o">=</span> <span class="mi">90</span>          <span class="c1"># 上市不足 N 自然日的不参与（保证 MA60 有效）</span>
+    <span class="n">BARS</span> <span class="o">=</span> <span class="mi">70</span>                   <span class="c1"># 拉取的日 K 根数（含当日）</span>
+    <span class="n">BATCH</span> <span class="o">=</span> <span class="mi">500</span>                 <span class="c1"># get_bars 分批</span>
+
+    <span class="c1"># ---- 交易 ----</span>
+    <span class="n">MAX_HOLD</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">POS_PCT</span> <span class="o">=</span> <span class="mf">0.20</span>              <span class="c1"># 每只占总资产</span>
+    <span class="n">BUY_SCORE</span> <span class="o">=</span> <span class="mi">90</span>              <span class="c1"># 买入阈值（&gt;=）</span>
+    <span class="n">SELL_SCORE</span> <span class="o">=</span> <span class="mi">80</span>             <span class="c1"># 卖出阈值（&lt;）</span>
+    <span class="n">CHECK_DAY</span> <span class="o">=</span> <span class="mi">3</span>               <span class="c1"># 买入后第 N 个交易日检查涨幅</span>
+    <span class="n">CHECK_MIN_GAIN</span> <span class="o">=</span> <span class="mf">0.0</span>        <span class="c1"># 第 N 日涨幅 &lt;= 此值卖出</span>
+    <span class="n">STOP_LOSS</span> <span class="o">=</span> <span class="mf">0.05</span>            <span class="c1"># 距买入价下跌超 5% 卖出</span>
+    <span class="n">TRAIL_DD</span> <span class="o">=</span> <span class="mf">0.08</span>             <span class="c1"># 距买入后最高点回撤超 8% 卖出</span>
+    <span class="n">SKIP_LIMIT_UP</span> <span class="o">=</span> <span class="kc">True</span>        <span class="c1"># 涨停价买不进，跳过</span>
+    <span class="n">POOL_EXIT_SCORE</span> <span class="o">=</span> <span class="mi">50</span>        <span class="c1"># 选股池退出：评分 &lt; 50 移出（选中后跨日保留）</span>
+    <span class="n">KCB_PROTECT</span> <span class="o">=</span> <span class="mf">0.02</span>          <span class="c1"># 科创板市价单保护限价：买入 现价*(1+2%)，卖出 现价*(1-2%)</span>
+
+    <span class="c1"># ---- 评分 ----</span>
+    <span class="c1"># 六项各 100 分，按权重加权成总分。原文写&quot;每项占 20%&quot;但列了 6 项（合计 120%），</span>
+    <span class="c1"># 这里默认六项等权（各 1/6）；如需改权重直接改这里，权重和不必为 1，会自动归一。</span>
+    <span class="c1"># V1.6：第 3 项拆成 振幅水平(amp) + 最大振幅倍数(amp_x)，各 0.5，合计仍是 6 份</span>
+    <span class="n">WEIGHTS</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;er&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;gain&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;amp&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;amp_x&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;drop&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;trend&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;plat&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+    <span class="n">ER_N</span> <span class="o">=</span> <span class="mi">10</span>                   <span class="c1"># 路径效率2.0窗口：t-9..t 共 10 个变动（含当日实时价）</span>
+    <span class="n">ER_ZERO</span><span class="p">,</span> <span class="n">ER_FULL</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.7</span> <span class="c1"># ER &lt;=0.2 得 0 分，&gt;=0.7 满分</span>
+    <span class="n">AMP_FULL</span><span class="p">,</span> <span class="n">AMP_ZERO</span> <span class="o">=</span> <span class="mf">0.04</span><span class="p">,</span> <span class="mf">0.08</span>         <span class="c1"># 日均振幅 &lt;=4% 满分，&gt;=8% 0 分</span>
+    <span class="n">AMPX_FULL</span><span class="p">,</span> <span class="n">AMPX_ZERO</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">3.0</span>         <span class="c1"># 振幅倍数 &lt;=1.5 满分，&gt;=3.0 0 分</span>
+    <span class="n">AMPX_FLOOR</span> <span class="o">=</span> <span class="mf">0.01</span>                       <span class="c1"># 倍数分母下限 1%（防一字板等极小振幅放大倍数）</span>
+    <span class="n">LAUNCH_LOOKBACK</span> <span class="o">=</span> <span class="mi">20</span>        <span class="c1"># 启动前低点：t-20..t-1 的最低价</span>
+    <span class="n">LAUNCH_MAX_GAIN</span> <span class="o">=</span> <span class="mf">0.50</span>      <span class="c1"># 现价距启动低点涨幅超 50% 直接 0 分</span>
+    <span class="n">BIG_CAP</span> <span class="o">=</span> <span class="mi">500</span>               <span class="c1"># 大盘股：前一交易日总市值 &gt; 500 亿元</span>
+    <span class="n">LAUNCH_MAX_GAIN_BIG</span> <span class="o">=</span> <span class="mf">0.30</span>  <span class="c1"># 大盘股现价距启动低点涨幅超 30% 直接 0 分</span>
+    <span class="n">PLAT_LOOK</span> <span class="o">=</span> <span class="mi">30</span>              <span class="c1"># 平台期：在 t-30..t-1 找最高收盘</span>
+    <span class="n">PLAT_BASE_LOOK</span> <span class="o">=</span> <span class="mi">20</span>         <span class="c1"># 上行段起点：最高收盘日及之前 20 个交易日的最低收盘</span>
+    <span class="n">PLAT_RISE_MIN</span> <span class="o">=</span> <span class="mf">0.20</span>        <span class="c1"># 上行段 &lt; 20% 视为没有一波上行，直接满分</span>
+    <span class="n">PLAT_K_FULL</span> <span class="o">=</span> <span class="mi">3</span>             <span class="c1"># 距最高收盘 &lt;= 3 个交易日满分</span>
+    <span class="n">PLAT_K_ZERO</span> <span class="o">=</span> <span class="mi">10</span>            <span class="c1"># 距最高收盘 &gt;= 10 个交易日 0 分</span>
+
+    <span class="n">DEBUG</span> <span class="o">=</span> <span class="kc">False</span>               <span class="c1"># True 时打印每只候选的子分明细</span>
+
+
+<span class="c1"># ==================================================================</span>
+<span class="c1"># 二、初始化</span>
+<span class="c1"># ==================================================================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+    <span class="n">set_benchmark</span><span class="p">(</span><span class="n">Cfg</span><span class="o">.</span><span class="n">BENCHMARK</span><span class="p">)</span>
+    <span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;use_real_price&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;avoid_future_data&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">set_slippage</span><span class="p">(</span><span class="n">PriceRelatedSlippage</span><span class="p">(</span><span class="mf">0.002</span><span class="p">))</span>
+    <span class="n">set_order_cost</span><span class="p">(</span><span class="n">OrderCost</span><span class="p">(</span>
+        <span class="n">open_tax</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">close_tax</span><span class="o">=</span><span class="mf">0.0005</span><span class="p">,</span>
+        <span class="n">open_commission</span><span class="o">=</span><span class="mf">0.0003</span><span class="p">,</span> <span class="n">close_commission</span><span class="o">=</span><span class="mf">0.0003</span><span class="p">,</span>
+        <span class="n">close_today_commission</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">min_commission</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;stock&#39;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">set_level</span><span class="p">(</span><span class="s1">&#39;order&#39;</span><span class="p">,</span> <span class="s1">&#39;error&#39;</span><span class="p">)</span>
+
+    <span class="c1"># 持仓跟踪：code -&gt; {buy_price, buy_date, days, peak, force_sell}</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># 选股池：code -&gt; 入池日期。select() 选中即入池，跨日保留，评分 &lt; POOL_EXIT_SCORE 移出</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">run_daily</span><span class="p">(</span><span class="n">before_market_open</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="s1">&#39;before_open&#39;</span><span class="p">)</span>
+    <span class="n">run_daily</span><span class="p">(</span><span class="n">trade</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">Cfg</span><span class="o">.</span><span class="n">RUN_TIME</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;均线多头评分策略 V1.9 初始化完成（请确认回测频率为&quot;分钟&quot;）&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">before_market_open</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+    <span class="c1"># 持仓交易日计数 +1（买入当日为第 0 日）</span>
+    <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">pos</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">p</span><span class="p">[</span><span class="s1">&#39;days&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+
+<span class="c1"># ==================================================================</span>
+<span class="c1"># 三、主流程</span>
+<span class="c1"># ==================================================================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">trade</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+    <span class="n">cd</span> <span class="o">=</span> <span class="n">get_current_data</span><span class="p">()</span>
+    <span class="n">_reconcile</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+
+    <span class="n">universe</span> <span class="o">=</span> <span class="n">_universe</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">)</span>
+    <span class="n">uset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">universe</span><span class="p">)</span>
+    <span class="n">held</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">positions</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="c1"># 池内股票若变 ST/退市/上市状态异常（不在 universe 且非停牌）直接移出</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">pool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">uset</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cd</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">paused</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="n">bars</span> <span class="o">=</span> <span class="n">_get_bars</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">uset</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">held</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">pool</span><span class="p">)))</span>
+
+    <span class="c1"># ---- 选股：当日选中的加入选股池 ----</span>
+    <span class="n">pre</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">universe</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">bars</span> <span class="ow">and</span> <span class="n">_select_price</span><span class="p">(</span><span class="n">bars</span><span class="p">[</span><span class="n">c</span><span class="p">])]</span>
+    <span class="n">turnover</span> <span class="o">=</span> <span class="n">_turnover</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">pre</span><span class="p">,</span> <span class="n">bars</span><span class="p">)</span>
+    <span class="n">picked</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">pre</span> <span class="k">if</span> <span class="mi">3</span> <span class="o">&lt;</span> <span class="n">turnover</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">]</span>
+    <span class="n">new_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">picked</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">pool</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">new_in</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">pool</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">current_dt</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
+
+    <span class="c1"># ---- 评分（选股池 + 持仓），池内评分 &lt; 50 移出 ----</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">to_score</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">pool</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">held</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">bars</span><span class="p">]</span>
+    <span class="n">caps</span> <span class="o">=</span> <span class="n">_market_cap</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">to_score</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">to_score</span><span class="p">:</span>
+        <span class="n">scores</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">detail</span> <span class="o">=</span> <span class="n">score</span><span class="p">(</span><span class="n">bars</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">caps</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">DEBUG</span> <span class="ow">and</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">pool</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;[评分] </span><span class="si">%s</span><span class="s1"> </span><span class="si">%.1f</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">scores</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">detail</span><span class="p">))</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">pool</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">scores</span> <span class="ow">and</span> <span class="n">scores</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">POOL_EXIT_SCORE</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">out</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="c1"># ---- 卖出 ----</span>
+    <span class="n">sold</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">held</span><span class="p">:</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">pos</span><span class="o">.</span><span class="n">closeable_amount</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>                      <span class="c1"># 当日买入 T+1 不可卖</span>
+        <span class="n">reason</span> <span class="o">=</span> <span class="n">_sell_reason</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">bars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">),</span> <span class="n">scores</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">),</span> <span class="n">cd</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">reason</span><span class="p">:</span>
+            <span class="n">_sell</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">reason</span><span class="p">,</span> <span class="n">scores</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">),</span> <span class="n">cd</span><span class="p">)</span>
+            <span class="n">sold</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+
+    <span class="c1"># ---- 买入 ----</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">positions</span>
+    <span class="n">holding</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">positions</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sold</span> <span class="ow">and</span> <span class="n">positions</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">total_amount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">slots</span> <span class="o">=</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">MAX_HOLD</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">holding</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;今日选中 </span><span class="si">%d</span><span class="s1"> 只(新入池 </span><span class="si">%d</span><span class="s1">)，移出 </span><span class="si">%d</span><span class="s1">，选股池 </span><span class="si">%d</span><span class="s1"> 只，持仓 </span><span class="si">%d</span><span class="s1">&#39;</span>
+             <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">picked</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_in</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">pool</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">holding</span><span class="p">)))</span>
+    <span class="k">if</span> <span class="n">slots</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">cands</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">pool</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">holding</span> <span class="ow">and</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sold</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cd</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">paused</span>
+             <span class="ow">and</span> <span class="n">scores</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">BUY_SCORE</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">SKIP_LIMIT_UP</span><span class="p">:</span>
+        <span class="n">cands</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cands</span> <span class="k">if</span> <span class="n">cd</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">last_price</span> <span class="o">&lt;</span> <span class="n">cd</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">high_limit</span><span class="p">]</span>
+    <span class="n">cands</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="o">-</span><span class="n">scores</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;池内评分&gt;=</span><span class="si">%d</span><span class="s1"> 共 </span><span class="si">%d</span><span class="s1"> 只，空位 </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Cfg</span><span class="o">.</span><span class="n">BUY_SCORE</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">cands</span><span class="p">),</span> <span class="n">slots</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">cands</span><span class="p">[:</span><span class="n">slots</span><span class="p">]:</span>
+        <span class="n">_buy</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">scores</span><span class="p">[</span><span class="n">code</span><span class="p">],</span> <span class="n">cd</span><span class="p">)</span>
+
+
+<span class="c1"># ==================================================================</span>
+<span class="c1"># 四、选股（与原 select() 口径一致；ST 已在股票池剔除，换手率单独批量算）</span>
+<span class="c1"># ==================================================================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_select_price</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
+    <span class="n">close</span><span class="p">,</span> <span class="n">volume</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="s1">&#39;close&#39;</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="s1">&#39;volume&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">close</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">60</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">close</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">volume</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">close</span><span class="p">[</span><span class="o">-</span><span class="mi">6</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">ma5</span><span class="p">,</span> <span class="n">ma10</span><span class="p">,</span> <span class="n">ma20</span><span class="p">,</span> <span class="n">ma60</span> <span class="o">=</span> <span class="p">(</span><span class="n">close</span><span class="p">[</span><span class="o">-</span><span class="n">n</span><span class="p">:]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">60</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">ma5</span> <span class="o">&gt;</span> <span class="n">ma10</span> <span class="o">&gt;</span> <span class="n">ma20</span> <span class="o">&gt;</span> <span class="n">ma60</span><span class="p">):</span>           <span class="c1"># 均线多头</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">close</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">ma5</span><span class="p">:</span>                          <span class="c1"># 股价 &gt; MA5</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">close</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">close</span><span class="p">[</span><span class="o">-</span><span class="mi">6</span><span class="p">])</span> <span class="o">/</span> <span class="n">close</span><span class="p">[</span><span class="o">-</span><span class="mi">6</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">:</span>   <span class="c1"># 近 5 日涨幅 &gt; 5%</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">vol_ma5_prev</span> <span class="o">=</span> <span class="n">volume</span><span class="p">[</span><span class="o">-</span><span class="mi">6</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>           <span class="c1"># = MA(volume,5)[-2]</span>
+    <span class="k">if</span> <span class="n">vol_ma5_prev</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">volume</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">vol_ma5_prev</span> <span class="o">&lt;=</span> <span class="mf">1.3</span><span class="p">:</span>   <span class="c1"># 放量 1.3 倍</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_turnover</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">codes</span><span class="p">,</span> <span class="n">bars</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;换手率(%) = 当日累计成交量 / 前一交易日流通股本&quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">codes</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">out</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">get_fundamentals</span><span class="p">(</span><span class="n">query</span><span class="p">(</span><span class="n">valuation</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">valuation</span><span class="o">.</span><span class="n">circulating_cap</span><span class="p">)</span>
+                          <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">valuation</span><span class="o">.</span><span class="n">code</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">codes</span><span class="p">)),</span> <span class="n">date</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">previous_date</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">cap</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;circulating_cap&#39;</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="n">cap</span> <span class="ow">and</span> <span class="n">cap</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>                       <span class="c1"># circulating_cap 单位：万股</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">bars</span><span class="p">[</span><span class="n">code</span><span class="p">][</span><span class="s1">&#39;volume&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">cap</span> <span class="o">*</span> <span class="mf">1e4</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_market_cap</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">codes</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;前一交易日总市值（亿元）&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">codes</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">get_fundamentals</span><span class="p">(</span><span class="n">query</span><span class="p">(</span><span class="n">valuation</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">valuation</span><span class="o">.</span><span class="n">market_cap</span><span class="p">)</span>
+                          <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">valuation</span><span class="o">.</span><span class="n">code</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">codes</span><span class="p">)),</span> <span class="n">date</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">previous_date</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;market_cap&#39;</span><span class="p">]))</span>
+
+
+<span class="c1"># ==================================================================</span>
+<span class="c1"># 五、评分</span>
+<span class="c1"># ==================================================================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_ma</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;以索引 k 结尾的 n 日均线&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">c</span><span class="p">[</span><span class="n">k</span> <span class="o">-</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_lin</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">zero</span><span class="p">,</span> <span class="n">full</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;线性插值：x=zero 时 0 分，x=full 时 100 分，两端截断&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">zero</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">full</span> <span class="o">-</span> <span class="n">zero</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">score</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">cap</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;cap: 前一交易日总市值（亿元），取不到时按非大盘股处理&quot;&quot;&quot;</span>
+    <span class="n">o</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="s1">&#39;open&#39;</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="s1">&#39;high&#39;</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="s1">&#39;low&#39;</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="s1">&#39;close&#39;</span><span class="p">]</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>                                <span class="c1"># t（当日，收盘用实时价）</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">30</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s1">&#39;bars&lt;31&#39;</span>
+
+    <span class="c1"># ---- 一票否决 ----</span>
+    <span class="k">if</span> <span class="n">_ma</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">_ma</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s1">&#39;veto:MA5&lt;MA10&#39;</span>
+    <span class="k">if</span> <span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">_ma</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s1">&#39;veto:low&lt;MA20&#39;</span>
+    <span class="n">launch_low</span> <span class="o">=</span> <span class="n">l</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">LAUNCH_LOOKBACK</span><span class="p">:</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">max_gain</span> <span class="o">=</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">LAUNCH_MAX_GAIN_BIG</span> <span class="k">if</span> <span class="n">cap</span> <span class="ow">and</span> <span class="n">cap</span> <span class="o">&gt;</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">BIG_CAP</span> <span class="k">else</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">LAUNCH_MAX_GAIN</span>
+    <span class="k">if</span> <span class="n">launch_low</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">launch_low</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="n">max_gain</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s1">&#39;veto:launch+</span><span class="si">%.0f%%</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">((</span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">launch_low</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+
+    <span class="n">s</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># 1. 路径效率2.0 ER = (C(t)-C(t-N)) / Σ|C(k)-C(k-1)|, k=t-N+1..t（含当日实时价，下跌为负）</span>
+    <span class="n">seg</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">ER_N</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">seg</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">er</span> <span class="o">=</span> <span class="p">(</span><span class="n">seg</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">seg</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">path</span> <span class="k">if</span> <span class="n">path</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>
+    <span class="n">s</span><span class="p">[</span><span class="s1">&#39;er&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_lin</span><span class="p">(</span><span class="n">er</span><span class="p">,</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">ER_ZERO</span><span class="p">,</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">ER_FULL</span><span class="p">)</span>
+
+    <span class="c1"># 2. 前 5 日涨幅（t-1 vs t-6）</span>
+    <span class="n">s</span><span class="p">[</span><span class="s1">&#39;gain&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_gain_score</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">6</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># 3. 单日振幅 = (最高 - 最低) / 前收，取 t-5..t-1</span>
+    <span class="n">amps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">h</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">-</span> <span class="n">l</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">/</span> <span class="n">c</span><span class="p">[</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">5</span><span class="p">,</span> <span class="n">i</span><span class="p">)])</span>
+    <span class="c1"># 3a. 振幅水平：日均振幅 &lt;=4% 满分，&gt;=8% 0 分</span>
+    <span class="n">s</span><span class="p">[</span><span class="s1">&#39;amp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_lin</span><span class="p">(</span><span class="n">amps</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">AMP_ZERO</span><span class="p">,</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">AMP_FULL</span><span class="p">)</span>
+    <span class="c1"># 3b. 最大振幅倍数：最大单日振幅 / max(其余 4 日均值, 1%)，&lt;=1.5 满分，&gt;=3.0 0 分</span>
+    <span class="n">amp_max</span> <span class="o">=</span> <span class="n">amps</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">rest</span> <span class="o">=</span> <span class="p">(</span><span class="n">amps</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> <span class="n">amp_max</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span>
+    <span class="n">s</span><span class="p">[</span><span class="s1">&#39;amp_x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_lin</span><span class="p">(</span><span class="n">amp_max</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">rest</span><span class="p">,</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">AMPX_FLOOR</span><span class="p">),</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">AMPX_ZERO</span><span class="p">,</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">AMPX_FULL</span><span class="p">)</span>
+
+    <span class="c1"># 4. 现价距前 5 日（t-5..t-1）最高价，&gt;-3% 满分，&lt;-10% 0 分</span>
+    <span class="n">s</span><span class="p">[</span><span class="s1">&#39;drop&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_lin</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">h</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">5</span><span class="p">:</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.10</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.03</span><span class="p">)</span>
+
+    <span class="c1"># 5. 趋势确认：t-5..t-1 每日 收盘&gt;MA5&gt;MA10&gt;MA20，少一日 -25</span>
+    <span class="n">miss</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">5</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="n">m5</span><span class="p">,</span> <span class="n">m10</span><span class="p">,</span> <span class="n">m20</span> <span class="o">=</span> <span class="n">_ma</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">_ma</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">_ma</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">m5</span> <span class="ow">and</span> <span class="n">m5</span> <span class="o">&gt;</span> <span class="n">m10</span> <span class="ow">and</span> <span class="n">m10</span> <span class="o">&gt;</span> <span class="n">m20</span><span class="p">):</span>
+            <span class="n">miss</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">s</span><span class="p">[</span><span class="s1">&#39;trend&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span> <span class="o">-</span> <span class="mi">25</span> <span class="o">*</span> <span class="n">miss</span><span class="p">))</span>
+
+    <span class="c1"># 6. 上行后平台期</span>
+    <span class="n">s</span><span class="p">[</span><span class="s1">&#39;plat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">score_platform</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+
+    <span class="n">w</span> <span class="o">=</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">WEIGHTS</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">w</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">s</span><span class="p">)</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%.0f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">s</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;er&#39;</span><span class="p">,</span> <span class="s1">&#39;gain&#39;</span><span class="p">,</span> <span class="s1">&#39;amp&#39;</span><span class="p">,</span> <span class="s1">&#39;amp_x&#39;</span><span class="p">,</span> <span class="s1">&#39;drop&#39;</span><span class="p">,</span> <span class="s1">&#39;trend&#39;</span><span class="p">,</span> <span class="s1">&#39;plat&#39;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">total</span><span class="p">),</span> <span class="n">detail</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_gain_score</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+    <span class="n">g</span> <span class="o">*=</span> <span class="mi">100</span>
+    <span class="k">if</span> <span class="mi">5</span> <span class="o">&lt;=</span> <span class="n">g</span> <span class="o">&lt;=</span> <span class="mi">20</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">100.0</span>
+    <span class="k">if</span> <span class="mi">4</span> <span class="o">&lt;=</span> <span class="n">g</span> <span class="o">&lt;</span> <span class="mi">5</span> <span class="ow">or</span> <span class="mi">20</span> <span class="o">&lt;</span> <span class="n">g</span> <span class="o">&lt;=</span> <span class="mi">23</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">75.0</span>
+    <span class="k">if</span> <span class="mi">3</span> <span class="o">&lt;=</span> <span class="n">g</span> <span class="o">&lt;</span> <span class="mi">4</span> <span class="ow">or</span> <span class="mi">23</span> <span class="o">&lt;</span> <span class="n">g</span> <span class="o">&lt;=</span> <span class="mi">26</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">50.0</span>
+    <span class="k">if</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="n">g</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">or</span> <span class="mi">26</span> <span class="o">&lt;</span> <span class="n">g</span> <span class="o">&lt;=</span> <span class="mi">30</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">25.0</span>
+    <span class="k">return</span> <span class="mf">0.0</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">score_platform</span><span class="p">(</span><span class="n">close</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;上行后平台期。close: 收盘价序列; i: 当前交易日 t 的索引, 只用到 t-1 及以前&quot;&quot;&quot;</span>
+    <span class="n">lo</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">PLAT_LOOK</span><span class="p">)</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">lo</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">close</span><span class="p">[</span><span class="n">lo</span><span class="p">:</span><span class="n">i</span><span class="p">]))</span>          <span class="c1"># t-30..t-1 最高收盘日（并列取最早）</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">close</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">D</span> <span class="o">-</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">PLAT_BASE_LOOK</span><span class="p">):</span><span class="n">D</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">base</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">close</span><span class="p">[</span><span class="n">D</span><span class="p">]</span> <span class="o">/</span> <span class="n">base</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">PLAT_RISE_MIN</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">100.0</span>                               <span class="c1"># 没有一波上行, 不影响</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">D</span>                                <span class="c1"># 停滞天数</span>
+    <span class="k">return</span> <span class="n">_lin</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">PLAT_K_ZERO</span><span class="p">,</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">PLAT_K_FULL</span><span class="p">)</span>
+
+
+<span class="c1"># ==================================================================</span>
+<span class="c1"># 六、卖出 / 买入</span>
+<span class="c1"># ==================================================================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_sell_reason</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">sc</span><span class="p">,</span> <span class="n">cd</span><span class="p">):</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">pos</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+    <span class="n">price</span> <span class="o">=</span> <span class="n">cd</span><span class="p">[</span><span class="n">code</span><span class="p">]</span><span class="o">.</span><span class="n">last_price</span>
+    <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">price</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">price</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;force_sell&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;前日卖出未成交，继续卖出&#39;</span>
+
+    <span class="n">p</span><span class="p">[</span><span class="s1">&#39;peak&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;peak&#39;</span><span class="p">],</span> <span class="n">price</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="s1">&#39;close&#39;</span><span class="p">]</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">10</span> <span class="ow">and</span> <span class="n">_ma</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">_ma</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="ow">and</span> <span class="n">_ma</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">_ma</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;MA5下穿MA10死叉&#39;</span>
+    <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;days&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">CHECK_DAY</span> <span class="ow">and</span> <span class="n">price</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;buy_price&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">CHECK_MIN_GAIN</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;买入后第</span><span class="si">%d</span><span class="s1">日涨幅</span><span class="si">%.2f%%</span><span class="s1">&lt;=0&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Cfg</span><span class="o">.</span><span class="n">CHECK_DAY</span><span class="p">,</span> <span class="p">(</span><span class="n">price</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;buy_price&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">sc</span> <span class="o">&lt;</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">SELL_SCORE</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;评分</span><span class="si">%.1f</span><span class="s1">&lt;</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">SELL_SCORE</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">price</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;buy_price&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">Cfg</span><span class="o">.</span><span class="n">STOP_LOSS</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;止损：距买入价</span><span class="si">%.2f%%</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">((</span><span class="n">price</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;buy_price&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">price</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;peak&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">Cfg</span><span class="o">.</span><span class="n">TRAIL_DD</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;回撤：距最高点</span><span class="si">%.2f%%</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">((</span><span class="n">price</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;peak&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_sell</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">reason</span><span class="p">,</span> <span class="n">sc</span><span class="p">,</span> <span class="n">cd</span><span class="p">):</span>
+    <span class="n">o</span> <span class="o">=</span> <span class="n">order_target</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">_style</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s1">&#39;sell&#39;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">o</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">o</span><span class="o">.</span><span class="n">filled</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">positions</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">pos</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">pnl</span> <span class="o">=</span> <span class="n">cd</span><span class="p">[</span><span class="n">code</span><span class="p">]</span><span class="o">.</span><span class="n">last_price</span> <span class="o">/</span> <span class="n">p</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;buy_price&#39;</span><span class="p">,</span> <span class="n">cd</span><span class="p">[</span><span class="n">code</span><span class="p">]</span><span class="o">.</span><span class="n">last_price</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;[卖出] </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> | 评分=</span><span class="si">%s</span><span class="s1"> 持有</span><span class="si">%s</span><span class="s1">日 收益</span><span class="si">%.2f%%</span><span class="s1">&#39;</span>
+                 <span class="o">%</span> <span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">reason</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%.1f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sc</span> <span class="k">if</span> <span class="n">sc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;days&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">),</span> <span class="n">pnl</span> <span class="o">*</span> <span class="mi">100</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># 跌停等原因未成交：次日继续卖</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">pos</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="n">code</span><span class="p">][</span><span class="s1">&#39;force_sell&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;[卖出未成交] </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">reason</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_buy</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">sc</span><span class="p">,</span> <span class="n">cd</span><span class="p">):</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">total_value</span> <span class="o">*</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">POS_PCT</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">available_cash</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="n">cd</span><span class="p">[</span><span class="n">code</span><span class="p">]</span><span class="o">.</span><span class="n">last_price</span> <span class="o">*</span> <span class="mi">100</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">o</span> <span class="o">=</span> <span class="n">order_value</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">_style</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s1">&#39;buy&#39;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">o</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">o</span><span class="o">.</span><span class="n">filled</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;buy_price&#39;</span><span class="p">:</span> <span class="n">pos</span><span class="o">.</span><span class="n">avg_cost</span><span class="p">,</span> <span class="s1">&#39;buy_date&#39;</span><span class="p">:</span> <span class="n">context</span><span class="o">.</span><span class="n">current_dt</span><span class="o">.</span><span class="n">date</span><span class="p">(),</span>
+                       <span class="s1">&#39;days&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;peak&#39;</span><span class="p">:</span> <span class="n">pos</span><span class="o">.</span><span class="n">avg_cost</span><span class="p">,</span> <span class="s1">&#39;force_sell&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;[买入] </span><span class="si">%s</span><span class="s1"> 评分=</span><span class="si">%.1f</span><span class="s1"> 价=</span><span class="si">%.2f</span><span class="s1"> 数量=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">sc</span><span class="p">,</span> <span class="n">pos</span><span class="o">.</span><span class="n">avg_cost</span><span class="p">,</span> <span class="n">o</span><span class="o">.</span><span class="n">filled</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_style</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">side</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;科创板市价单必须带保护限价；其他板块用普通市价单&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">code</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;688&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">cd</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">side</span> <span class="o">==</span> <span class="s1">&#39;buy&#39;</span><span class="p">:</span>
+        <span class="n">px</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">last_price</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">KCB_PROTECT</span><span class="p">),</span> <span class="n">d</span><span class="o">.</span><span class="n">high_limit</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">px</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">last_price</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">KCB_PROTECT</span><span class="p">),</span> <span class="n">d</span><span class="o">.</span><span class="n">low_limit</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">MarketOrderStyle</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">px</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_reconcile</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;g.pos 与实际持仓对齐（防重启/部分成交造成脱钩）&quot;&quot;&quot;</span>
+    <span class="n">held</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">positions</span>
+    <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">pos</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">held</span> <span class="ow">or</span> <span class="n">held</span><span class="p">[</span><span class="n">code</span><span class="p">]</span><span class="o">.</span><span class="n">total_amount</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">pos</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">held</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">pos</span> <span class="ow">and</span> <span class="n">pos</span><span class="o">.</span><span class="n">total_amount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">pos</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;buy_price&#39;</span><span class="p">:</span> <span class="n">pos</span><span class="o">.</span><span class="n">avg_cost</span><span class="p">,</span> <span class="s1">&#39;buy_date&#39;</span><span class="p">:</span> <span class="n">context</span><span class="o">.</span><span class="n">current_dt</span><span class="o">.</span><span class="n">date</span><span class="p">(),</span>
+                           <span class="s1">&#39;days&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;peak&#39;</span><span class="p">:</span> <span class="n">pos</span><span class="o">.</span><span class="n">avg_cost</span><span class="p">,</span> <span class="s1">&#39;force_sell&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+
+
+<span class="c1"># ==================================================================</span>
+<span class="c1"># 七、数据</span>
+<span class="c1"># ==================================================================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_universe</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">):</span>
+    <span class="n">today</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">current_dt</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
+    <span class="n">secs</span> <span class="o">=</span> <span class="n">get_all_securities</span><span class="p">([</span><span class="s1">&#39;stock&#39;</span><span class="p">],</span> <span class="n">date</span><span class="o">=</span><span class="n">today</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">secs</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">today</span> <span class="o">-</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;start_date&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">days</span> <span class="o">&lt;</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">MIN_LIST_DAYS</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">EXCLUDE_BJ</span> <span class="ow">and</span> <span class="n">code</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.BJ&#39;</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">EXCLUDE_KCB</span> <span class="ow">and</span> <span class="n">code</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;688&#39;</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">EXCLUDE_CYB</span> <span class="ow">and</span> <span class="n">code</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s1">&#39;300&#39;</span><span class="p">,</span> <span class="s1">&#39;301&#39;</span><span class="p">)):</span>
+            <span class="k">continue</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">cd</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">paused</span> <span class="ow">or</span> <span class="n">d</span><span class="o">.</span><span class="n">is_st</span> <span class="ow">or</span> <span class="s1">&#39;ST&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="s1">&#39;退&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_bars</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">codes</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;日 K（含当日 14:55 的未完成 K 线），前复权到当日&quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;open&#39;</span><span class="p">,</span> <span class="s1">&#39;high&#39;</span><span class="p">,</span> <span class="s1">&#39;low&#39;</span><span class="p">,</span> <span class="s1">&#39;close&#39;</span><span class="p">,</span> <span class="s1">&#39;volume&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">codes</span><span class="p">),</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">BATCH</span><span class="p">):</span>
+        <span class="n">chunk</span> <span class="o">=</span> <span class="n">codes</span><span class="p">[</span><span class="n">k</span><span class="p">:</span><span class="n">k</span> <span class="o">+</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">BATCH</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">get_bars</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">Cfg</span><span class="o">.</span><span class="n">BARS</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;1d&#39;</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="n">fields</span><span class="p">,</span> <span class="n">include_now</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">end_dt</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">current_dt</span><span class="p">,</span> <span class="n">fq_ref_date</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">current_dt</span><span class="o">.</span><span class="n">date</span><span class="p">(),</span> <span class="n">df</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;get_bars 失败(</span><span class="si">%d</span><span class="s1">-</span><span class="si">%d</span><span class="s1">): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">),</span> <span class="n">e</span><span class="p">))</span>
+            <span class="k">continue</span>
+        <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">arr</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">arr</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">f</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">}</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="s1">&#39;close&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                <span class="k">continue</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span>
+    <span class="k">return</span> <span class="n">out</span>
+</pre></div></td></tr></table></div>
+</div>
+<textarea id="raw" hidden># -*- coding: utf-8 -*-
+&quot;&quot;&quot;
+均线多头 + 六维评分 选股交易策略 V1.9（聚宽 JoinQuant）
+
+V1.6 = V1.0 + 评分第 3 项「日均影线率」拆成两项（各占半项权重，合计仍按 6 项平分）：
+       3a 振幅水平：t-5..t-1 日均单日振幅，&lt;=4% 满分，&gt;=8% 0 分
+       3b 最大振幅倍数：最大单日振幅 / max(其余4日均值, 1%)，&lt;=1.5 满分，&gt;=3.0 0 分
+       单日振幅 = (当日最高 - 当日最低) / 前一交易日收盘。其余与 V1.0 完全一致。
+V1.7 = V1.6 + 评分第 6 项「爆发后滞涨」替换为「上行后平台期」：
+       t-30..t-1 最高收盘 Hc 在 D 日；上行段 = Hc / (D 及之前 20 日最低收盘) - 1；
+       上行段 &lt; 20% 满分（无一波上行，不受影响）；否则 停滞天数 k = (t-1) - D，
+       k&lt;=3 满分，k&gt;=10 0 分，中间线性。其余与 V1.6 完全一致。
+V1.8 = V1.7 + 评分第 1 项改为「路径效率2.0」：窗口 10 日并包含当日，分子去掉绝对值：
+       ER = (C(t) - C(t-10)) / Σ|C(k) - C(k-1)|，k = t-9..t，C(t) 用 14:55 实时价；
+       ER 取值 -1..1（下跌为负），ER &lt;= 0.2 得 0 分，&gt;= 0.7 满分，中间线性。其余与 V1.7 完全一致。
+V1.9 = V1.8 + 一票否决「距启动低点涨幅过大」按市值分档：
+       现价 / (t-20..t-1 最低价) - 1，总市值 &gt; 500 亿的大盘股超 30% 直接 0 分，其余股票超 50% 直接 0 分。
+       总市值取前一交易日（聚宽 valuation.market_cap，单位亿元）。其余与 V1.8 完全一致。
+
+回测设置：频率必须选「分钟」。每日 14:55 用实时价近似收盘价，完成 选股 -&gt; 评分 -&gt; 卖出 -&gt; 买入。
+  * 选股/评分里的「当日」= 截至 14:55 的当日 K 线（get_bars include_now=True），
+    当日成交量为 14:55 时的累计量（约为全天 95%）。
+  * 换手率 = 当日累计成交量 / 前一交易日流通股本（聚宽当日换手率需收盘后才有）。
+
+流程：
+  1. 选股：全 A（剔除 ST/停牌/北交所/上市不足）跑 select()，选中即加入选股池并跨日保留，
+     池内评分 &lt; 50 才移出
+  2. 评分：选股池 + 持仓 逐只 score()，三条一票否决 + 六项子分加权
+  3. 卖出：持仓满足任一卖出条件即清仓
+  4. 买入：选股池中评分 &gt;= 90 的，按评分从高到低填补空位，每只 20% 总资产，最多 5 只
+&quot;&quot;&quot;
+from jqdata import *
+import numpy as np
+import builtins
+
+# jqdata 的 import * 会覆盖同名内置函数（sum 已确认被覆盖），这里恢复为 Python 内置版本
+sum, min, max, abs = builtins.sum, builtins.min, builtins.max, builtins.abs
+
+
+# ==================================================================
+# 一、参数
+# ==================================================================
+class Cfg:
+    BENCHMARK = &#x27;000300.XSHG&#x27;
+    RUN_TIME = &#x27;14:55&#x27;
+    EXCLUDE_BJ = True           # 剔除北交所
+    EXCLUDE_KCB = False         # 剔除科创板（688）
+    EXCLUDE_CYB = False         # 剔除创业板（300/301）
+    MIN_LIST_DAYS = 90          # 上市不足 N 自然日的不参与（保证 MA60 有效）
+    BARS = 70                   # 拉取的日 K 根数（含当日）
+    BATCH = 500                 # get_bars 分批
+
+    # ---- 交易 ----
+    MAX_HOLD = 5
+    POS_PCT = 0.20              # 每只占总资产
+    BUY_SCORE = 90              # 买入阈值（&gt;=）
+    SELL_SCORE = 80             # 卖出阈值（&lt;）
+    CHECK_DAY = 3               # 买入后第 N 个交易日检查涨幅
+    CHECK_MIN_GAIN = 0.0        # 第 N 日涨幅 &lt;= 此值卖出
+    STOP_LOSS = 0.05            # 距买入价下跌超 5% 卖出
+    TRAIL_DD = 0.08             # 距买入后最高点回撤超 8% 卖出
+    SKIP_LIMIT_UP = True        # 涨停价买不进，跳过
+    POOL_EXIT_SCORE = 50        # 选股池退出：评分 &lt; 50 移出（选中后跨日保留）
+    KCB_PROTECT = 0.02          # 科创板市价单保护限价：买入 现价*(1+2%)，卖出 现价*(1-2%)
+
+    # ---- 评分 ----
+    # 六项各 100 分，按权重加权成总分。原文写&quot;每项占 20%&quot;但列了 6 项（合计 120%），
+    # 这里默认六项等权（各 1/6）；如需改权重直接改这里，权重和不必为 1，会自动归一。
+    # V1.6：第 3 项拆成 振幅水平(amp) + 最大振幅倍数(amp_x)，各 0.5，合计仍是 6 份
+    WEIGHTS = {&#x27;er&#x27;: 1, &#x27;gain&#x27;: 1, &#x27;amp&#x27;: 0.5, &#x27;amp_x&#x27;: 0.5, &#x27;drop&#x27;: 1, &#x27;trend&#x27;: 1, &#x27;plat&#x27;: 1}
+    ER_N = 10                   # 路径效率2.0窗口：t-9..t 共 10 个变动（含当日实时价）
+    ER_ZERO, ER_FULL = 0.2, 0.7 # ER &lt;=0.2 得 0 分，&gt;=0.7 满分
+    AMP_FULL, AMP_ZERO = 0.04, 0.08         # 日均振幅 &lt;=4% 满分，&gt;=8% 0 分
+    AMPX_FULL, AMPX_ZERO = 1.5, 3.0         # 振幅倍数 &lt;=1.5 满分，&gt;=3.0 0 分
+    AMPX_FLOOR = 0.01                       # 倍数分母下限 1%（防一字板等极小振幅放大倍数）
+    LAUNCH_LOOKBACK = 20        # 启动前低点：t-20..t-1 的最低价
+    LAUNCH_MAX_GAIN = 0.50      # 现价距启动低点涨幅超 50% 直接 0 分
+    BIG_CAP = 500               # 大盘股：前一交易日总市值 &gt; 500 亿元
+    LAUNCH_MAX_GAIN_BIG = 0.30  # 大盘股现价距启动低点涨幅超 30% 直接 0 分
+    PLAT_LOOK = 30              # 平台期：在 t-30..t-1 找最高收盘
+    PLAT_BASE_LOOK = 20         # 上行段起点：最高收盘日及之前 20 个交易日的最低收盘
+    PLAT_RISE_MIN = 0.20        # 上行段 &lt; 20% 视为没有一波上行，直接满分
+    PLAT_K_FULL = 3             # 距最高收盘 &lt;= 3 个交易日满分
+    PLAT_K_ZERO = 10            # 距最高收盘 &gt;= 10 个交易日 0 分
+
+    DEBUG = False               # True 时打印每只候选的子分明细
+
+
+# ==================================================================
+# 二、初始化
+# ==================================================================
+def initialize(context):
+    set_benchmark(Cfg.BENCHMARK)
+    set_option(&#x27;use_real_price&#x27;, True)
+    set_option(&#x27;avoid_future_data&#x27;, True)
+    set_slippage(PriceRelatedSlippage(0.002))
+    set_order_cost(OrderCost(
+        open_tax=0, close_tax=0.0005,
+        open_commission=0.0003, close_commission=0.0003,
+        close_today_commission=0, min_commission=5), type=&#x27;stock&#x27;)
+    log.set_level(&#x27;order&#x27;, &#x27;error&#x27;)
+
+    # 持仓跟踪：code -&gt; {buy_price, buy_date, days, peak, force_sell}
+    g.pos = {}
+    # 选股池：code -&gt; 入池日期。select() 选中即入池，跨日保留，评分 &lt; POOL_EXIT_SCORE 移出
+    g.pool = {}
+    run_daily(before_market_open, time=&#x27;before_open&#x27;)
+    run_daily(trade, time=Cfg.RUN_TIME)
+    log.info(&#x27;均线多头评分策略 V1.9 初始化完成（请确认回测频率为&quot;分钟&quot;）&#x27;)
+
+
+def before_market_open(context):
+    # 持仓交易日计数 +1（买入当日为第 0 日）
+    for code, p in g.pos.items():
+        p[&#x27;days&#x27;] += 1
+
+
+# ==================================================================
+# 三、主流程
+# ==================================================================
+def trade(context):
+    cd = get_current_data()
+    _reconcile(context)
+
+    universe = _universe(context, cd)
+    uset = set(universe)
+    held = list(context.portfolio.positions.keys())
+    # 池内股票若变 ST/退市/上市状态异常（不在 universe 且非停牌）直接移出
+    for c in list(g.pool):
+        if c not in uset and not cd[c].paused:
+            g.pool.pop(c)
+    bars = _get_bars(context, list(uset | set(held) | set(g.pool)))
+
+    # ---- 选股：当日选中的加入选股池 ----
+    pre = [c for c in universe if c in bars and _select_price(bars[c])]
+    turnover = _turnover(context, pre, bars)
+    picked = [c for c in pre if 3 &lt; turnover.get(c, 0) &lt; 10]
+    new_in = [c for c in picked if c not in g.pool]
+    for c in new_in:
+        g.pool[c] = context.current_dt.date()
+
+    # ---- 评分（选股池 + 持仓），池内评分 &lt; 50 移出 ----
+    scores = {}
+    to_score = [c for c in set(g.pool) | set(held) if c in bars]
+    caps = _market_cap(context, to_score)
+    for c in to_score:
+        scores[c], detail = score(bars[c], caps.get(c))
+        if Cfg.DEBUG and c in g.pool:
+            log.info(&#x27;[评分] %s %.1f %s&#x27; % (c, scores[c], detail))
+    out = [c for c in g.pool if c in scores and scores[c] &lt; Cfg.POOL_EXIT_SCORE]
+    for c in out:
+        g.pool.pop(c)
+
+    # ---- 卖出 ----
+    sold = set()
+    for code in held:
+        pos = context.portfolio.positions[code]
+        if pos.closeable_amount &lt;= 0:
+            continue                      # 当日买入 T+1 不可卖
+        reason = _sell_reason(code, bars.get(code), scores.get(code), cd)
+        if reason:
+            _sell(context, code, reason, scores.get(code), cd)
+            sold.add(code)
+
+    # ---- 买入 ----
+    positions = context.portfolio.positions
+    holding = [c for c in list(positions.keys()) if c not in sold and positions[c].total_amount &gt; 0]
+    slots = Cfg.MAX_HOLD - len(holding)
+    log.info(&#x27;今日选中 %d 只(新入池 %d)，移出 %d，选股池 %d 只，持仓 %d&#x27;
+             % (len(picked), len(new_in), len(out), len(g.pool), len(holding)))
+    if slots &lt;= 0:
+        return
+    cands = [c for c in g.pool if c not in holding and c not in sold and not cd[c].paused
+             and scores.get(c, 0) &gt;= Cfg.BUY_SCORE]
+    if Cfg.SKIP_LIMIT_UP:
+        cands = [c for c in cands if cd[c].last_price &lt; cd[c].high_limit]
+    cands.sort(key=lambda c: -scores[c])
+    log.info(&#x27;池内评分&gt;=%d 共 %d 只，空位 %d&#x27; % (Cfg.BUY_SCORE, len(cands), slots))
+
+    for code in cands[:slots]:
+        _buy(context, code, scores[code], cd)
+
+
+# ==================================================================
+# 四、选股（与原 select() 口径一致；ST 已在股票池剔除，换手率单独批量算）
+# ==================================================================
+def _select_price(b):
+    close, volume = b[&#x27;close&#x27;], b[&#x27;volume&#x27;]
+    if len(close) &lt; 60:
+        return False
+    if close[-1] &lt;= 0 or volume[-1] &lt;= 0 or close[-6] &lt;= 0:
+        return False
+    ma5, ma10, ma20, ma60 = (close[-n:].mean() for n in (5, 10, 20, 60))
+    if not (ma5 &gt; ma10 &gt; ma20 &gt; ma60):           # 均线多头
+        return False
+    if close[-1] &lt;= ma5:                          # 股价 &gt; MA5
+        return False
+    if (close[-1] - close[-6]) / close[-6] &lt;= 0.05:   # 近 5 日涨幅 &gt; 5%
+        return False
+    vol_ma5_prev = volume[-6:-1].mean()           # = MA(volume,5)[-2]
+    if vol_ma5_prev &lt;= 0 or volume[-1] / vol_ma5_prev &lt;= 1.3:   # 放量 1.3 倍
+        return False
+    return True
+
+
+def _turnover(context, codes, bars):
+    &quot;&quot;&quot;换手率(%) = 当日累计成交量 / 前一交易日流通股本&quot;&quot;&quot;
+    out = {}
+    if not codes:
+        return out
+    df = get_fundamentals(query(valuation.code, valuation.circulating_cap)
+                          .filter(valuation.code.in_(codes)), date=context.previous_date)
+    for code, cap in zip(df[&#x27;code&#x27;], df[&#x27;circulating_cap&#x27;]):
+        if cap and cap &gt; 0:                       # circulating_cap 单位：万股
+            out[code] = bars[code][&#x27;volume&#x27;][-1] / (cap * 1e4) * 100
+    return out
+
+
+def _market_cap(context, codes):
+    &quot;&quot;&quot;前一交易日总市值（亿元）&quot;&quot;&quot;
+    if not codes:
+        return {}
+    df = get_fundamentals(query(valuation.code, valuation.market_cap)
+                          .filter(valuation.code.in_(codes)), date=context.previous_date)
+    return dict(zip(df[&#x27;code&#x27;], df[&#x27;market_cap&#x27;]))
+
+
+# ==================================================================
+# 五、评分
+# ==================================================================
+def _ma(c, n, k):
+    &quot;&quot;&quot;以索引 k 结尾的 n 日均线&quot;&quot;&quot;
+    return c[k - n + 1:k + 1].mean()
+
+
+def _lin(x, zero, full):
+    &quot;&quot;&quot;线性插值：x=zero 时 0 分，x=full 时 100 分，两端截断&quot;&quot;&quot;
+    return float(min(max((x - zero) / (full - zero), 0.0), 1.0) * 100)
+
+
+def score(b, cap=None):
+    &quot;&quot;&quot;cap: 前一交易日总市值（亿元），取不到时按非大盘股处理&quot;&quot;&quot;
+    o, h, l, c = b[&#x27;open&#x27;], b[&#x27;high&#x27;], b[&#x27;low&#x27;], b[&#x27;close&#x27;]
+    i = len(c) - 1                                # t（当日，收盘用实时价）
+    if i &lt; 30:
+        return 0.0, &#x27;bars&lt;31&#x27;
+
+    # ---- 一票否决 ----
+    if _ma(c, 5, i) &lt; _ma(c, 10, i):
+        return 0.0, &#x27;veto:MA5&lt;MA10&#x27;
+    if l[i] &lt; _ma(c, 20, i):
+        return 0.0, &#x27;veto:low&lt;MA20&#x27;
+    launch_low = l[i - Cfg.LAUNCH_LOOKBACK:i].min()
+    max_gain = Cfg.LAUNCH_MAX_GAIN_BIG if cap and cap &gt; Cfg.BIG_CAP else Cfg.LAUNCH_MAX_GAIN
+    if launch_low &gt; 0 and c[i] / launch_low - 1 &gt; max_gain:
+        return 0.0, &#x27;veto:launch+%.0f%%&#x27; % ((c[i] / launch_low - 1) * 100)
+
+    s = {}
+    # 1. 路径效率2.0 ER = (C(t)-C(t-N)) / Σ|C(k)-C(k-1)|, k=t-N+1..t（含当日实时价，下跌为负）
+    seg = c[i - Cfg.ER_N:i + 1]
+    path = np.abs(np.diff(seg)).sum()
+    er = (seg[-1] - seg[0]) / path if path &gt; 0 else 0.0
+    s[&#x27;er&#x27;] = _lin(er, Cfg.ER_ZERO, Cfg.ER_FULL)
+
+    # 2. 前 5 日涨幅（t-1 vs t-6）
+    s[&#x27;gain&#x27;] = _gain_score(c[i - 1] / c[i - 6] - 1)
+
+    # 3. 单日振幅 = (最高 - 最低) / 前收，取 t-5..t-1
+    amps = np.array([(h[k] - l[k]) / c[k - 1] for k in range(i - 5, i)])
+    # 3a. 振幅水平：日均振幅 &lt;=4% 满分，&gt;=8% 0 分
+    s[&#x27;amp&#x27;] = _lin(amps.mean(), Cfg.AMP_ZERO, Cfg.AMP_FULL)
+    # 3b. 最大振幅倍数：最大单日振幅 / max(其余 4 日均值, 1%)，&lt;=1.5 满分，&gt;=3.0 0 分
+    amp_max = amps.max()
+    rest = (amps.sum() - amp_max) / 4
+    s[&#x27;amp_x&#x27;] = _lin(amp_max / max(rest, Cfg.AMPX_FLOOR), Cfg.AMPX_ZERO, Cfg.AMPX_FULL)
+
+    # 4. 现价距前 5 日（t-5..t-1）最高价，&gt;-3% 满分，&lt;-10% 0 分
+    s[&#x27;drop&#x27;] = _lin(c[i] / h[i - 5:i].max() - 1, -0.10, -0.03)
+
+    # 5. 趋势确认：t-5..t-1 每日 收盘&gt;MA5&gt;MA10&gt;MA20，少一日 -25
+    miss = 0
+    for k in range(i - 5, i):
+        m5, m10, m20 = _ma(c, 5, k), _ma(c, 10, k), _ma(c, 20, k)
+        if not (c[k] &gt; m5 and m5 &gt; m10 and m10 &gt; m20):
+            miss += 1
+    s[&#x27;trend&#x27;] = float(max(0, 100 - 25 * miss))
+
+    # 6. 上行后平台期
+    s[&#x27;plat&#x27;] = score_platform(c, i)
+
+    w = Cfg.WEIGHTS
+    total = sum(s[k] * w[k] for k in s) / sum(w.values())
+    detail = &#x27; &#x27;.join(&#x27;%s=%.0f&#x27; % (k, s[k]) for k in (&#x27;er&#x27;, &#x27;gain&#x27;, &#x27;amp&#x27;, &#x27;amp_x&#x27;, &#x27;drop&#x27;, &#x27;trend&#x27;, &#x27;plat&#x27;))
+    return float(total), detail
+
+
+def _gain_score(g):
+    g *= 100
+    if 5 &lt;= g &lt;= 20:
+        return 100.0
+    if 4 &lt;= g &lt; 5 or 20 &lt; g &lt;= 23:
+        return 75.0
+    if 3 &lt;= g &lt; 4 or 23 &lt; g &lt;= 26:
+        return 50.0
+    if 2 &lt;= g &lt; 3 or 26 &lt; g &lt;= 30:
+        return 25.0
+    return 0.0
+
+
+def score_platform(close, i):
+    &quot;&quot;&quot;上行后平台期。close: 收盘价序列; i: 当前交易日 t 的索引, 只用到 t-1 及以前&quot;&quot;&quot;
+    lo = max(0, i - Cfg.PLAT_LOOK)
+    D = lo + int(np.argmax(close[lo:i]))          # t-30..t-1 最高收盘日（并列取最早）
+    base = close[max(0, D - Cfg.PLAT_BASE_LOOK):D + 1].min()
+    if base &lt;= 0 or close[D] / base - 1 &lt; Cfg.PLAT_RISE_MIN:
+        return 100.0                               # 没有一波上行, 不影响
+    k = (i - 1) - D                                # 停滞天数
+    return _lin(k, Cfg.PLAT_K_ZERO, Cfg.PLAT_K_FULL)
+
+
+# ==================================================================
+# 六、卖出 / 买入
+# ==================================================================
+def _sell_reason(code, b, sc, cd):
+    p = g.pos.get(code)
+    price = cd[code].last_price
+    if p is None or b is None or price &lt;= 0 or np.isnan(price):
+        return None
+    if p.get(&#x27;force_sell&#x27;):
+        return &#x27;前日卖出未成交，继续卖出&#x27;
+
+    p[&#x27;peak&#x27;] = max(p[&#x27;peak&#x27;], price)
+    c = b[&#x27;close&#x27;]
+    i = len(c) - 1
+    if i &gt;= 10 and _ma(c, 5, i) &lt; _ma(c, 10, i) and _ma(c, 5, i - 1) &gt;= _ma(c, 10, i - 1):
+        return &#x27;MA5下穿MA10死叉&#x27;
+    if p[&#x27;days&#x27;] == Cfg.CHECK_DAY and price / p[&#x27;buy_price&#x27;] - 1 &lt;= Cfg.CHECK_MIN_GAIN:
+        return &#x27;买入后第%d日涨幅%.2f%%&lt;=0&#x27; % (Cfg.CHECK_DAY, (price / p[&#x27;buy_price&#x27;] - 1) * 100)
+    if sc is not None and sc &lt; Cfg.SELL_SCORE:
+        return &#x27;评分%.1f&lt;%d&#x27; % (sc, Cfg.SELL_SCORE)
+    if price / p[&#x27;buy_price&#x27;] - 1 &lt; -Cfg.STOP_LOSS:
+        return &#x27;止损：距买入价%.2f%%&#x27; % ((price / p[&#x27;buy_price&#x27;] - 1) * 100)
+    if price / p[&#x27;peak&#x27;] - 1 &lt; -Cfg.TRAIL_DD:
+        return &#x27;回撤：距最高点%.2f%%&#x27; % ((price / p[&#x27;peak&#x27;] - 1) * 100)
+    return None
+
+
+def _sell(context, code, reason, sc, cd):
+    o = order_target(code, 0, _style(code, cd, side=&#x27;sell&#x27;))
+    if o is not None and o.filled &gt; 0 and code not in context.portfolio.positions:
+        p = g.pos.pop(code, {})
+        pnl = cd[code].last_price / p.get(&#x27;buy_price&#x27;, cd[code].last_price) - 1
+        log.info(&#x27;[卖出] %s %s | 评分=%s 持有%s日 收益%.2f%%&#x27;
+                 % (code, reason, &#x27;%.1f&#x27; % sc if sc is not None else &#x27;-&#x27;, p.get(&#x27;days&#x27;, &#x27;-&#x27;), pnl * 100))
+    else:
+        # 跌停等原因未成交：次日继续卖
+        if code in g.pos:
+            g.pos[code][&#x27;force_sell&#x27;] = True
+        log.warn(&#x27;[卖出未成交] %s %s&#x27; % (code, reason))
+
+
+def _buy(context, code, sc, cd):
+    value = min(context.portfolio.total_value * Cfg.POS_PCT, context.portfolio.available_cash)
+    if value &lt; cd[code].last_price * 100:
+        return
+    o = order_value(code, value, _style(code, cd, side=&#x27;buy&#x27;))
+    if o is not None and o.filled &gt; 0:
+        pos = context.portfolio.positions[code]
+        g.pos[code] = {&#x27;buy_price&#x27;: pos.avg_cost, &#x27;buy_date&#x27;: context.current_dt.date(),
+                       &#x27;days&#x27;: 0, &#x27;peak&#x27;: pos.avg_cost, &#x27;force_sell&#x27;: False}
+        log.info(&#x27;[买入] %s 评分=%.1f 价=%.2f 数量=%d&#x27; % (code, sc, pos.avg_cost, o.filled))
+
+
+def _style(code, cd, side):
+    &quot;&quot;&quot;科创板市价单必须带保护限价；其他板块用普通市价单&quot;&quot;&quot;
+    if not code.startswith(&#x27;688&#x27;):
+        return None
+    d = cd[code]
+    if side == &#x27;buy&#x27;:
+        px = min(d.last_price * (1 + Cfg.KCB_PROTECT), d.high_limit)
+    else:
+        px = max(d.last_price * (1 - Cfg.KCB_PROTECT), d.low_limit)
+    return MarketOrderStyle(round(px, 2))
+
+
+def _reconcile(context):
+    &quot;&quot;&quot;g.pos 与实际持仓对齐（防重启/部分成交造成脱钩）&quot;&quot;&quot;
+    held = context.portfolio.positions
+    for code in list(g.pos):
+        if code not in held or held[code].total_amount == 0:
+            g.pos.pop(code)
+    for code, pos in held.items():
+        if code not in g.pos and pos.total_amount &gt; 0:
+            g.pos[code] = {&#x27;buy_price&#x27;: pos.avg_cost, &#x27;buy_date&#x27;: context.current_dt.date(),
+                           &#x27;days&#x27;: 0, &#x27;peak&#x27;: pos.avg_cost, &#x27;force_sell&#x27;: False}
+
+
+# ==================================================================
+# 七、数据
+# ==================================================================
+def _universe(context, cd):
+    today = context.current_dt.date()
+    secs = get_all_securities([&#x27;stock&#x27;], date=today)
+    out = []
+    for code, row in secs.iterrows():
+        if (today - row[&#x27;start_date&#x27;]).days &lt; Cfg.MIN_LIST_DAYS:
+            continue
+        if Cfg.EXCLUDE_BJ and code.endswith(&#x27;.BJ&#x27;):
+            continue
+        if Cfg.EXCLUDE_KCB and code.startswith(&#x27;688&#x27;):
+            continue
+        if Cfg.EXCLUDE_CYB and code.startswith((&#x27;300&#x27;, &#x27;301&#x27;)):
+            continue
+        d = cd[code]
+        if d.paused or d.is_st or &#x27;ST&#x27; in d.name or &#x27;退&#x27; in d.name:
+            continue
+        out.append(code)
+    return out
+
+
+def _get_bars(context, codes):
+    &quot;&quot;&quot;日 K（含当日 14:55 的未完成 K 线），前复权到当日&quot;&quot;&quot;
+    out = {}
+    fields = [&#x27;open&#x27;, &#x27;high&#x27;, &#x27;low&#x27;, &#x27;close&#x27;, &#x27;volume&#x27;]
+    for k in range(0, len(codes), Cfg.BATCH):
+        chunk = codes[k:k + Cfg.BATCH]
+        try:
+            data = get_bars(chunk, count=Cfg.BARS, unit=&#x27;1d&#x27;, fields=fields, include_now=True,
+                            end_dt=context.current_dt, fq_ref_date=context.current_dt.date(), df=False)
+        except Exception as e:
+            log.warn(&#x27;get_bars 失败(%d-%d): %s&#x27; % (k, k + len(chunk), e))
+            continue
+        for code, arr in data.items():
+            if arr is None or len(arr) == 0:
+                continue
+            b = {f: np.asarray(arr[f], dtype=float) for f in fields}
+            if np.isnan(b[&#x27;close&#x27;]).any():
+                continue
+            out[code] = b
+    return out
+</textarea>
+<script>
+document.getElementById("copy").addEventListener("click", async e => { const b = e.currentTarget, t = document.getElementById("raw").value;
+  try { await navigator.clipboard.writeText(t); } catch (err) { const a = document.getElementById("raw"); a.hidden = false; a.select(); document.execCommand("copy"); a.hidden = true; }
+  b.textContent = "已复制"; setTimeout(() => b.textContent = "复制代码", 1500); });
+</script>
+</main>
+<footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-16</div></footer>
+</body>
+</html>

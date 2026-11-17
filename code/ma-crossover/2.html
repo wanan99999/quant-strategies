@@ -1,0 +1,908 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>双均线 / 三均线交叉策略 选股模块 代码</title>
+<meta name="description" content="双均线/三均线交叉策略（MA Crossover）—— 第一部分：选股策略 (聚宽 JoinQuant)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 22l6-7 5 4 9-11' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="top"><div class="bar"><a class="brand" href="../../index.html">量化策略库</a>
+<nav><a href="../../index.html#dividend">股息率策略</a><a href="../../index.html#trend">趋势策略</a><a href="../../index.html#news">消息股策略</a></nav></div></header>
+<main class="wrap">
+<nav class="crumb"><a href="../../index.html">策略库</a> / <a href="../../index.html#trend">趋势策略</a> / <a href="../../s/ma-crossover.html">双均线 / 三均线交叉策略</a></nav>
+<section class="codehead"><h1>双均线 / 三均线交叉策略 · 选股模块</h1><p class="sub">双均线/三均线交叉策略（MA Crossover）—— 第一部分：选股策略 (聚宽 JoinQuant)</p><p class="sub2">职责：构建候选池 g.pool（每周五盘后运行），并按行业类型给每只标的分配</p>
+<div class="vers"><a class="vchip" href="1.html">完整策略</a><a class="vchip on" href="2.html">选股模块</a><a class="vchip" href="3.html">交易模块</a><a class="vchip" href="4.html">风控模块</a></div>
+<div class="tools"><span class="mono">均线_选股策略.py · 293 行 · 11 KB</span><span class="grow"></span>
+<button class="btn" id="copy" type="button">复制代码</button><a class="btn" href="../../files/ma-crossover/%E5%9D%87%E7%BA%BF_%E9%80%89%E8%82%A1%E7%AD%96%E7%95%A5.py" download>下载 .py</a></div></section>
+<div class="codebox"><div class="hl"><table class="hltable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">  1</span>
+<span class="normal">  2</span>
+<span class="normal">  3</span>
+<span class="normal">  4</span>
+<span class="normal">  5</span>
+<span class="normal">  6</span>
+<span class="normal">  7</span>
+<span class="normal">  8</span>
+<span class="normal">  9</span>
+<span class="normal"> 10</span>
+<span class="normal"> 11</span>
+<span class="normal"> 12</span>
+<span class="normal"> 13</span>
+<span class="normal"> 14</span>
+<span class="normal"> 15</span>
+<span class="normal"> 16</span>
+<span class="normal"> 17</span>
+<span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span></pre></div></td><td class="code"><div><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">双均线/三均线交叉策略（MA Crossover）—— 第一部分：选股策略 (聚宽 JoinQuant)</span>
+<span class="sd">========================================================================</span>
+<span class="sd">职责：构建候选池 g.pool（每周五盘后运行），并按行业类型给每只标的分配</span>
+<span class="sd">      适配子策略：成长型→三均线；周期/主题型→双均线；防御型→排除。</span>
+<span class="sd">本文件同时提供 MA / 斜率 / ADX / 布林带宽 / 均线缠绕 等【公共指标函数】，</span>
+<span class="sd">供交易、风控模块调用。本文件不含 initialize，导入无副作用。</span>
+
+<span class="sd">选股四层（对应文字版第一部分）：</span>
+<span class="sd">  第一层 基础过滤 : 非ST、上市≥120自然日、近20日日均成交额≥1亿、收盘价≥3元</span>
+<span class="sd">  第二层 均线多头排列: 双均线(MA10&gt;MA20+向上+价&gt;MA10) / 三均线(MA5&gt;MA10&gt;MA20&gt;MA60...)</span>
+<span class="sd">  第三层 行业适配   : 成长→三均线；周期/主题→双均线；防御→排除</span>
+<span class="sd">  第四层 终筛排序   : 发散度30% + 持续性25% + 量能25% + 回调20%，取前5~10只</span>
+
+<span class="sd">组合方式：可在研究环境按模块 import，或按【选股→风控→交易】拼进同一文件。</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jqdata</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+
+<span class="c1"># ============================ 申万一级行业 → 类型映射 ============================</span>
+<span class="n">GROWTH</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;电力设备&#39;</span><span class="p">,</span> <span class="s1">&#39;电子&#39;</span><span class="p">,</span> <span class="s1">&#39;计算机&#39;</span><span class="p">,</span> <span class="s1">&#39;医药生物&#39;</span><span class="p">}</span>
+<span class="n">CYCLE</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;机械设备&#39;</span><span class="p">,</span> <span class="s1">&#39;汽车&#39;</span><span class="p">,</span> <span class="s1">&#39;基础化工&#39;</span><span class="p">,</span> <span class="s1">&#39;有色金属&#39;</span><span class="p">,</span> <span class="s1">&#39;房地产&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;钢铁&#39;</span><span class="p">,</span> <span class="s1">&#39;建筑材料&#39;</span><span class="p">,</span> <span class="s1">&#39;家用电器&#39;</span><span class="p">,</span> <span class="s1">&#39;轻工制造&#39;</span><span class="p">}</span>
+<span class="n">THEME</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;通信&#39;</span><span class="p">,</span> <span class="s1">&#39;传媒&#39;</span><span class="p">,</span> <span class="s1">&#39;国防军工&#39;</span><span class="p">,</span> <span class="s1">&#39;社会服务&#39;</span><span class="p">}</span>
+<span class="n">DEFENSE</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;银行&#39;</span><span class="p">,</span> <span class="s1">&#39;公用事业&#39;</span><span class="p">,</span> <span class="s1">&#39;交通运输&#39;</span><span class="p">,</span> <span class="s1">&#39;煤炭&#39;</span><span class="p">}</span>   <span class="c1"># 防御型 → 直接排除</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">sector_type_of</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;返回 &#39;growth&#39;/&#39;cycle&#39;/&#39;theme&#39;/&#39;defense&#39;；未知行业默认按 &#39;cycle&#39;(双均线)。&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">GROWTH</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;growth&#39;</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">DEFENSE</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;defense&#39;</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">THEME</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;theme&#39;</span>
+    <span class="k">return</span> <span class="s1">&#39;cycle&#39;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">adapt_of</span><span class="p">(</span><span class="n">sector_type</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;行业类型 → 适配子策略。&#39;defense&#39; 返回 None 表示排除。&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">sector_type</span> <span class="o">==</span> <span class="s1">&#39;growth&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;triple&#39;</span>
+    <span class="k">if</span> <span class="n">sector_type</span> <span class="o">==</span> <span class="s1">&#39;defense&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="s1">&#39;dual&#39;</span>   <span class="c1"># cycle / theme</span>
+
+
+<span class="c1"># ============================ 公共指标函数 ============================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ma</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;简单移动平均：shift=0 为最新，shift=k 为 k 日前的 MA。&quot;&quot;&quot;</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cl</span><span class="p">)</span> <span class="o">-</span> <span class="n">shift</span>
+    <span class="k">if</span> <span class="n">end</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cl</span><span class="p">[</span><span class="n">end</span> <span class="o">-</span> <span class="n">n</span><span class="p">:</span><span class="n">end</span><span class="p">]))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">slope_up</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;MA(n) 近 k 日斜率 &gt; 0。&quot;&quot;&quot;</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">ma</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">ma</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">b</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="n">b</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">golden_cross</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">nf</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;shift 日处是否发生金叉：快线由下向上穿慢线。&quot;&quot;&quot;</span>
+    <span class="n">f1</span><span class="p">,</span> <span class="n">s1</span> <span class="o">=</span> <span class="n">ma</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">nf</span><span class="p">,</span> <span class="n">shift</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">ma</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="n">shift</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">f0</span><span class="p">,</span> <span class="n">s0</span> <span class="o">=</span> <span class="n">ma</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">nf</span><span class="p">,</span> <span class="n">shift</span><span class="p">),</span> <span class="n">ma</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="n">shift</span><span class="p">)</span>
+    <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">f0</span><span class="p">,</span> <span class="n">s0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">f1</span> <span class="o">&lt;=</span> <span class="n">s1</span> <span class="ow">and</span> <span class="n">f0</span> <span class="o">&gt;</span> <span class="n">s0</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">death_cross</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">nf</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;shift 日处是否发生死叉。&quot;&quot;&quot;</span>
+    <span class="n">f1</span><span class="p">,</span> <span class="n">s1</span> <span class="o">=</span> <span class="n">ma</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">nf</span><span class="p">,</span> <span class="n">shift</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">ma</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="n">shift</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">f0</span><span class="p">,</span> <span class="n">s0</span> <span class="o">=</span> <span class="n">ma</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">nf</span><span class="p">,</span> <span class="n">shift</span><span class="p">),</span> <span class="n">ma</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="n">shift</span><span class="p">)</span>
+    <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">f0</span><span class="p">,</span> <span class="n">s0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">f1</span> <span class="o">&gt;=</span> <span class="n">s1</span> <span class="ow">and</span> <span class="n">f0</span> <span class="o">&lt;</span> <span class="n">s0</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">fresh_golden</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">nf</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;最近 within 个交易日内是否出现过金叉（新鲜金叉）。&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">golden_cross</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">nf</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">within</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">consecutive_above</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">nf</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="n">cap</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;MA(nf) &gt; MA(ns) 已连续多少个交易日（上限 cap）。&quot;&quot;&quot;</span>
+    <span class="n">cnt</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cap</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">ma</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">nf</span><span class="p">,</span> <span class="n">i</span><span class="p">),</span> <span class="n">ma</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">a</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">a</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">cnt</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">cnt</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">cross_count</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">nf</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;近 window 日 MA(nf) 与 MA(ns) 的交叉次数（衡量均线缠绕）。&quot;&quot;&quot;</span>
+    <span class="n">signs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">window</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">ma</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">nf</span><span class="p">,</span> <span class="n">i</span><span class="p">),</span> <span class="n">ma</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">ns</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">a</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">signs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="n">b</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">signs</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">signs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">signs</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">true_range</span><span class="p">(</span><span class="n">high</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">prev_close</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">prev_close</span><span class="p">),</span> <span class="nb">abs</span><span class="p">(</span><span class="n">low</span> <span class="o">-</span> <span class="n">prev_close</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">calc_adx</span><span class="p">(</span><span class="n">highs</span><span class="p">,</span> <span class="n">lows</span><span class="p">,</span> <span class="n">closes</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wilder ADX(14)。数据不足返回 None。&quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">closes</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">period</span> <span class="o">+</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">pdm</span><span class="p">,</span> <span class="n">mdm</span><span class="p">,</span> <span class="n">tr</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="n">up</span><span class="p">,</span> <span class="n">dn</span> <span class="o">=</span> <span class="n">highs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">highs</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">lows</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">lows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">pdm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">up</span> <span class="k">if</span> <span class="p">(</span><span class="n">up</span> <span class="o">&gt;</span> <span class="n">dn</span> <span class="ow">and</span> <span class="n">up</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">mdm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dn</span> <span class="k">if</span> <span class="p">(</span><span class="n">dn</span> <span class="o">&gt;</span> <span class="n">up</span> <span class="ow">and</span> <span class="n">dn</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">tr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">true_range</span><span class="p">(</span><span class="n">highs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">lows</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">closes</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">wilder</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">x</span><span class="p">[:</span><span class="n">period</span><span class="p">]);</span> <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">period</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">s</span> <span class="o">-</span> <span class="n">s</span> <span class="o">/</span> <span class="n">period</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">];</span> <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="n">atr</span><span class="p">,</span> <span class="n">sp</span><span class="p">,</span> <span class="n">sm</span> <span class="o">=</span> <span class="n">wilder</span><span class="p">(</span><span class="n">tr</span><span class="p">),</span> <span class="n">wilder</span><span class="p">(</span><span class="n">pdm</span><span class="p">),</span> <span class="n">wilder</span><span class="p">(</span><span class="n">mdm</span><span class="p">)</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atr</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">atr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">dx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">);</span> <span class="k">continue</span>
+        <span class="n">dip</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">sp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">atr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">sm</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">atr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">denom</span> <span class="o">=</span> <span class="p">(</span><span class="n">dip</span> <span class="o">+</span> <span class="n">dim</span><span class="p">)</span> <span class="ow">or</span> <span class="mf">1.0</span>
+        <span class="n">dx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dip</span> <span class="o">-</span> <span class="n">dim</span><span class="p">)</span> <span class="o">/</span> <span class="n">denom</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dx</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">period</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">adx</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dx</span><span class="p">[:</span><span class="n">period</span><span class="p">]))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">period</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">dx</span><span class="p">)):</span>
+        <span class="n">adx</span> <span class="o">=</span> <span class="p">(</span><span class="n">adx</span> <span class="o">*</span> <span class="p">(</span><span class="n">period</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">dx</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">period</span>
+    <span class="k">return</span> <span class="n">adx</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">boll_bandwidth</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;布林带宽 / MA20 =(上轨-下轨)/中轨 = 2k*std/MA。&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cl</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">mid</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">cl</span><span class="p">[</span><span class="o">-</span><span class="n">n</span><span class="p">:]))</span>
+    <span class="n">std</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">cl</span><span class="p">[</span><span class="o">-</span><span class="n">n</span><span class="p">:]))</span>
+    <span class="k">if</span> <span class="n">mid</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">k</span> <span class="o">*</span> <span class="n">std</span><span class="p">)</span> <span class="o">/</span> <span class="n">mid</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_daily_arrays</span><span class="p">(</span><span class="n">security</span><span class="p">,</span> <span class="n">end_dt</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;high&#39;</span><span class="p">,</span> <span class="s1">&#39;low&#39;</span><span class="p">,</span> <span class="s1">&#39;close&#39;</span><span class="p">)):</span>
+    <span class="n">bars</span> <span class="o">=</span> <span class="n">get_bars</span><span class="p">(</span><span class="n">security</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">count</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;1d&#39;</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">fields</span><span class="p">),</span>
+                    <span class="n">include_now</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">end_dt</span><span class="o">=</span><span class="n">end_dt</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">bars</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">bars</span><span class="p">[</span><span class="s1">&#39;close&#39;</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">f</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bars</span><span class="p">[</span><span class="n">f</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">}</span>
+
+
+<span class="c1"># ============================ 选股主流程 ============================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">select_universe</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;每周五盘后：重建候选池 g.pool，并缓存每只标的的均线/行业/适配信息。&quot;&quot;&quot;</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">sel</span>
+    <span class="n">prev</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">previous_date</span>
+
+    <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">base_index</span><span class="p">:</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">get_index_stocks</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">base_index</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">prev</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">get_all_securities</span><span class="p">(</span><span class="n">types</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;stock&#39;</span><span class="p">],</span> <span class="n">date</span><span class="o">=</span><span class="n">prev</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="n">cd</span> <span class="o">=</span> <span class="n">get_current_data</span><span class="p">()</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">timedelta</span>
+    <span class="n">list_cutoff</span> <span class="o">=</span> <span class="n">prev</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_list_days&#39;</span><span class="p">])</span>
+
+    <span class="c1"># 第一层：基础过滤（ST / 上市时长 / 停牌）</span>
+    <span class="n">stage1</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">base</span><span class="p">:</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">cd</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">paused</span> <span class="ow">or</span> <span class="n">info</span><span class="o">.</span><span class="n">is_st</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;ST&#39;</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;退&#39;</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="n">sinfo</span> <span class="o">=</span> <span class="n">get_security_info</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sinfo</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">sinfo</span><span class="o">.</span><span class="n">start_date</span> <span class="o">&gt;</span> <span class="n">list_cutoff</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">stage1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+    <span class="n">ind</span> <span class="o">=</span> <span class="n">get_industry</span><span class="p">(</span><span class="n">stage1</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">prev</span><span class="p">)</span>
+
+    <span class="n">raw</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># 通过前三层的候选：(sec, info, 四维原始指标)</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">stage1</span><span class="p">:</span>
+        <span class="n">arr</span> <span class="o">=</span> <span class="n">get_daily_arrays</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">current_dt</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span>
+                               <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;high&#39;</span><span class="p">,</span> <span class="s1">&#39;low&#39;</span><span class="p">,</span> <span class="s1">&#39;close&#39;</span><span class="p">,</span> <span class="s1">&#39;volume&#39;</span><span class="p">,</span> <span class="s1">&#39;money&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">arr</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="s1">&#39;close&#39;</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">65</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">highs</span><span class="p">,</span> <span class="n">lows</span><span class="p">,</span> <span class="n">closes</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="s1">&#39;high&#39;</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="s1">&#39;low&#39;</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="s1">&#39;close&#39;</span><span class="p">]</span>
+        <span class="n">vol</span><span class="p">,</span> <span class="n">money</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="s1">&#39;volume&#39;</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="s1">&#39;money&#39;</span><span class="p">]</span>
+        <span class="n">price</span> <span class="o">=</span> <span class="n">closes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># S3/S4：流动性 &amp; 价格</span>
+        <span class="k">if</span> <span class="n">price</span> <span class="o">&lt;</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_price&#39;</span><span class="p">]:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">money</span><span class="p">[</span><span class="o">-</span><span class="mi">20</span><span class="p">:]))</span> <span class="o">&lt;</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;min_amount&#39;</span><span class="p">]:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># 第三层：行业类型 → 适配子策略（防御型排除）</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="p">(</span><span class="n">ind</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="p">{})</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sw_l1&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;industry_name&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">stype</span> <span class="o">=</span> <span class="n">sector_type_of</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">adapt</span> <span class="o">=</span> <span class="n">adapt_of</span><span class="p">(</span><span class="n">stype</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">adapt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">m5</span><span class="p">,</span> <span class="n">m10</span><span class="p">,</span> <span class="n">m20</span><span class="p">,</span> <span class="n">m60</span> <span class="o">=</span> <span class="n">ma</span><span class="p">(</span><span class="n">closes</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">ma</span><span class="p">(</span><span class="n">closes</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">ma</span><span class="p">(</span><span class="n">closes</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="n">ma</span><span class="p">(</span><span class="n">closes</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+        <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="p">(</span><span class="n">m5</span><span class="p">,</span> <span class="n">m10</span><span class="p">,</span> <span class="n">m20</span><span class="p">,</span> <span class="n">m60</span><span class="p">):</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># 第二层（修正）：选股只圈定&quot;中期趋势向上&quot;的慢速universe。</span>
+        <span class="c1"># ★ 不再在选股里要求&quot;已金叉/完全多头排列&quot;——金叉是单日事件，而选股每周才刷新，</span>
+        <span class="c1">#   若选股已要求金叉状态，则入场端&quot;当日金叉&quot;永远与之错开(4年零买入的根因)。</span>
+        <span class="c1">#   快速金叉统一交给每日入场逻辑(均线_交易策略.py)在该universe上捕捉。</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">m20</span> <span class="o">&gt;</span> <span class="n">m60</span> <span class="ow">and</span> <span class="n">slope_up</span><span class="p">(</span><span class="n">closes</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">5</span><span class="p">)):</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># 第四层原始指标</span>
+        <span class="n">div</span> <span class="o">=</span> <span class="p">(</span><span class="n">m5</span> <span class="o">-</span> <span class="n">m60</span><span class="p">)</span> <span class="o">/</span> <span class="n">m60</span> <span class="k">if</span> <span class="n">m60</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>                  <span class="c1"># 发散度</span>
+        <span class="n">persist</span> <span class="o">=</span> <span class="n">consecutive_above</span><span class="p">(</span><span class="n">closes</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">cap</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>         <span class="c1"># 持续性</span>
+        <span class="n">v5</span><span class="p">,</span> <span class="n">v20</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">vol</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">:])),</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">vol</span><span class="p">[</span><span class="o">-</span><span class="mi">20</span><span class="p">:]))</span>
+        <span class="n">volratio</span> <span class="o">=</span> <span class="n">v5</span> <span class="o">/</span> <span class="n">v20</span> <span class="k">if</span> <span class="n">v20</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">1.0</span>                    <span class="c1"># 量能配合</span>
+        <span class="n">hi5</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">highs</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">:]))</span>
+        <span class="n">pullback</span> <span class="o">=</span> <span class="p">(</span><span class="n">hi5</span> <span class="o">-</span> <span class="n">price</span><span class="p">)</span> <span class="o">/</span> <span class="n">hi5</span> <span class="k">if</span> <span class="n">hi5</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>         <span class="c1"># 回调幅度</span>
+
+        <span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;adapt&#39;</span><span class="p">:</span> <span class="n">adapt</span><span class="p">,</span> <span class="s1">&#39;sector&#39;</span><span class="p">:</span> <span class="n">name</span> <span class="ow">or</span> <span class="s1">&#39;NA&#39;</span><span class="p">,</span> <span class="s1">&#39;sector_type&#39;</span><span class="p">:</span> <span class="n">stype</span><span class="p">,</span>
+            <span class="s1">&#39;ma5&#39;</span><span class="p">:</span> <span class="n">m5</span><span class="p">,</span> <span class="s1">&#39;ma10&#39;</span><span class="p">:</span> <span class="n">m10</span><span class="p">,</span> <span class="s1">&#39;ma20&#39;</span><span class="p">:</span> <span class="n">m20</span><span class="p">,</span> <span class="s1">&#39;ma60&#39;</span><span class="p">:</span> <span class="n">m60</span><span class="p">,</span>
+            <span class="s1">&#39;div&#39;</span><span class="p">:</span> <span class="n">div</span><span class="p">,</span> <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="n">price</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">raw</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">s</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;div&#39;</span><span class="p">:</span> <span class="n">div</span><span class="p">,</span> <span class="s1">&#39;persist&#39;</span><span class="p">:</span> <span class="n">persist</span><span class="p">,</span>
+                              <span class="s1">&#39;volratio&#39;</span><span class="p">:</span> <span class="n">volratio</span><span class="p">,</span> <span class="s1">&#39;pullback&#39;</span><span class="p">:</span> <span class="n">pullback</span><span class="p">}))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">raw</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">pool</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">pool_info</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">{}</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;[选股] 无标的通过筛选&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="c1"># 第四层：四维加权评分（组内 min-max 归一化）</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">norm</span><span class="p">(</span><span class="n">vals</span><span class="p">):</span>
+        <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">vals</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
+        <span class="n">rng</span> <span class="o">=</span> <span class="p">(</span><span class="n">hi</span> <span class="o">-</span> <span class="n">lo</span><span class="p">)</span> <span class="ow">or</span> <span class="mf">1.0</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">v</span> <span class="o">-</span> <span class="n">lo</span><span class="p">)</span> <span class="o">/</span> <span class="n">rng</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vals</span><span class="p">]</span>
+
+    <span class="n">divs</span> <span class="o">=</span> <span class="n">norm</span><span class="p">([</span><span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;div&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">])</span>
+    <span class="n">pers</span> <span class="o">=</span> <span class="n">norm</span><span class="p">([</span><span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;persist&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">])</span>
+    <span class="n">vols</span> <span class="o">=</span> <span class="n">norm</span><span class="p">([</span><span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;volratio&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">])</span>
+    <span class="n">pbs</span>  <span class="o">=</span> <span class="n">norm</span><span class="p">([</span><span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;pullback&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">raw</span><span class="p">])</span>
+    <span class="n">scored</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">raw</span><span class="p">):</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.30</span> <span class="o">*</span> <span class="n">divs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="n">pers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span>
+                 <span class="mf">0.25</span> <span class="o">*</span> <span class="n">vols</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.20</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">pbs</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>  <span class="c1"># 回调越小得分越高</span>
+        <span class="n">info</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">score</span>
+        <span class="n">scored</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">s</span><span class="p">,</span> <span class="n">info</span><span class="p">))</span>
+    <span class="n">scored</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;score&#39;</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># 终选：同一申万一级行业≤2只，池容量取前 pool_max</span>
+    <span class="n">pool</span><span class="p">,</span> <span class="n">pool_info</span><span class="p">,</span> <span class="n">sector_cnt</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">{},</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">scored</span><span class="p">:</span>
+        <span class="n">sec</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;sector&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">sector_cnt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sec</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;per_industry_max&#39;</span><span class="p">]:</span>
+            <span class="k">continue</span>
+        <span class="n">pool</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="n">pool_info</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span>
+        <span class="n">sector_cnt</span><span class="p">[</span><span class="n">sec</span><span class="p">]</span> <span class="o">=</span> <span class="n">sector_cnt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sec</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;pool_max&#39;</span><span class="p">]:</span>
+            <span class="k">break</span>
+
+    <span class="n">g</span><span class="o">.</span><span class="n">pool</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">pool_info</span> <span class="o">=</span> <span class="n">pool</span><span class="p">,</span> <span class="n">pool_info</span>
+    <span class="n">n_dual</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">pool</span> <span class="k">if</span> <span class="n">pool_info</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s1">&#39;adapt&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;dual&#39;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;[选股] 候选池</span><span class="si">%d</span><span class="s1">只（双均线</span><span class="si">%d</span><span class="s1"> / 三均线</span><span class="si">%d</span><span class="s1">）行业分布</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+             <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pool</span><span class="p">),</span> <span class="n">n_dual</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span> <span class="o">-</span> <span class="n">n_dual</span><span class="p">,</span> <span class="n">sector_cnt</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_sector</span><span class="p">(</span><span class="n">security</span><span class="p">):</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="s1">&#39;pool_info&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">security</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">info</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sector&#39;</span><span class="p">,</span> <span class="s1">&#39;NA&#39;</span><span class="p">),</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sector_type&#39;</span><span class="p">,</span> <span class="s1">&#39;cycle&#39;</span><span class="p">)</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="n">get_industry</span><span class="p">(</span><span class="n">security</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="p">(</span><span class="n">ind</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">security</span><span class="p">,</span> <span class="p">{})</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sw_l1&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;industry_name&#39;</span><span class="p">,</span> <span class="s1">&#39;NA&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">name</span><span class="p">,</span> <span class="n">sector_type_of</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</pre></div></td></tr></table></div>
+</div>
+<textarea id="raw" hidden># -*- coding: utf-8 -*-
+&quot;&quot;&quot;
+双均线/三均线交叉策略（MA Crossover）—— 第一部分：选股策略 (聚宽 JoinQuant)
+========================================================================
+职责：构建候选池 g.pool（每周五盘后运行），并按行业类型给每只标的分配
+      适配子策略：成长型→三均线；周期/主题型→双均线；防御型→排除。
+本文件同时提供 MA / 斜率 / ADX / 布林带宽 / 均线缠绕 等【公共指标函数】，
+供交易、风控模块调用。本文件不含 initialize，导入无副作用。
+
+选股四层（对应文字版第一部分）：
+  第一层 基础过滤 : 非ST、上市≥120自然日、近20日日均成交额≥1亿、收盘价≥3元
+  第二层 均线多头排列: 双均线(MA10&gt;MA20+向上+价&gt;MA10) / 三均线(MA5&gt;MA10&gt;MA20&gt;MA60...)
+  第三层 行业适配   : 成长→三均线；周期/主题→双均线；防御→排除
+  第四层 终筛排序   : 发散度30% + 持续性25% + 量能25% + 回调20%，取前5~10只
+
+组合方式：可在研究环境按模块 import，或按【选股→风控→交易】拼进同一文件。
+&quot;&quot;&quot;
+import numpy as np
+from jqdata import *
+
+
+# ============================ 申万一级行业 → 类型映射 ============================
+GROWTH = {&#x27;电力设备&#x27;, &#x27;电子&#x27;, &#x27;计算机&#x27;, &#x27;医药生物&#x27;}
+CYCLE  = {&#x27;机械设备&#x27;, &#x27;汽车&#x27;, &#x27;基础化工&#x27;, &#x27;有色金属&#x27;, &#x27;房地产&#x27;,
+          &#x27;钢铁&#x27;, &#x27;建筑材料&#x27;, &#x27;家用电器&#x27;, &#x27;轻工制造&#x27;}
+THEME  = {&#x27;通信&#x27;, &#x27;传媒&#x27;, &#x27;国防军工&#x27;, &#x27;社会服务&#x27;}
+DEFENSE = {&#x27;银行&#x27;, &#x27;公用事业&#x27;, &#x27;交通运输&#x27;, &#x27;煤炭&#x27;}   # 防御型 → 直接排除
+
+
+def sector_type_of(name):
+    &quot;&quot;&quot;返回 &#x27;growth&#x27;/&#x27;cycle&#x27;/&#x27;theme&#x27;/&#x27;defense&#x27;；未知行业默认按 &#x27;cycle&#x27;(双均线)。&quot;&quot;&quot;
+    if name in GROWTH:
+        return &#x27;growth&#x27;
+    if name in DEFENSE:
+        return &#x27;defense&#x27;
+    if name in THEME:
+        return &#x27;theme&#x27;
+    return &#x27;cycle&#x27;
+
+
+def adapt_of(sector_type):
+    &quot;&quot;&quot;行业类型 → 适配子策略。&#x27;defense&#x27; 返回 None 表示排除。&quot;&quot;&quot;
+    if sector_type == &#x27;growth&#x27;:
+        return &#x27;triple&#x27;
+    if sector_type == &#x27;defense&#x27;:
+        return None
+    return &#x27;dual&#x27;   # cycle / theme
+
+
+# ============================ 公共指标函数 ============================
+def ma(cl, n, shift=0):
+    &quot;&quot;&quot;简单移动平均：shift=0 为最新，shift=k 为 k 日前的 MA。&quot;&quot;&quot;
+    end = len(cl) - shift
+    if end &lt; n:
+        return None
+    return float(np.mean(cl[end - n:end]))
+
+
+def slope_up(cl, n, k):
+    &quot;&quot;&quot;MA(n) 近 k 日斜率 &gt; 0。&quot;&quot;&quot;
+    a, b = ma(cl, n, 0), ma(cl, n, k)
+    return a is not None and b is not None and a &gt; b
+
+
+def golden_cross(cl, nf, ns, shift=0):
+    &quot;&quot;&quot;shift 日处是否发生金叉：快线由下向上穿慢线。&quot;&quot;&quot;
+    f1, s1 = ma(cl, nf, shift + 1), ma(cl, ns, shift + 1)
+    f0, s0 = ma(cl, nf, shift), ma(cl, ns, shift)
+    if None in (f1, s1, f0, s0):
+        return False
+    return f1 &lt;= s1 and f0 &gt; s0
+
+
+def death_cross(cl, nf, ns, shift=0):
+    &quot;&quot;&quot;shift 日处是否发生死叉。&quot;&quot;&quot;
+    f1, s1 = ma(cl, nf, shift + 1), ma(cl, ns, shift + 1)
+    f0, s0 = ma(cl, nf, shift), ma(cl, ns, shift)
+    if None in (f1, s1, f0, s0):
+        return False
+    return f1 &gt;= s1 and f0 &lt; s0
+
+
+def fresh_golden(cl, nf, ns, within=3):
+    &quot;&quot;&quot;最近 within 个交易日内是否出现过金叉（新鲜金叉）。&quot;&quot;&quot;
+    return any(golden_cross(cl, nf, ns, shift=i) for i in range(within))
+
+
+def consecutive_above(cl, nf, ns, cap=20):
+    &quot;&quot;&quot;MA(nf) &gt; MA(ns) 已连续多少个交易日（上限 cap）。&quot;&quot;&quot;
+    cnt = 0
+    for i in range(cap):
+        a, b = ma(cl, nf, i), ma(cl, ns, i)
+        if a is None or b is None or a &lt;= b:
+            break
+        cnt += 1
+    return cnt
+
+
+def cross_count(cl, nf, ns, window=20):
+    &quot;&quot;&quot;近 window 日 MA(nf) 与 MA(ns) 的交叉次数（衡量均线缠绕）。&quot;&quot;&quot;
+    signs = []
+    for i in range(window + 1):
+        a, b = ma(cl, nf, i), ma(cl, ns, i)
+        if a is None or b is None:
+            break
+        signs.append(1 if a &gt; b else -1)
+    return sum(1 for i in range(len(signs) - 1) if signs[i] != signs[i + 1])
+
+
+def true_range(high, low, prev_close):
+    return max(high - low, abs(high - prev_close), abs(low - prev_close))
+
+
+def calc_adx(highs, lows, closes, period=14):
+    &quot;&quot;&quot;Wilder ADX(14)。数据不足返回 None。&quot;&quot;&quot;
+    n = len(closes)
+    if n &lt; 2 * period + 2:
+        return None
+    pdm, mdm, tr = [], [], []
+    for i in range(1, n):
+        up, dn = highs[i] - highs[i - 1], lows[i - 1] - lows[i]
+        pdm.append(up if (up &gt; dn and up &gt; 0) else 0.0)
+        mdm.append(dn if (dn &gt; up and dn &gt; 0) else 0.0)
+        tr.append(true_range(highs[i], lows[i], closes[i - 1]))
+
+    def wilder(x):
+        s = sum(x[:period]); out = [s]
+        for i in range(period, len(x)):
+            s = s - s / period + x[i]; out.append(s)
+        return out
+
+    atr, sp, sm = wilder(tr), wilder(pdm), wilder(mdm)
+    dx = []
+    for i in range(len(atr)):
+        if atr[i] &lt;= 0:
+            dx.append(0.0); continue
+        dip, dim = 100 * sp[i] / atr[i], 100 * sm[i] / atr[i]
+        denom = (dip + dim) or 1.0
+        dx.append(100 * abs(dip - dim) / denom)
+    if len(dx) &lt; period:
+        return None
+    adx = float(np.mean(dx[:period]))
+    for i in range(period, len(dx)):
+        adx = (adx * (period - 1) + dx[i]) / period
+    return adx
+
+
+def boll_bandwidth(cl, n=20, k=2):
+    &quot;&quot;&quot;布林带宽 / MA20 =(上轨-下轨)/中轨 = 2k*std/MA。&quot;&quot;&quot;
+    if len(cl) &lt; n:
+        return None
+    mid = float(np.mean(cl[-n:]))
+    std = float(np.std(cl[-n:]))
+    if mid &lt;= 0:
+        return None
+    return (2 * k * std) / mid
+
+
+def get_daily_arrays(security, end_dt, count, fields=(&#x27;high&#x27;, &#x27;low&#x27;, &#x27;close&#x27;)):
+    bars = get_bars(security, count=count, unit=&#x27;1d&#x27;, fields=list(fields),
+                    include_now=True, end_dt=end_dt, df=False)
+    if bars is None or len(bars[&#x27;close&#x27;]) &lt; 2:
+        return None
+    return {f: np.array(bars[f], dtype=float) for f in fields}
+
+
+# ============================ 选股主流程 ============================
+def select_universe(context):
+    &quot;&quot;&quot;每周五盘后：重建候选池 g.pool，并缓存每只标的的均线/行业/适配信息。&quot;&quot;&quot;
+    p = g.sel
+    prev = context.previous_date
+
+    if g.base_index:
+        base = get_index_stocks(g.base_index, date=prev)
+    else:
+        base = list(get_all_securities(types=[&#x27;stock&#x27;], date=prev).index)
+
+    cd = get_current_data()
+    from datetime import timedelta
+    list_cutoff = prev - timedelta(days=p[&#x27;min_list_days&#x27;])
+
+    # 第一层：基础过滤（ST / 上市时长 / 停牌）
+    stage1 = []
+    for s in base:
+        info = cd[s]
+        if info.paused or info.is_st or (&#x27;ST&#x27; in info.name) or (&#x27;退&#x27; in info.name):
+            continue
+        sinfo = get_security_info(s)
+        if sinfo is None or sinfo.start_date &gt; list_cutoff:
+            continue
+        stage1.append(s)
+
+    ind = get_industry(stage1, date=prev)
+
+    raw = []  # 通过前三层的候选：(sec, info, 四维原始指标)
+    for s in stage1:
+        arr = get_daily_arrays(s, context.current_dt, 90,
+                               fields=(&#x27;high&#x27;, &#x27;low&#x27;, &#x27;close&#x27;, &#x27;volume&#x27;, &#x27;money&#x27;))
+        if arr is None or len(arr[&#x27;close&#x27;]) &lt; 65:
+            continue
+        highs, lows, closes = arr[&#x27;high&#x27;], arr[&#x27;low&#x27;], arr[&#x27;close&#x27;]
+        vol, money = arr[&#x27;volume&#x27;], arr[&#x27;money&#x27;]
+        price = closes[-1]
+
+        # S3/S4：流动性 &amp; 价格
+        if price &lt; p[&#x27;min_price&#x27;]:
+            continue
+        if float(np.mean(money[-20:])) &lt; p[&#x27;min_amount&#x27;]:
+            continue
+
+        # 第三层：行业类型 → 适配子策略（防御型排除）
+        name = (ind.get(s, {}) or {}).get(&#x27;sw_l1&#x27;, {}).get(&#x27;industry_name&#x27;, &#x27;&#x27;)
+        stype = sector_type_of(name)
+        adapt = adapt_of(stype)
+        if adapt is None:
+            continue
+
+        m5, m10, m20, m60 = ma(closes, 5), ma(closes, 10), ma(closes, 20), ma(closes, 60)
+        if None in (m5, m10, m20, m60):
+            continue
+
+        # 第二层（修正）：选股只圈定&quot;中期趋势向上&quot;的慢速universe。
+        # ★ 不再在选股里要求&quot;已金叉/完全多头排列&quot;——金叉是单日事件，而选股每周才刷新，
+        #   若选股已要求金叉状态，则入场端&quot;当日金叉&quot;永远与之错开(4年零买入的根因)。
+        #   快速金叉统一交给每日入场逻辑(均线_交易策略.py)在该universe上捕捉。
+        if not (m20 &gt; m60 and slope_up(closes, 60, 5)):
+            continue
+
+        # 第四层原始指标
+        div = (m5 - m60) / m60 if m60 &gt; 0 else 0.0                  # 发散度
+        persist = consecutive_above(closes, 5, 10, cap=20)         # 持续性
+        v5, v20 = float(np.mean(vol[-5:])), float(np.mean(vol[-20:]))
+        volratio = v5 / v20 if v20 &gt; 0 else 1.0                    # 量能配合
+        hi5 = float(np.max(highs[-5:]))
+        pullback = (hi5 - price) / hi5 if hi5 &gt; 0 else 0.0         # 回调幅度
+
+        info = {
+            &#x27;adapt&#x27;: adapt, &#x27;sector&#x27;: name or &#x27;NA&#x27;, &#x27;sector_type&#x27;: stype,
+            &#x27;ma5&#x27;: m5, &#x27;ma10&#x27;: m10, &#x27;ma20&#x27;: m20, &#x27;ma60&#x27;: m60,
+            &#x27;div&#x27;: div, &#x27;price&#x27;: price,
+        }
+        raw.append((s, info, {&#x27;div&#x27;: div, &#x27;persist&#x27;: persist,
+                              &#x27;volratio&#x27;: volratio, &#x27;pullback&#x27;: pullback}))
+
+    if not raw:
+        g.pool, g.pool_info = [], {}
+        log.warn(&#x27;[选股] 无标的通过筛选&#x27;)
+        return
+
+    # 第四层：四维加权评分（组内 min-max 归一化）
+    def norm(vals):
+        lo, hi = min(vals), max(vals)
+        rng = (hi - lo) or 1.0
+        return [(v - lo) / rng for v in vals]
+
+    divs = norm([r[2][&#x27;div&#x27;] for r in raw])
+    pers = norm([r[2][&#x27;persist&#x27;] for r in raw])
+    vols = norm([r[2][&#x27;volratio&#x27;] for r in raw])
+    pbs  = norm([r[2][&#x27;pullback&#x27;] for r in raw])
+    scored = []
+    for i, (s, info, _) in enumerate(raw):
+        score = (0.30 * divs[i] + 0.25 * pers[i] +
+                 0.25 * vols[i] + 0.20 * (1 - pbs[i]))  # 回调越小得分越高
+        info[&#x27;score&#x27;] = score
+        scored.append((s, info))
+    scored.sort(key=lambda x: x[1][&#x27;score&#x27;], reverse=True)
+
+    # 终选：同一申万一级行业≤2只，池容量取前 pool_max
+    pool, pool_info, sector_cnt = [], {}, {}
+    for s, info in scored:
+        sec = info[&#x27;sector&#x27;]
+        if sector_cnt.get(sec, 0) &gt;= p[&#x27;per_industry_max&#x27;]:
+            continue
+        pool.append(s)
+        pool_info[s] = info
+        sector_cnt[sec] = sector_cnt.get(sec, 0) + 1
+        if len(pool) &gt;= p[&#x27;pool_max&#x27;]:
+            break
+
+    g.pool, g.pool_info = pool, pool_info
+    n_dual = sum(1 for s in pool if pool_info[s][&#x27;adapt&#x27;] == &#x27;dual&#x27;)
+    log.info(&#x27;[选股] 候选池%d只（双均线%d / 三均线%d）行业分布%s&#x27; %
+             (len(pool), n_dual, len(pool) - n_dual, sector_cnt))
+
+
+def get_sector(security):
+    info = getattr(g, &#x27;pool_info&#x27;, {}).get(security)
+    if info:
+        return info.get(&#x27;sector&#x27;, &#x27;NA&#x27;), info.get(&#x27;sector_type&#x27;, &#x27;cycle&#x27;)
+    ind = get_industry(security)
+    name = (ind.get(security, {}) or {}).get(&#x27;sw_l1&#x27;, {}).get(&#x27;industry_name&#x27;, &#x27;NA&#x27;)
+    return name, sector_type_of(name)
+</textarea>
+<script>
+document.getElementById("copy").addEventListener("click", async e => { const b = e.currentTarget, t = document.getElementById("raw").value;
+  try { await navigator.clipboard.writeText(t); } catch (err) { const a = document.getElementById("raw"); a.hidden = false; a.select(); document.execCommand("copy"); a.hidden = true; }
+  b.textContent = "已复制"; setTimeout(() => b.textContent = "复制代码", 1500); });
+</script>
+</main>
+<footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-16</div></footer>
+</body>
+</html>

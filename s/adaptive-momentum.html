@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>动量策略（行业夏普动量） · 量化策略库</title>
+<meta name="description" content="先选近 6 个月夏普动量最强的行业，再在行业里选残差动量最强的个股，每月再平衡。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 22l6-7 5 4 9-11' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="top"><div class="bar"><a class="brand" href="../index.html">量化策略库</a>
+<nav><a href="../index.html#dividend">股息率策略</a><a href="../index.html#trend">趋势策略</a><a href="../index.html#news">消息股策略</a></nav></div></header>
+<main class="wrap">
+<nav class="crumb"><a href="../index.html">策略库</a> / <a href="../index.html#trend">趋势策略</a></nav>
+<header class="shead"><div class="chips"><span class="chip c-trend">趋势策略</span><span class="chip">设计 + 聚宽代码</span></div>
+<h1>动量策略（行业夏普动量）</h1><p class="lede">先选近 6 个月夏普动量最强的行业，再在行业里选残差动量最强的个股，每月再平衡。</p></header>
+<div class="kpis"><div class="kpi"><div class="k">形成期 / 剔除期</div><div class="v">6 个月 / 1 个月</div><div class="s">剔除最近 1 个月避免短期反转</div></div><div class="kpi"><div class="k">调仓</div><div class="v">月度</div><div class="s">中证 800 成分股</div></div></div>
+<div class="cols">
+<section class="blk"><h2>规则要点</h2><ul class='bul'><li>行业层面用夏普动量（收益 ÷ 波动）排名，个股层面用残差动量</li><li>形成期 6 个月、剔除最近 1 个月、持有 1 个月</li><li>针对动量崩溃单独设计防护</li></ul></section>
+<section class="blk"><h2>结论与注意</h2><ul class='bul'><li>依据：A 股个股短期呈反转、行业层面动量显著；具体参数和风控见说明书。</li></ul></section>
+</div>
+
+<section class="blk"><h2>策略代码 <small>1 个文件 · 聚宽 JoinQuant</small></h2><div class="tblwrap"><table class="ctbl"><thead><tr><th>版本</th><th>说明</th><th>长度</th><th></th></tr></thead><tbody><tr><td><a href="../code/adaptive-momentum/1.html"><b>聚宽代码</b></a></td><td class="cn">策略类型：横截面动量 / 行业轮动（月度调仓，中长期视角）</td><td class="num">526 行</td><td class="act"><a href="../code/adaptive-momentum/1.html">查看</a><a href="../files/adaptive-momentum/%E5%8A%A8%E9%87%8F%E7%AD%96%E7%95%A5_Adaptive_Momentum.py" download>下载</a></td></tr></tbody></table></div></section>
+<section class="blk"><h2>说明文档 <small>1</small></h2><div class="files"><a class="file" href="../docs/adaptive-momentum/1.html"><span class="ftype t-md">文档</span><span class="fmain"><b>策略说明书</b><span>在线阅读 · 原文件 MD</span></span><span class="fsize">6 KB</span></a></div></section>
+
+</main>
+<footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-16</div></footer>
+</body>
+</html>

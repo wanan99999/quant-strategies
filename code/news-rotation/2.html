@@ -1,0 +1,1016 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>消息股轮换调仓策略 收盘数据版 代码</title>
+<meta name="description" content="轮换调仓策略 (聚宽 JoinQuant 平台) —— 收盘数据版">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 22l6-7 5 4 9-11' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="top"><div class="bar"><a class="brand" href="../../index.html">量化策略库</a>
+<nav><a href="../../index.html#dividend">股息率策略</a><a href="../../index.html#trend">趋势策略</a><a href="../../index.html#news">消息股策略</a></nav></div></header>
+<main class="wrap">
+<nav class="crumb"><a href="../../index.html">策略库</a> / <a href="../../index.html#news">消息股策略</a> / <a href="../../s/news-rotation.html">消息股轮换调仓策略</a></nav>
+<section class="codehead"><h1>消息股轮换调仓策略 · 收盘数据版</h1><p class="sub">轮换调仓策略 (聚宽 JoinQuant 平台) —— 收盘数据版</p><p class="sub2">【本版相对&quot;14:50 实时版&quot;的改动】</p>
+<div class="vers"><a class="vchip" href="1.html">14:50 实时版</a><a class="vchip on" href="2.html">收盘数据版</a><a class="vchip" href="3.html">无换手率版</a><a class="vchip" href="4.html">无轮动版</a></div>
+<div class="tools"><span class="mono">轮换调仓策略_聚宽_收盘版.py · 329 行 · 15 KB</span><span class="grow"></span>
+<button class="btn" id="copy" type="button">复制代码</button><a class="btn" href="../../files/news-rotation/%E8%BD%AE%E6%8D%A2%E8%B0%83%E4%BB%93%E7%AD%96%E7%95%A5_%E8%81%9A%E5%AE%BD_%E6%94%B6%E7%9B%98%E7%89%88.py" download>下载 .py</a></div></section>
+<div class="codebox"><div class="hl"><table class="hltable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">  1</span>
+<span class="normal">  2</span>
+<span class="normal">  3</span>
+<span class="normal">  4</span>
+<span class="normal">  5</span>
+<span class="normal">  6</span>
+<span class="normal">  7</span>
+<span class="normal">  8</span>
+<span class="normal">  9</span>
+<span class="normal"> 10</span>
+<span class="normal"> 11</span>
+<span class="normal"> 12</span>
+<span class="normal"> 13</span>
+<span class="normal"> 14</span>
+<span class="normal"> 15</span>
+<span class="normal"> 16</span>
+<span class="normal"> 17</span>
+<span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span></pre></div></td><td class="code"><div><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">轮换调仓策略 (聚宽 JoinQuant 平台) —— 收盘数据版</span>
+<span class="sd">根据《短线交易规则手册 · 买卖点交易计划》实现。</span>
+
+<span class="sd">【本版相对&quot;14:50 实时版&quot;的改动】</span>
+<span class="sd">  1. 所有原来取&quot;14:50 实时数据&quot;的地方，一律改用【该交易日收盘数据】：</span>
+<span class="sd">     收盘价、真实 MA5（近5日收盘均值）、RSI(14)、当日涨幅、全日换手率。</span>
+<span class="sd">  2. 所有盘中操作按&quot;当日收盘评估、分两个时点成交&quot;执行：</span>
+<span class="sd">       · 卖出（STEP2 破MA5 / STEP3 RSI风控 / STEP4 切出强势持仓）→ 当日【收盘】成交。</span>
+<span class="sd">       · 买入（STEP4 换入落后标的 / 补仓）→ 记入计划，于【次日开盘】成交。</span>
+
+<span class="sd">核心执行顺序（每日收盘统一评估）：</span>
+<span class="sd">  STEP 1 换手率过滤 : 当日换手率 &lt; 3% 的标的不参与（不买、不作为轮动目标）</span>
+<span class="sd">  STEP 2 5日均线防守: 收盘价仍低于当日 MA5 → 当日收盘卖出该持仓</span>
+<span class="sd">  STEP 3 RSI 风控   : RSI(14) &gt; 80 且当日涨幅 &lt; 10% → 当日收盘清仓</span>
+<span class="sd">                      （涨幅 ≥ 10% 接近涨停，视为强势，保留不清）</span>
+<span class="sd">  STEP 4 轮动调仓   : 触发(持仓涨幅&gt;5% 或 池内分化&gt;5%)时做高低切换：</span>
+<span class="sd">      → 有可用现金：不切换，直接次日开盘用现金买入合格标的</span>
+<span class="sd">      → 已满仓无现金：强势持仓当日收盘卖出，其仓位次日开盘换入&quot;合格、涨幅较小&quot;标的</span>
+<span class="sd">    未触发轮换时：只要有空仓位就（计划）买入合格标的，仅当无任何标的合格时才空仓。</span>
+<span class="sd">  合格标准：换手率≥3%、站上MA5、RSI&lt;80、涨幅&lt;10%（均取当日收盘数据）</span>
+
+<span class="sd">说明：</span>
+<span class="sd">  · 本策略是&quot;股票池内部轮动&quot;，请在 g.stock_pool 中填入你的股票池。</span>
+<span class="sd">  · 所有价格与指标取【当日收盘】数值；MA5 为近5日真实收盘均值。</span>
+<span class="sd">  · 每笔买入固定使用总资金的 33%，最多同时持有 3 只（≈满仓）。</span>
+<span class="sd">  · order_target_value 精确控制每只标的的持仓市值。</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jqdata</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+
+<span class="c1"># ============================ 初始化 ============================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+    <span class="c1"># ---- 交易环境 ----</span>
+    <span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;use_real_price&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>      <span class="c1"># 使用真实价格</span>
+    <span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;avoid_future_data&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>   <span class="c1"># 避免未来数据</span>
+    <span class="n">set_benchmark</span><span class="p">(</span><span class="s1">&#39;000300.XSHG&#39;</span><span class="p">)</span>            <span class="c1"># 基准：沪深300</span>
+    <span class="n">set_slippage</span><span class="p">(</span><span class="n">FixedSlippage</span><span class="p">(</span><span class="mf">0.002</span><span class="p">))</span>      <span class="c1"># 滑点</span>
+    <span class="n">set_order_cost</span><span class="p">(</span><span class="n">OrderCost</span><span class="p">(</span>
+        <span class="n">open_commission</span><span class="o">=</span><span class="mf">0.0003</span><span class="p">,</span>
+        <span class="n">close_commission</span><span class="o">=</span><span class="mf">0.0003</span><span class="p">,</span>
+        <span class="n">min_commission</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">close_today_commission</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;stock&#39;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">set_level</span><span class="p">(</span><span class="s1">&#39;order&#39;</span><span class="p">,</span> <span class="s1">&#39;error&#39;</span><span class="p">)</span>
+
+    <span class="c1"># ---- 股票池（请替换为你自己的池子，例如行业ETF成分股 / 主题概念股）----</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">stock_pool</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;301387.XSHE&#39;</span><span class="p">,</span>  <span class="c1"># 光大同创 （示例，请替换）</span>
+        <span class="s1">&#39;002436.XSHE&#39;</span><span class="p">,</span>  <span class="c1"># 兴森科技</span>
+        <span class="s1">&#39;300120.XSHE&#39;</span><span class="p">,</span>  <span class="c1"># 经纬辉开</span>
+        <span class="s1">&#39;000601.XSHE&#39;</span><span class="p">,</span>  <span class="c1"># 韶能股份</span>
+        <span class="s1">&#39;003018.XSHE&#39;</span><span class="p">,</span>  <span class="c1"># 金富科技</span>
+        <span class="s1">&#39;000510.XSHE&#39;</span><span class="p">,</span>  <span class="c1"># 新金路</span>
+        <span class="s1">&#39;300128.XSHE&#39;</span><span class="p">,</span>  <span class="c1"># 锦富技术</span>
+        <span class="s1">&#39;301560.XSHE&#39;</span><span class="p">,</span>  <span class="c1"># 众捷汽车</span>
+        <span class="s1">&#39;688226.XSHG&#39;</span><span class="p">,</span>  <span class="c1"># 威腾电气</span>
+        <span class="s1">&#39;603291.XSHG&#39;</span><span class="p">,</span>  <span class="c1"># 联合水务</span>
+        <span class="s1">&#39;600418.XSHG&#39;</span><span class="p">,</span>  <span class="c1"># 江淮汽车</span>
+        <span class="s1">&#39;688011.XSHG&#39;</span><span class="p">,</span>  <span class="c1"># 新光光电</span>
+        <span class="s1">&#39;300022.XSHE&#39;</span><span class="p">,</span>  <span class="c1"># 吉峰科技</span>
+    <span class="p">]</span>
+
+    <span class="c1"># ---- 策略参数 ----</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">max_positions</span> <span class="o">=</span> <span class="mi">3</span>       <span class="c1"># 最多同时持有几只</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">position_pct</span> <span class="o">=</span> <span class="mf">0.33</span>     <span class="c1"># 每笔买入使用总资金的比例 (33%)，3笔≈满仓</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">turnover_min</span> <span class="o">=</span> <span class="mf">3.0</span>      <span class="c1"># 换手率门槛(%) —— STEP1</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">ma_period</span> <span class="o">=</span> <span class="mi">5</span>           <span class="c1"># 均线周期 —— STEP2</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">rsi_period</span> <span class="o">=</span> <span class="mi">14</span>         <span class="c1"># RSI 周期 —— STEP3</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">rsi_reduce</span> <span class="o">=</span> <span class="mi">80</span>         <span class="c1"># RSI 超买阈值（&gt;80 触发清仓判断）</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">rsi_gain_cap</span> <span class="o">=</span> <span class="mf">0.10</span>     <span class="c1"># RSI 清仓的涨幅上限：当日涨幅 &lt; 10% 才清仓</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">rotate_gain</span> <span class="o">=</span> <span class="mf">0.05</span>      <span class="c1"># 持仓涨幅触发轮动阈值 (5%) —— STEP4</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">divergence</span> <span class="o">=</span> <span class="mf">0.05</span>       <span class="c1"># 池内分化触发轮动阈值 (5%)</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">switch_ratio</span> <span class="o">=</span> <span class="mf">1.00</span>     <span class="c1"># 每次切换转移的仓位比例 (100%)</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">cash_threshold</span> <span class="o">=</span> <span class="mi">5000</span>   <span class="c1"># 可用现金 ≥ 此值时优先用现金买入、不做切换</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">rsi_overbought</span> <span class="o">=</span> <span class="mi">80</span>     <span class="c1"># 买入 RSI 上限：收盘RSI &lt; 80 才买</span>
+
+    <span class="c1"># ---- 次日开盘待买清单：[(security, target_value), ...] ----</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">to_buy</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># ---- 定时任务 ----</span>
+    <span class="c1"># 次日开盘：执行昨日收盘定下的买入计划（买入 → 开盘成交）</span>
+    <span class="n">run_daily</span><span class="p">(</span><span class="n">morning_buy</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="s1">&#39;open&#39;</span><span class="p">,</span> <span class="n">reference_security</span><span class="o">=</span><span class="s1">&#39;000300.XSHG&#39;</span><span class="p">)</span>
+    <span class="c1"># 当日收盘：用当日收盘数据评估，卖出当日收盘成交，并生成次日开盘买入计划</span>
+    <span class="c1"># ★ 使用 &#39;open&#39; / &#39;close&#39; 定时点，日线与分钟频率回测均可正确撮合：</span>
+    <span class="c1">#   卖单在当日收盘价成交，买单于次日开盘价成交。</span>
+    <span class="n">run_daily</span><span class="p">(</span><span class="n">evening_eval</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="s1">&#39;close&#39;</span><span class="p">,</span> <span class="n">reference_security</span><span class="o">=</span><span class="s1">&#39;000300.XSHG&#39;</span><span class="p">)</span>
+
+
+<span class="c1"># ============================ 指标计算 ============================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_metrics</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">security</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;采集单只标的【当日收盘】的量价指标；数据不足或停牌返回 None。&quot;&quot;&quot;</span>
+    <span class="n">cd</span> <span class="o">=</span> <span class="n">get_current_data</span><span class="p">()[</span><span class="n">security</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">cd</span><span class="o">.</span><span class="n">paused</span><span class="p">:</span>  <span class="c1"># 停牌不参与</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># 取足够长的日线收盘（含当日已收盘的完整K线）用于 MA / RSI</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">ma_period</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">rsi_period</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">25</span>
+    <span class="n">bars</span> <span class="o">=</span> <span class="n">get_bars</span><span class="p">(</span><span class="n">security</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;1d&#39;</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;close&#39;</span><span class="p">],</span>
+                    <span class="n">include_now</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">end_dt</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">current_dt</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">closes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bars</span><span class="p">[</span><span class="s1">&#39;close&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">closes</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">g</span><span class="o">.</span><span class="n">rsi_period</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">price</span> <span class="o">=</span> <span class="n">closes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># 当日收盘价</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">price</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">price</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># --- 真实 MA5（近5日收盘均值）---</span>
+    <span class="n">ma</span> <span class="o">=</span> <span class="n">closes</span><span class="p">[</span><span class="o">-</span><span class="n">g</span><span class="o">.</span><span class="n">ma_period</span><span class="p">:]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+    <span class="c1"># --- RSI(14) (Wilder 平滑，基于收盘) ---</span>
+    <span class="n">rsi</span> <span class="o">=</span> <span class="n">calc_rsi</span><span class="p">(</span><span class="n">closes</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">rsi_period</span><span class="p">)</span>
+
+    <span class="c1"># --- 当日涨幅（以收盘价计）---</span>
+    <span class="n">prev_close</span> <span class="o">=</span> <span class="n">closes</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">gain</span> <span class="o">=</span> <span class="p">(</span><span class="n">price</span> <span class="o">/</span> <span class="n">prev_close</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="k">if</span> <span class="n">prev_close</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>
+
+    <span class="c1"># --- 涨停判断 ---</span>
+    <span class="n">limit_up</span> <span class="o">=</span> <span class="n">cd</span><span class="o">.</span><span class="n">high_limit</span> <span class="ow">and</span> <span class="n">price</span> <span class="o">&gt;=</span> <span class="n">cd</span><span class="o">.</span><span class="n">high_limit</span> <span class="o">-</span> <span class="mf">0.001</span>
+
+    <span class="c1"># --- 当日换手率(%)：直接取当日收盘的换手率字段 ---</span>
+    <span class="n">turnover</span> <span class="o">=</span> <span class="n">get_turnover</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">security</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="n">price</span><span class="p">,</span> <span class="s1">&#39;ma5&#39;</span><span class="p">:</span> <span class="n">ma</span><span class="p">,</span> <span class="s1">&#39;rsi&#39;</span><span class="p">:</span> <span class="n">rsi</span><span class="p">,</span> <span class="s1">&#39;gain&#39;</span><span class="p">:</span> <span class="n">gain</span><span class="p">,</span>
+        <span class="s1">&#39;limit_up&#39;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">limit_up</span><span class="p">),</span> <span class="s1">&#39;turnover&#39;</span><span class="p">:</span> <span class="n">turnover</span><span class="p">,</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">calc_rsi</span><span class="p">(</span><span class="n">closes</span><span class="p">,</span> <span class="n">period</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wilder RSI。&quot;&quot;&quot;</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">closes</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">period</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">gains</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">diff</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">diff</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">losses</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">diff</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">diff</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">avg_gain</span> <span class="o">=</span> <span class="n">gains</span><span class="p">[:</span><span class="n">period</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">avg_loss</span> <span class="o">=</span> <span class="n">losses</span><span class="p">[:</span><span class="n">period</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">period</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">diff</span><span class="p">)):</span>
+        <span class="n">avg_gain</span> <span class="o">=</span> <span class="p">(</span><span class="n">avg_gain</span> <span class="o">*</span> <span class="p">(</span><span class="n">period</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">gains</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">period</span>
+        <span class="n">avg_loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">avg_loss</span> <span class="o">*</span> <span class="p">(</span><span class="n">period</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">losses</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">period</span>
+    <span class="k">if</span> <span class="n">avg_loss</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">100.0</span>
+    <span class="n">rs</span> <span class="o">=</span> <span class="n">avg_gain</span> <span class="o">/</span> <span class="n">avg_loss</span>
+    <span class="k">return</span> <span class="mf">100.0</span> <span class="o">-</span> <span class="mf">100.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">rs</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_turnover</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">security</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;当日换手率(%)：直接取当日收盘的 turnover_ratio 字段，不再自行计算。&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">get_valuation</span><span class="p">(</span><span class="n">security</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">current_dt</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                            <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;turnover_ratio&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+        <span class="n">tr</span> <span class="o">=</span> <span class="n">val</span><span class="p">[</span><span class="s1">&#39;turnover_ratio&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">tr</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">tr</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mf">0.0</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span>  <span class="c1"># turnover_ratio 已是百分比(%)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;换手率获取失败 </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">security</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+
+
+<span class="c1"># ==================== 每日收盘评估主流程（卖出=当日收盘） ====================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">evening_eval</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+    <span class="c1"># 一次性采集全池指标（当日收盘数据）</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">stock_pool</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">compute_metrics</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metrics</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span>
+
+    <span class="c1"># 本轮的次日开盘买入计划从空开始重建</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">to_buy</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">positions</span>
+
+    <span class="c1"># -------- STEP 2：5日均线防守（对持仓）→ 当日收盘卖出 --------</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">positions</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">m</span><span class="p">[</span><span class="s1">&#39;price&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">m</span><span class="p">[</span><span class="s1">&#39;ma5&#39;</span><span class="p">]:</span>
+            <span class="n">order_target_value</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;[STEP2 收盘破MA5清仓] </span><span class="si">%s</span><span class="s1"> 收</span><span class="si">%.2f</span><span class="s1"> &lt; MA5 </span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="s1">&#39;price&#39;</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="s1">&#39;ma5&#39;</span><span class="p">]))</span>
+
+    <span class="c1"># -------- STEP 3：RSI 风控（对剩余持仓）→ 当日收盘卖出 --------</span>
+    <span class="c1"># 规则：RSI(14) &gt; 80 且当日涨幅 &lt; 10% → 直接清仓</span>
+    <span class="c1"># （涨幅 ≥ 10% 接近涨停，视为强势，保留不清）</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">positions</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">m</span><span class="p">[</span><span class="s1">&#39;rsi&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">m</span><span class="p">[</span><span class="s1">&#39;rsi&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">g</span><span class="o">.</span><span class="n">rsi_reduce</span> <span class="ow">and</span> <span class="n">m</span><span class="p">[</span><span class="s1">&#39;gain&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">g</span><span class="o">.</span><span class="n">rsi_gain_cap</span><span class="p">:</span>
+            <span class="n">order_target_value</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;[STEP3 RSI&gt;</span><span class="si">%d</span><span class="s1">且涨幅&lt;</span><span class="si">%.0f%%</span><span class="s1">收盘清仓] </span><span class="si">%s</span><span class="s1"> RSI=</span><span class="si">%.1f</span><span class="s1"> 涨幅</span><span class="si">%.2f%%</span><span class="s1">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">rsi_reduce</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">rsi_gain_cap</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">m</span><span class="p">[</span><span class="s1">&#39;rsi&#39;</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="s1">&#39;gain&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">100</span><span class="p">))</span>
+
+    <span class="c1"># -------- STEP 4：轮动调仓（切出=当日收盘卖，换入=次日开盘买）--------</span>
+    <span class="n">rotation_adjust</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">metrics</span><span class="p">)</span>
+
+    <span class="c1"># -------- 补仓：有空余仓位时，生成次日开盘买入计划 --------</span>
+    <span class="n">plan_fill_positions</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">metrics</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">to_buy</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;[计划] 次日开盘拟买入 </span><span class="si">%d</span><span class="s1"> 只：</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                 <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">to_buy</span><span class="p">),</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">to_buy</span><span class="p">]))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">is_eligible_target</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;买入/轮动候选合格：换手率≥3%、站上MA5、RSI&lt;80、涨幅&lt;10%（全部取当日收盘数据）。&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">m</span><span class="p">[</span><span class="s1">&#39;rsi&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s1">&#39;turnover&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">g</span><span class="o">.</span><span class="n">turnover_min</span> <span class="ow">and</span>   <span class="c1"># 当日换手率 ≥ 3%</span>
+            <span class="n">m</span><span class="p">[</span><span class="s1">&#39;price&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">m</span><span class="p">[</span><span class="s1">&#39;ma5&#39;</span><span class="p">]</span> <span class="ow">and</span>            <span class="c1"># 收盘价 ≥ MA5</span>
+            <span class="n">m</span><span class="p">[</span><span class="s1">&#39;rsi&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">g</span><span class="o">.</span><span class="n">rsi_overbought</span> <span class="ow">and</span>       <span class="c1"># 收盘RSI &lt; 80</span>
+            <span class="n">m</span><span class="p">[</span><span class="s1">&#39;gain&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">g</span><span class="o">.</span><span class="n">rsi_gain_cap</span><span class="p">)</span>           <span class="c1"># 涨幅 &lt; 10%(未涨停)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">rotation_adjust</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">metrics</span><span class="p">):</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">positions</span>
+    <span class="n">held</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">positions</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">held</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="c1"># 触发条件A：任一持仓当日涨幅 &gt; 5%</span>
+    <span class="n">strong</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">held</span> <span class="k">if</span> <span class="n">metrics</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s1">&#39;gain&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">g</span><span class="o">.</span><span class="n">rotate_gain</span><span class="p">]</span>
+
+    <span class="c1"># 触发条件B：池内涨跌幅分化 &gt; 5%</span>
+    <span class="n">pool_gains</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="p">[</span><span class="s1">&#39;gain&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+    <span class="n">divergence</span> <span class="o">=</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">pool_gains</span><span class="p">)</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">pool_gains</span><span class="p">))</span> <span class="k">if</span> <span class="n">pool_gains</span> <span class="k">else</span> <span class="mf">0.0</span>
+    <span class="n">triggered</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">strong</span><span class="p">)</span> <span class="ow">or</span> <span class="n">divergence</span> <span class="o">&gt;</span> <span class="n">g</span><span class="o">.</span><span class="n">divergence</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">triggered</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;[STEP4 触发轮动] 强势持仓=</span><span class="si">%s</span><span class="s1"> 池内分化=</span><span class="si">%.2f%%</span><span class="s1">&#39;</span> <span class="o">%</span>
+             <span class="p">(</span><span class="n">strong</span><span class="p">,</span> <span class="n">divergence</span> <span class="o">*</span> <span class="mi">100</span><span class="p">))</span>
+
+    <span class="c1"># 【现金优先】账户有可用现金 → 不做切换，交由补仓在次日开盘用现金买入合格标的</span>
+    <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">available_cash</span> <span class="o">&gt;=</span> <span class="n">g</span><span class="o">.</span><span class="n">cash_threshold</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;[STEP4] 账户有现金</span><span class="si">%.0f</span><span class="s1">元(≥</span><span class="si">%.0f</span><span class="s1">) → 不切换，改用现金次日开盘买入&#39;</span> <span class="o">%</span>
+                 <span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">available_cash</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">cash_threshold</span><span class="p">))</span>
+        <span class="k">return</span>
+
+    <span class="c1"># 找&quot;当日涨幅较小、且符合条件&quot;的候选目标（不在持仓中，涨幅升序）</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                  <span class="k">if</span> <span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">positions</span> <span class="ow">and</span> <span class="n">is_eligible_target</span><span class="p">(</span><span class="n">metrics</span><span class="p">[</span><span class="n">s</span><span class="p">])]</span>
+    <span class="n">candidates</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">metrics</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="s1">&#39;gain&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">candidates</span><span class="p">:</span>
+        <span class="c1"># 池内无未涨/合格标的 → 按决策树：全部上涨则不动(RSI已在STEP3处理减仓)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;[STEP4] 无符合条件的落后标的，维持现状&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="c1"># 强势持仓优先，否则用池内最强的持仓作为切出对象</span>
+    <span class="n">switch_from</span> <span class="o">=</span> <span class="n">strong</span> <span class="k">if</span> <span class="n">strong</span> <span class="k">else</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">held</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">metrics</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="s1">&#39;gain&#39;</span><span class="p">])]</span>
+
+    <span class="k">for</span> <span class="n">src</span> <span class="ow">in</span> <span class="n">switch_from</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">src</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">positions</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">candidates</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">tgt</span> <span class="o">=</span> <span class="n">candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># 涨幅最小的合格标的</span>
+        <span class="n">src_value</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="n">src</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">move_value</span> <span class="o">=</span> <span class="n">src_value</span> <span class="o">*</span> <span class="n">g</span><span class="o">.</span><span class="n">switch_ratio</span>  <span class="c1"># 转移 100%</span>
+
+        <span class="c1"># 切出强势持仓（100%）→ 当日收盘卖出</span>
+        <span class="n">order_target_value</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">src_value</span> <span class="o">-</span> <span class="n">move_value</span><span class="p">)</span>
+        <span class="c1"># 换入目标标的 → 记入次日开盘买入计划（目标市值）</span>
+        <span class="n">tgt_cur</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="n">tgt</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="n">tgt</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">positions</span> <span class="k">else</span> <span class="mf">0.0</span>
+        <span class="n">plan_buy</span><span class="p">(</span><span class="n">tgt</span><span class="p">,</span> <span class="n">tgt_cur</span> <span class="o">+</span> <span class="n">move_value</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;[STEP4 切换] </span><span class="si">%s</span><span class="s1">(涨</span><span class="si">%.2f%%</span><span class="s1">) 收盘卖出 -</span><span class="si">%.0f%%</span><span class="s1"> → </span><span class="si">%s</span><span class="s1">(涨</span><span class="si">%.2f%%</span><span class="s1">) 次日开盘买入 金额</span><span class="si">%.0f</span><span class="s1">&#39;</span> <span class="o">%</span>
+                 <span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">metrics</span><span class="p">[</span><span class="n">src</span><span class="p">][</span><span class="s1">&#39;gain&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">switch_ratio</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span>
+                  <span class="n">tgt</span><span class="p">,</span> <span class="n">metrics</span><span class="p">[</span><span class="n">tgt</span><span class="p">][</span><span class="s1">&#39;gain&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">move_value</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">plan_fill_positions</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">metrics</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;空余仓位时，生成次日开盘买入计划，每笔用总资金33%（对应&quot;再次买入条件&quot;）。&quot;&quot;&quot;</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">positions</span>
+    <span class="n">planned</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">to_buy</span><span class="p">]</span>
+    <span class="n">planned_new</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">planned</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">]</span>
+    <span class="c1"># 空余仓位数 = 上限 - 现有持仓 - 已计划买入的新标的</span>
+    <span class="n">slots</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">max_positions</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">planned_new</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">slots</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                  <span class="k">if</span> <span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">positions</span> <span class="ow">and</span> <span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">planned</span>
+                  <span class="ow">and</span> <span class="n">is_eligible_target</span><span class="p">(</span><span class="n">metrics</span><span class="p">[</span><span class="n">s</span><span class="p">])]</span>
+    <span class="n">candidates</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">metrics</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="s1">&#39;gain&#39;</span><span class="p">])</span>  <span class="c1"># 优先买涨幅较小的</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">candidates</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="c1"># 每笔买入固定使用【总资金的 33%】(3 笔≈满仓，故最多同时持有 3 只)</span>
+    <span class="n">target_value</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">total_value</span> <span class="o">*</span> <span class="n">g</span><span class="o">.</span><span class="n">position_pct</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">[:</span><span class="n">slots</span><span class="p">]:</span>
+        <span class="n">plan_buy</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">target_value</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;[补仓计划] </span><span class="si">%s</span><span class="s1"> 涨</span><span class="si">%.2f%%</span><span class="s1"> 换手</span><span class="si">%.2f%%</span><span class="s1"> 次日开盘目标市值</span><span class="si">%.0f</span><span class="s1">(总资金</span><span class="si">%.0f%%</span><span class="s1">)&#39;</span> <span class="o">%</span>
+                 <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">metrics</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s1">&#39;gain&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">metrics</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="s1">&#39;turnover&#39;</span><span class="p">],</span>
+                  <span class="n">target_value</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">position_pct</span> <span class="o">*</span> <span class="mi">100</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">plan_buy</span><span class="p">(</span><span class="n">security</span><span class="p">,</span> <span class="n">target_value</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;把买入意图写入次日开盘计划；同一标的取较大的目标市值，避免重复下单。&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">to_buy</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="n">security</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">to_buy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">target_value</span><span class="p">))</span>
+            <span class="k">return</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">to_buy</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">security</span><span class="p">,</span> <span class="n">target_value</span><span class="p">))</span>
+
+
+<span class="c1"># ==================== 次日开盘买入（买入=开盘成交） ====================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">morning_buy</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;执行昨日收盘定下的买入计划，于开盘价成交。&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">g</span><span class="o">.</span><span class="n">to_buy</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">plan</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">to_buy</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">to_buy</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># 取出后清空，避免重复执行</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">target_value</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">plan</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">available_cash</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;[开盘买入] 可用现金不足，剩余计划取消：</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                     <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">plan</span><span class="p">[</span><span class="n">idx</span><span class="p">:]])</span>
+            <span class="k">break</span>
+        <span class="n">cd</span> <span class="o">=</span> <span class="n">get_current_data</span><span class="p">()[</span><span class="n">s</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">cd</span><span class="o">.</span><span class="n">paused</span><span class="p">:</span>  <span class="c1"># 开盘停牌 → 跳过</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;[开盘买入] </span><span class="si">%s</span><span class="s1"> 停牌，跳过&#39;</span> <span class="o">%</span> <span class="n">s</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">order_target_value</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">target_value</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;[开盘买入] </span><span class="si">%s</span><span class="s1"> 目标市值</span><span class="si">%.0f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">target_value</span><span class="p">))</span>
+</pre></div></td></tr></table></div>
+</div>
+<textarea id="raw" hidden># -*- coding: utf-8 -*-
+&quot;&quot;&quot;
+轮换调仓策略 (聚宽 JoinQuant 平台) —— 收盘数据版
+根据《短线交易规则手册 · 买卖点交易计划》实现。
+
+【本版相对&quot;14:50 实时版&quot;的改动】
+  1. 所有原来取&quot;14:50 实时数据&quot;的地方，一律改用【该交易日收盘数据】：
+     收盘价、真实 MA5（近5日收盘均值）、RSI(14)、当日涨幅、全日换手率。
+  2. 所有盘中操作按&quot;当日收盘评估、分两个时点成交&quot;执行：
+       · 卖出（STEP2 破MA5 / STEP3 RSI风控 / STEP4 切出强势持仓）→ 当日【收盘】成交。
+       · 买入（STEP4 换入落后标的 / 补仓）→ 记入计划，于【次日开盘】成交。
+
+核心执行顺序（每日收盘统一评估）：
+  STEP 1 换手率过滤 : 当日换手率 &lt; 3% 的标的不参与（不买、不作为轮动目标）
+  STEP 2 5日均线防守: 收盘价仍低于当日 MA5 → 当日收盘卖出该持仓
+  STEP 3 RSI 风控   : RSI(14) &gt; 80 且当日涨幅 &lt; 10% → 当日收盘清仓
+                      （涨幅 ≥ 10% 接近涨停，视为强势，保留不清）
+  STEP 4 轮动调仓   : 触发(持仓涨幅&gt;5% 或 池内分化&gt;5%)时做高低切换：
+      → 有可用现金：不切换，直接次日开盘用现金买入合格标的
+      → 已满仓无现金：强势持仓当日收盘卖出，其仓位次日开盘换入&quot;合格、涨幅较小&quot;标的
+    未触发轮换时：只要有空仓位就（计划）买入合格标的，仅当无任何标的合格时才空仓。
+  合格标准：换手率≥3%、站上MA5、RSI&lt;80、涨幅&lt;10%（均取当日收盘数据）
+
+说明：
+  · 本策略是&quot;股票池内部轮动&quot;，请在 g.stock_pool 中填入你的股票池。
+  · 所有价格与指标取【当日收盘】数值；MA5 为近5日真实收盘均值。
+  · 每笔买入固定使用总资金的 33%，最多同时持有 3 只（≈满仓）。
+  · order_target_value 精确控制每只标的的持仓市值。
+&quot;&quot;&quot;
+import numpy as np
+from jqdata import *
+
+
+# ============================ 初始化 ============================
+def initialize(context):
+    # ---- 交易环境 ----
+    set_option(&#x27;use_real_price&#x27;, True)      # 使用真实价格
+    set_option(&#x27;avoid_future_data&#x27;, True)   # 避免未来数据
+    set_benchmark(&#x27;000300.XSHG&#x27;)            # 基准：沪深300
+    set_slippage(FixedSlippage(0.002))      # 滑点
+    set_order_cost(OrderCost(
+        open_commission=0.0003,
+        close_commission=0.0003,
+        min_commission=5,
+        close_today_commission=0), type=&#x27;stock&#x27;)
+    log.set_level(&#x27;order&#x27;, &#x27;error&#x27;)
+
+    # ---- 股票池（请替换为你自己的池子，例如行业ETF成分股 / 主题概念股）----
+    g.stock_pool = [
+        &#x27;301387.XSHE&#x27;,  # 光大同创 （示例，请替换）
+        &#x27;002436.XSHE&#x27;,  # 兴森科技
+        &#x27;300120.XSHE&#x27;,  # 经纬辉开
+        &#x27;000601.XSHE&#x27;,  # 韶能股份
+        &#x27;003018.XSHE&#x27;,  # 金富科技
+        &#x27;000510.XSHE&#x27;,  # 新金路
+        &#x27;300128.XSHE&#x27;,  # 锦富技术
+        &#x27;301560.XSHE&#x27;,  # 众捷汽车
+        &#x27;688226.XSHG&#x27;,  # 威腾电气
+        &#x27;603291.XSHG&#x27;,  # 联合水务
+        &#x27;600418.XSHG&#x27;,  # 江淮汽车
+        &#x27;688011.XSHG&#x27;,  # 新光光电
+        &#x27;300022.XSHE&#x27;,  # 吉峰科技
+    ]
+
+    # ---- 策略参数 ----
+    g.max_positions = 3       # 最多同时持有几只
+    g.position_pct = 0.33     # 每笔买入使用总资金的比例 (33%)，3笔≈满仓
+    g.turnover_min = 3.0      # 换手率门槛(%) —— STEP1
+    g.ma_period = 5           # 均线周期 —— STEP2
+    g.rsi_period = 14         # RSI 周期 —— STEP3
+    g.rsi_reduce = 80         # RSI 超买阈值（&gt;80 触发清仓判断）
+    g.rsi_gain_cap = 0.10     # RSI 清仓的涨幅上限：当日涨幅 &lt; 10% 才清仓
+    g.rotate_gain = 0.05      # 持仓涨幅触发轮动阈值 (5%) —— STEP4
+    g.divergence = 0.05       # 池内分化触发轮动阈值 (5%)
+    g.switch_ratio = 1.00     # 每次切换转移的仓位比例 (100%)
+    g.cash_threshold = 5000   # 可用现金 ≥ 此值时优先用现金买入、不做切换
+    g.rsi_overbought = 80     # 买入 RSI 上限：收盘RSI &lt; 80 才买
+
+    # ---- 次日开盘待买清单：[(security, target_value), ...] ----
+    g.to_buy = []
+
+    # ---- 定时任务 ----
+    # 次日开盘：执行昨日收盘定下的买入计划（买入 → 开盘成交）
+    run_daily(morning_buy, time=&#x27;open&#x27;, reference_security=&#x27;000300.XSHG&#x27;)
+    # 当日收盘：用当日收盘数据评估，卖出当日收盘成交，并生成次日开盘买入计划
+    # ★ 使用 &#x27;open&#x27; / &#x27;close&#x27; 定时点，日线与分钟频率回测均可正确撮合：
+    #   卖单在当日收盘价成交，买单于次日开盘价成交。
+    run_daily(evening_eval, time=&#x27;close&#x27;, reference_security=&#x27;000300.XSHG&#x27;)
+
+
+# ============================ 指标计算 ============================
+def compute_metrics(context, security):
+    &quot;&quot;&quot;采集单只标的【当日收盘】的量价指标；数据不足或停牌返回 None。&quot;&quot;&quot;
+    cd = get_current_data()[security]
+    if cd.paused:  # 停牌不参与
+        return None
+
+    # 取足够长的日线收盘（含当日已收盘的完整K线）用于 MA / RSI
+    n = max(g.ma_period, g.rsi_period + 1) + 25
+    bars = get_bars(security, count=n, unit=&#x27;1d&#x27;, fields=[&#x27;close&#x27;],
+                    include_now=True, end_dt=context.current_dt, df=False)
+    closes = np.array(bars[&#x27;close&#x27;], dtype=float)
+    if len(closes) &lt; g.rsi_period + 1:
+        return None
+
+    price = closes[-1]  # 当日收盘价
+    if not price or np.isnan(price):
+        return None
+
+    # --- 真实 MA5（近5日收盘均值）---
+    ma = closes[-g.ma_period:].mean()
+
+    # --- RSI(14) (Wilder 平滑，基于收盘) ---
+    rsi = calc_rsi(closes, g.rsi_period)
+
+    # --- 当日涨幅（以收盘价计）---
+    prev_close = closes[-2]
+    gain = (price / prev_close - 1.0) if prev_close &gt; 0 else 0.0
+
+    # --- 涨停判断 ---
+    limit_up = cd.high_limit and price &gt;= cd.high_limit - 0.001
+
+    # --- 当日换手率(%)：直接取当日收盘的换手率字段 ---
+    turnover = get_turnover(context, security)
+
+    return {
+        &#x27;price&#x27;: price, &#x27;ma5&#x27;: ma, &#x27;rsi&#x27;: rsi, &#x27;gain&#x27;: gain,
+        &#x27;limit_up&#x27;: bool(limit_up), &#x27;turnover&#x27;: turnover,
+    }
+
+
+def calc_rsi(closes, period):
+    &quot;&quot;&quot;Wilder RSI。&quot;&quot;&quot;
+    diff = np.diff(closes)
+    if len(diff) &lt; period:
+        return None
+    gains = np.where(diff &gt; 0, diff, 0.0)
+    losses = np.where(diff &lt; 0, -diff, 0.0)
+    avg_gain = gains[:period].mean()
+    avg_loss = losses[:period].mean()
+    for i in range(period, len(diff)):
+        avg_gain = (avg_gain * (period - 1) + gains[i]) / period
+        avg_loss = (avg_loss * (period - 1) + losses[i]) / period
+    if avg_loss == 0:
+        return 100.0
+    rs = avg_gain / avg_loss
+    return 100.0 - 100.0 / (1.0 + rs)
+
+
+def get_turnover(context, security):
+    &quot;&quot;&quot;当日换手率(%)：直接取当日收盘的 turnover_ratio 字段，不再自行计算。&quot;&quot;&quot;
+    try:
+        val = get_valuation(security, end_date=context.current_dt, count=1,
+                            fields=[&#x27;turnover_ratio&#x27;])
+        if val is None or len(val) == 0:
+            return 0.0
+        tr = val[&#x27;turnover_ratio&#x27;].iloc[0]
+        if tr is None or np.isnan(tr):
+            return 0.0
+        return float(tr)  # turnover_ratio 已是百分比(%)
+    except Exception as e:
+        log.warn(&#x27;换手率获取失败 %s: %s&#x27; % (security, e))
+        return 0.0
+
+
+# ==================== 每日收盘评估主流程（卖出=当日收盘） ====================
+def evening_eval(context):
+    # 一次性采集全池指标（当日收盘数据）
+    metrics = {}
+    for s in g.stock_pool:
+        m = compute_metrics(context, s)
+        if m is not None:
+            metrics[s] = m
+
+    # 本轮的次日开盘买入计划从空开始重建
+    g.to_buy = []
+
+    positions = context.portfolio.positions
+
+    # -------- STEP 2：5日均线防守（对持仓）→ 当日收盘卖出 --------
+    for s in list(positions.keys()):
+        m = metrics.get(s)
+        if m is None:
+            continue
+        if m[&#x27;price&#x27;] &lt; m[&#x27;ma5&#x27;]:
+            order_target_value(s, 0)
+            log.info(&#x27;[STEP2 收盘破MA5清仓] %s 收%.2f &lt; MA5 %.2f&#x27; %
+                     (s, m[&#x27;price&#x27;], m[&#x27;ma5&#x27;]))
+
+    # -------- STEP 3：RSI 风控（对剩余持仓）→ 当日收盘卖出 --------
+    # 规则：RSI(14) &gt; 80 且当日涨幅 &lt; 10% → 直接清仓
+    # （涨幅 ≥ 10% 接近涨停，视为强势，保留不清）
+    for s in list(context.portfolio.positions.keys()):
+        m = metrics.get(s)
+        if m is None or m[&#x27;rsi&#x27;] is None:
+            continue
+        if m[&#x27;rsi&#x27;] &gt; g.rsi_reduce and m[&#x27;gain&#x27;] &lt; g.rsi_gain_cap:
+            order_target_value(s, 0)
+            log.info(&#x27;[STEP3 RSI&gt;%d且涨幅&lt;%.0f%%收盘清仓] %s RSI=%.1f 涨幅%.2f%%&#x27; %
+                     (g.rsi_reduce, g.rsi_gain_cap * 100, s, m[&#x27;rsi&#x27;], m[&#x27;gain&#x27;] * 100))
+
+    # -------- STEP 4：轮动调仓（切出=当日收盘卖，换入=次日开盘买）--------
+    rotation_adjust(context, metrics)
+
+    # -------- 补仓：有空余仓位时，生成次日开盘买入计划 --------
+    plan_fill_positions(context, metrics)
+
+    if g.to_buy:
+        log.info(&#x27;[计划] 次日开盘拟买入 %d 只：%s&#x27; %
+                 (len(g.to_buy), [s for s, _ in g.to_buy]))
+
+
+def is_eligible_target(m):
+    &quot;&quot;&quot;买入/轮动候选合格：换手率≥3%、站上MA5、RSI&lt;80、涨幅&lt;10%（全部取当日收盘数据）。&quot;&quot;&quot;
+    if m is None or m[&#x27;rsi&#x27;] is None:
+        return False
+    return (m[&#x27;turnover&#x27;] &gt;= g.turnover_min and   # 当日换手率 ≥ 3%
+            m[&#x27;price&#x27;] &gt;= m[&#x27;ma5&#x27;] and            # 收盘价 ≥ MA5
+            m[&#x27;rsi&#x27;] &lt; g.rsi_overbought and       # 收盘RSI &lt; 80
+            m[&#x27;gain&#x27;] &lt; g.rsi_gain_cap)           # 涨幅 &lt; 10%(未涨停)
+
+
+def rotation_adjust(context, metrics):
+    positions = context.portfolio.positions
+    held = [s for s in positions.keys() if s in metrics]
+    if not held:
+        return
+
+    # 触发条件A：任一持仓当日涨幅 &gt; 5%
+    strong = [s for s in held if metrics[s][&#x27;gain&#x27;] &gt; g.rotate_gain]
+
+    # 触发条件B：池内涨跌幅分化 &gt; 5%
+    pool_gains = [m[&#x27;gain&#x27;] for m in metrics.values()]
+    divergence = (max(pool_gains) - min(pool_gains)) if pool_gains else 0.0
+    triggered = bool(strong) or divergence &gt; g.divergence
+    if not triggered:
+        return
+    log.info(&#x27;[STEP4 触发轮动] 强势持仓=%s 池内分化=%.2f%%&#x27; %
+             (strong, divergence * 100))
+
+    # 【现金优先】账户有可用现金 → 不做切换，交由补仓在次日开盘用现金买入合格标的
+    if context.portfolio.available_cash &gt;= g.cash_threshold:
+        log.info(&#x27;[STEP4] 账户有现金%.0f元(≥%.0f) → 不切换，改用现金次日开盘买入&#x27; %
+                 (context.portfolio.available_cash, g.cash_threshold))
+        return
+
+    # 找&quot;当日涨幅较小、且符合条件&quot;的候选目标（不在持仓中，涨幅升序）
+    candidates = [s for s in metrics.keys()
+                  if s not in positions and is_eligible_target(metrics[s])]
+    candidates.sort(key=lambda x: metrics[x][&#x27;gain&#x27;])
+    if not candidates:
+        # 池内无未涨/合格标的 → 按决策树：全部上涨则不动(RSI已在STEP3处理减仓)
+        log.info(&#x27;[STEP4] 无符合条件的落后标的，维持现状&#x27;)
+        return
+
+    # 强势持仓优先，否则用池内最强的持仓作为切出对象
+    switch_from = strong if strong else [max(held, key=lambda x: metrics[x][&#x27;gain&#x27;])]
+
+    for src in switch_from:
+        if src not in context.portfolio.positions:
+            continue
+        if not candidates:
+            break
+        tgt = candidates.pop(0)  # 涨幅最小的合格标的
+        src_value = context.portfolio.positions[src].value
+        move_value = src_value * g.switch_ratio  # 转移 100%
+
+        # 切出强势持仓（100%）→ 当日收盘卖出
+        order_target_value(src, src_value - move_value)
+        # 换入目标标的 → 记入次日开盘买入计划（目标市值）
+        tgt_cur = context.portfolio.positions[tgt].value if tgt in context.portfolio.positions else 0.0
+        plan_buy(tgt, tgt_cur + move_value)
+        log.info(&#x27;[STEP4 切换] %s(涨%.2f%%) 收盘卖出 -%.0f%% → %s(涨%.2f%%) 次日开盘买入 金额%.0f&#x27; %
+                 (src, metrics[src][&#x27;gain&#x27;] * 100, g.switch_ratio * 100,
+                  tgt, metrics[tgt][&#x27;gain&#x27;] * 100, move_value))
+
+
+def plan_fill_positions(context, metrics):
+    &quot;&quot;&quot;空余仓位时，生成次日开盘买入计划，每笔用总资金33%（对应&quot;再次买入条件&quot;）。&quot;&quot;&quot;
+    positions = context.portfolio.positions
+    planned = [s for s, _ in g.to_buy]
+    planned_new = [s for s in planned if s not in positions]
+    # 空余仓位数 = 上限 - 现有持仓 - 已计划买入的新标的
+    slots = g.max_positions - len(positions) - len(planned_new)
+    if slots &lt;= 0:
+        return
+    candidates = [s for s in metrics.keys()
+                  if s not in positions and s not in planned
+                  and is_eligible_target(metrics[s])]
+    candidates.sort(key=lambda x: metrics[x][&#x27;gain&#x27;])  # 优先买涨幅较小的
+    if not candidates:
+        return
+    # 每笔买入固定使用【总资金的 33%】(3 笔≈满仓，故最多同时持有 3 只)
+    target_value = context.portfolio.total_value * g.position_pct
+    for s in candidates[:slots]:
+        plan_buy(s, target_value)
+        log.info(&#x27;[补仓计划] %s 涨%.2f%% 换手%.2f%% 次日开盘目标市值%.0f(总资金%.0f%%)&#x27; %
+                 (s, metrics[s][&#x27;gain&#x27;] * 100, metrics[s][&#x27;turnover&#x27;],
+                  target_value, g.position_pct * 100))
+
+
+def plan_buy(security, target_value):
+    &quot;&quot;&quot;把买入意图写入次日开盘计划；同一标的取较大的目标市值，避免重复下单。&quot;&quot;&quot;
+    for i, (s, v) in enumerate(g.to_buy):
+        if s == security:
+            g.to_buy[i] = (s, max(v, target_value))
+            return
+    g.to_buy.append((security, target_value))
+
+
+# ==================== 次日开盘买入（买入=开盘成交） ====================
+def morning_buy(context):
+    &quot;&quot;&quot;执行昨日收盘定下的买入计划，于开盘价成交。&quot;&quot;&quot;
+    if not g.to_buy:
+        return
+    plan = g.to_buy
+    g.to_buy = []  # 取出后清空，避免重复执行
+    for idx, (s, target_value) in enumerate(plan):
+        if context.portfolio.available_cash &lt; 1000:
+            log.info(&#x27;[开盘买入] 可用现金不足，剩余计划取消：%s&#x27; %
+                     [x for x, _ in plan[idx:]])
+            break
+        cd = get_current_data()[s]
+        if cd.paused:  # 开盘停牌 → 跳过
+            log.info(&#x27;[开盘买入] %s 停牌，跳过&#x27; % s)
+            continue
+        order_target_value(s, target_value)
+        log.info(&#x27;[开盘买入] %s 目标市值%.0f&#x27; % (s, target_value))
+</textarea>
+<script>
+document.getElementById("copy").addEventListener("click", async e => { const b = e.currentTarget, t = document.getElementById("raw").value;
+  try { await navigator.clipboard.writeText(t); } catch (err) { const a = document.getElementById("raw"); a.hidden = false; a.select(); document.execCommand("copy"); a.hidden = true; }
+  b.textContent = "已复制"; setTimeout(() => b.textContent = "复制代码", 1500); });
+</script>
+</main>
+<footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-16</div></footer>
+</body>
+</html>

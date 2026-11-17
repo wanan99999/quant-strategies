@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>股息率分档建仓策略 · 量化策略库</title>
+<meta name="description" content="以股息率最常见区间为中心画 11 条档位线，股息率每上一条线加 10% 仓位、每下一条线减 10%，到哪条线就调到哪条线的仓位。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 22l6-7 5 4 9-11' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="top"><div class="bar"><a class="brand" href="../index.html">量化策略库</a>
+<nav><a href="../index.html#dividend">股息率策略</a><a href="../index.html#trend">趋势策略</a><a href="../index.html#news">消息股策略</a></nav></div></header>
+<main class="wrap">
+<nav class="crumb"><a href="../index.html">策略库</a> / <a href="../index.html#dividend">股息率策略</a></nav>
+<header class="shead"><div class="chips"><span class="chip c-dividend">股息率策略</span><span class="chip">已回测 · 聚宽实测</span></div>
+<h1>股息率分档建仓策略</h1><p class="lede">以股息率最常见区间为中心画 11 条档位线，股息率每上一条线加 10% 仓位、每下一条线减 10%，到哪条线就调到哪条线的仓位。</p></header>
+<div class="kpis"><div class="kpi"><div class="k">V1.1 五只组合（本地，2023 起）</div><div class="v">+71.4%</div><div class="s">年化 15.1% · 最大回撤 -9.0% · 平均仓位 51%</div></div><div class="kpi"><div class="k">V1.0 聚宽逐只回测 20 家</div><div class="v">平均 +77.8%</div><div class="s">持有不动平均 +90.1%，跑赢 8 家</div></div><div class="kpi"><div class="k">V1.0 招商银行（本地）</div><div class="v">+53.4%</div><div class="s">2023 起，109 笔交易</div></div></div>
+<div class="cols">
+<section class="blk"><h2>规则要点</h2><ul class='bul'><li>区间 [L, H]、宽度 W = H − L；档位线从 L − 0.5W 到 H + 0.5W，每 0.2W 一条，共 11 条</li><li>仓位从 0% 到 100%，每条线 +10%，区间中点对应 50%</li><li>到达哪条线就调到哪条线的仓位：上升到更高的线加仓，回落到更低的线减仓，两线之间不动</li><li>满仓额度按当前总资产计算（赚钱后仓位跟着变大）；V1.1 每只额度 = 总资产 × 20%</li></ul></section>
+<section class="blk"><h2>结论与注意</h2><ul class='bul'><li>单边大涨的国有大行跑输持有 40–60 个百分点（越涨越减仓）。</li><li>比单向买卖版本交易次数多、收益略低，优点是回撤小。</li></ul></section>
+</div>
+<section class="blk"><h2>报告 <small>1</small></h2><div class="files"><a class="file" href="../files/div-ladder/%E8%82%A1%E6%81%AF%E7%8E%87%E5%88%86%E6%A1%A3%E5%BB%BA%E4%BB%93%E7%AD%96%E7%95%A5V1.0_20%E5%AE%B6%E9%93%B6%E8%A1%8C%E5%9B%9E%E6%B5%8B%E6%80%BB%E7%BB%93.pdf" target="_blank" rel="noopener"><span class="ftype t-pdf">PDF</span><span class="fmain"><b>V1.0 20 家银行聚宽回测总结</b><span>逐只回测截图、区间下调敏感度</span></span><span class="fsize">7.6 MB</span></a></div></section>
+<section class="blk"><h2>策略代码 <small>2 个文件 · 聚宽 JoinQuant</small></h2><div class="tblwrap"><table class="ctbl"><thead><tr><th>版本</th><th>说明</th><th>长度</th><th></th></tr></thead><tbody><tr><td><a href="../code/div-ladder/1.html"><b>V1.0</b></a></td><td class="cn">以该股「最常见股息率区间」[下限 L, 上限 H] 为基准，区间宽度 W = H - L，每 0.2W 一条档位线，共 11 条。</td><td class="num">176 行</td><td class="act"><a href="../code/div-ladder/1.html">查看</a><a href="../files/div-ladder/%E8%82%A1%E6%81%AF%E7%8E%87%E5%88%86%E6%A1%A3%E5%BB%BA%E4%BB%93%E7%AD%96%E7%95%A5_V1.0.py" download>下载</a></td></tr><tr><td><a href="../code/div-ladder/2.html"><b>V1.1</b></a></td><td class="cn">从 20 家银行股票池中选 5 只，每只独立按股息率分档。</td><td class="num">234 行</td><td class="act"><a href="../code/div-ladder/2.html">查看</a><a href="../files/div-ladder/%E8%82%A1%E6%81%AF%E7%8E%87%E5%88%86%E6%A1%A3%E5%BB%BA%E4%BB%93%E7%AD%96%E7%95%A5_V1.1.py" download>下载</a></td></tr></tbody></table></div></section>
+
+<section class="blk"><h2>数据 <small>1</small></h2><div class="files"><a class="file" href="../files/div-ladder/20%E5%AE%B6%E5%8D%83%E4%BA%BF%E9%93%B6%E8%A1%8C%E8%82%A1_%E8%82%A1%E6%81%AF%E7%8E%87%E5%8C%BA%E9%97%B4%E7%BB%9F%E8%AE%A1.xlsx" download><span class="ftype t-xlsx">Excel</span><span class="fmain"><b>20 家千亿银行股息率区间统计</b><span>下载</span></span><span class="fsize">662 KB</span></a></div></section>
+</main>
+<footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-16</div></footer>
+</body>
+</html>
