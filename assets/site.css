@@ -40,11 +40,15 @@ h2 { font-family: var(--f-display); font-size: 21px; line-height: 1.4; margin: 0
 .dot.c-dividend { background: var(--c-dividend) } .dot.c-trend { background: var(--c-trend) } .dot.c-news { background: var(--c-news) }
 .cat { display: grid; gap: 14px } .cathead { display: grid; gap: 4px } .cathead h2 { display: flex; align-items: center; gap: 10px } .cathead p { margin: 0; color: var(--ink-2) }
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px }
-.card { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 16px 18px; display: grid; gap: 8px; align-content: start; color: var(--ink); transition: border-color .15s, transform .15s }
+.card { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; color: var(--ink); transition: border-color .15s, transform .15s }
 .card:hover { text-decoration: none; border-color: var(--accent); transform: translateY(-1px) }
-.card h3 { margin: 0; font-size: 17px; line-height: 1.4 } .card p { margin: 0; color: var(--ink-2); font-size: 13.5px; line-height: 1.6 }
-.cm { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; border-top: 1px dashed var(--rule); padding-top: 8px; margin-top: 2px }
-.cmk { font-size: 12.5px; color: var(--ink-3) } .cmv { font-family: var(--f-mono); font-size: 17px; white-space: nowrap }
+.card h3 { margin: 0; font-size: 17px; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.card p.tag { margin: 0; color: var(--ink-2); font-size: 13.5px; line-height: 1.6; height: calc(1.6em * 3); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical }
+.cm { margin-top: auto; border-top: 1px dashed var(--rule); padding-top: 10px; display: grid; gap: 2px }
+.cmrow { display: flex; justify-content: space-between; align-items: center; gap: 10px; height: 30px }
+.cms { font-size: 12px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.cmk { font-size: 12.5px; color: var(--ink-3) } .cmv { font-family: var(--f-body); font-weight: 700; font-size: 19px; font-variant-numeric: tabular-nums; letter-spacing: .01em; white-space: nowrap }
+.cmv.na { font-weight: 500; font-size: 15px; color: var(--ink-3) }
 .cnt { font-size: 12px; color: var(--ink-3) }
 .empty { color: var(--ink-3) }
 /* chips */
@@ -58,7 +62,7 @@ h2 { font-family: var(--f-display); font-size: 21px; line-height: 1.4; margin: 0
 .shead { display: grid; gap: 10px }
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px }
 .kpi { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 16px; display: grid; gap: 2px; align-content: start }
-.kpi .k { font-size: 12.5px; color: var(--ink-3) } .kpi .v { font-family: var(--f-mono); font-size: 24px; line-height: 1.25 } .kpi .s { font-size: 12.5px; color: var(--ink-2) }
+.kpi .k { font-size: 12.5px; color: var(--ink-3) } .kpi .v { font-family: var(--f-body); font-weight: 700; font-size: 24px; line-height: 1.3; font-variant-numeric: tabular-nums } .kpi .s { font-size: 12.5px; color: var(--ink-2) }
 .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px 32px }
 .blk { display: grid; gap: 10px; align-content: start; min-width: 0 }
 .bul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; color: var(--ink-2) } .bul li::marker { color: var(--ink-3) }

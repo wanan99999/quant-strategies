@@ -20,43 +20,43 @@
 <nav class="catnav"><a href="#dividend"><span class="dot c-dividend"></span>股息率策略<small>3</small></a><a href="#trend"><span class="dot c-trend"></span>趋势策略<small>6</small></a><a href="#news"><span class="dot c-news"></span>消息股策略<small>3</small></a></nav></header>
 <section class="cat" id="dividend"><div class="cathead"><h2><span class="dot c-dividend"></span>股息率策略 <small>3</small></h2><p>用股息率判断贵贱：股息率高时买、低时卖，或用股息率决定仓位。主要用于银行等高股息股。</p></div>
 <div class="cards"><a class="card" href="s/div-rotation.html"><div class="chips"><span class="chip">已回测 · 聚宽实测</span></div>
-<h3>股息率区间轮动策略</h3><p>20 家千亿银行，每只按自己的「最常见股息率区间」买卖：股息率高于区间上限买入，跌破下限卖出，最多持 2 只轮动。</p>
-<div class="cm"><span class="cmk">V1.2 聚宽实测（2023-01 至 2026-10）</span><span class="cmv">+319.5%</span></div>
+<h3>股息率区间轮动策略</h3><p class="tag">20 家千亿银行，每只按自己的「最常见股息率区间」买卖：股息率高于区间上限买入，跌破下限卖出，最多持 2 只轮动。</p>
+<div class="cm"><div class="cmrow"><span class="cmk">2023-01 至 2026-10 策略收益</span><span class="cmv">+319.5%</span></div><div class="cms">V1.2 聚宽实测；只用上一年数据约 +106%</div></div>
 <div class="cnt">报告 7 · 代码 16 · 数据 5</div></a><a class="card" href="s/div-ladder.html"><div class="chips"><span class="chip">已回测 · 聚宽实测</span></div>
-<h3>股息率分档建仓策略</h3><p>以股息率最常见区间为中心画 11 条档位线，股息率每上一条线加 10% 仓位、每下一条线减 10%，到哪条线就调到哪条线的仓位。</p>
-<div class="cm"><span class="cmk">V1.1 五只组合（本地，2023 起）</span><span class="cmv">+71.4%</span></div>
+<h3>股息率分档建仓策略</h3><p class="tag">以股息率最常见区间为中心画 11 条档位线，股息率每上一条线加 10% 仓位、每下一条线减 10%，到哪条线就调到哪条线的仓位。</p>
+<div class="cm"><div class="cmrow"><span class="cmk">2023-01 至 2026-10 策略收益</span><span class="cmv">+71.4%</span></div><div class="cms">V1.1 五只组合，本地测算</div></div>
 <div class="cnt">报告 1 · 代码 2 · 数据 1</div></a><a class="card" href="s/div-momentum-position.html"><div class="chips"><span class="chip">本地测算 · 待聚宽验证</span></div>
-<h3>银行股顺势 + 股息率定仓位</h3><p>买哪几只由顺势决定，买多少由股息率决定：20 家银行平均股息率 ≤3% 空仓、≥5% 满仓，中间线性加减。</p>
-<div class="cm"><span class="cmk">全程年化（2008–2026）</span><span class="cmv">+10.6%</span></div>
+<h3>银行股顺势 + 股息率定仓位</h3><p class="tag">买哪几只由顺势决定，买多少由股息率决定：20 家银行平均股息率 ≤3% 空仓、≥5% 满仓，中间线性加减。</p>
+<div class="cm"><div class="cmrow"><span class="cmk">2023-01 至 2026-10 策略收益</span><span class="cmv">+140.6%</span></div><div class="cms">本地测算；池内等权 +80.2%</div></div>
 <div class="cnt">报告 1 · 代码 1 · 数据 1</div></a></div></section><section class="cat" id="trend"><div class="cathead"><h2><span class="dot c-trend"></span>趋势策略 <small>6</small></h2><p>强者恒强：买离高点近、均线多头、突破的股票，跌出排名或破位就卖。</p></div>
 <div class="cards"><a class="card" href="s/bank-momentum.html"><div class="chips"><span class="chip">本地测算 · 最终版</span></div>
-<h3>银行股顺势策略</h3><p>银行股里强者恒强：持有离一年高点最近的 4 只，掉出前 6 名才卖，不追近期已大涨的。</p>
-<div class="cm"><span class="cmk">2019 年起年化</span><span class="cmv">+17.4%</span></div>
+<h3>银行股顺势策略</h3><p class="tag">银行股里强者恒强：持有离一年高点最近的 4 只，掉出前 6 名才卖，不追近期已大涨的。</p>
+<div class="cm"><div class="cmrow"><span class="cmk">2023-01 至 2026-10 策略收益</span><span class="cmv">+139.9%</span></div><div class="cms">本地测算；池内等权 +80.2%</div></div>
 <div class="cnt">报告 3 · 代码 1 · 数据 2</div></a><a class="card" href="s/sector-momentum.html"><div class="chips"><span class="chip">本地测算</span></div>
-<h3>板块顺势策略（煤炭 / 石油石化）</h3><p>把银行股顺势规则搬到其他申万一级板块。煤炭、石油石化有效，钢铁略好，有色金属、公用事业跑输。</p>
-<div class="cm"><span class="cmk">煤炭 2019 年起年化</span><span class="cmv">+20.4%</span></div>
+<h3>板块顺势策略（煤炭 / 石油石化）</h3><p class="tag">把银行股顺势规则搬到其他申万一级板块。煤炭、石油石化有效，钢铁略好，有色金属、公用事业跑输。</p>
+<div class="cm"><div class="cmrow"><span class="cmk">2023-01 至 2026-10 策略收益</span><span class="cmv">+62.4%</span></div><div class="cms">煤炭，本地测算；石油石化 +22.8%</div></div>
 <div class="cnt">报告 1 · 代码 2 · 数据 2</div></a><a class="card" href="s/ma-score.html"><div class="chips"><span class="chip">聚宽代码 · 多版本迭代</span></div>
-<h3>均线多头评分策略</h3><p>均线多头排列的股票按六项指标打分，评分 ≥90 买入；死叉、评分跌破、止损或回撤就卖。</p>
-<div class="cm"><span class="cmk">评分维度</span><span class="cmv">6 项</span></div>
+<h3>均线多头评分策略</h3><p class="tag">均线多头排列的股票按六项指标打分，评分 ≥90 买入；死叉、评分跌破、止损或回撤就卖。</p>
+<div class="cm"><div class="cmrow"><span class="cmk">2023-01 至 2026-10 策略收益</span><span class="cmv na">待回测</span></div><div class="cms">尚无这段时间的回测结果</div></div>
 <div class="cnt">代码 14 · 文档 1</div></a><a class="card" href="s/adaptive-momentum.html"><div class="chips"><span class="chip">设计 + 聚宽代码</span></div>
-<h3>动量策略（行业夏普动量）</h3><p>先选近 6 个月夏普动量最强的行业，再在行业里选残差动量最强的个股，每月再平衡。</p>
-<div class="cm"><span class="cmk">形成期 / 剔除期</span><span class="cmv">6 个月 / 1 个月</span></div>
+<h3>动量策略（行业夏普动量）</h3><p class="tag">先选近 6 个月夏普动量最强的行业，再在行业里选残差动量最强的个股，每月再平衡。</p>
+<div class="cm"><div class="cmrow"><span class="cmk">2023-01 至 2026-10 策略收益</span><span class="cmv na">待回测</span></div><div class="cms">尚无这段时间的回测结果</div></div>
 <div class="cnt">代码 1 · 文档 1</div></a><a class="card" href="s/ma-crossover.html"><div class="chips"><span class="chip">设计 + 聚宽代码</span></div>
-<h3>双均线 / 三均线交叉策略</h3><p>在均线多头、趋势已确立的股票里，用 MA10/MA20 金叉（三均线版更严格）入场，死叉或破位离场。</p>
-<div class="cm"><span class="cmk">双均线</span><span class="cmv">MA10 / MA20</span></div>
+<h3>双均线 / 三均线交叉策略</h3><p class="tag">在均线多头、趋势已确立的股票里，用 MA10/MA20 金叉（三均线版更严格）入场，死叉或破位离场。</p>
+<div class="cm"><div class="cmrow"><span class="cmk">2023-01 至 2026-10 策略收益</span><span class="cmv na">待回测</span></div><div class="cms">尚无这段时间的回测结果</div></div>
 <div class="cnt">代码 4 · 文档 1</div></a><a class="card" href="s/turtle.html"><div class="chips"><span class="chip">设计 + 聚宽代码</span></div>
-<h3>海龟交易法则</h3><p>经典通道突破趋势跟踪，按 ATR 波动率标准化仓位，适配 A 股只做多。</p>
-<div class="cm"><span class="cmk">入场</span><span class="cmv">通道突破</span></div>
+<h3>海龟交易法则</h3><p class="tag">经典通道突破趋势跟踪，按 ATR 波动率标准化仓位，适配 A 股只做多。</p>
+<div class="cm"><div class="cmrow"><span class="cmk">2023-01 至 2026-10 策略收益</span><span class="cmv na">待回测</span></div><div class="cms">尚无这段时间的回测结果</div></div>
 <div class="cnt">代码 3 · 文档 1</div></a></div></section><section class="cat" id="news"><div class="cathead"><h2><span class="dot c-news"></span>消息股策略 <small>3</small></h2><p>围绕消息驱动的自选股和热点板块做中短线：均线确认入场，大盘顶背离和热点退潮时撤退。</p></div>
 <div class="cards"><a class="card" href="s/news-midterm.html"><div class="chips"><span class="chip">聚宽代码 · V1 / V2</span></div>
-<h3>消息股中期策略（中短线趋势跟踪）</h3><p>在消息股自选池里做中短线：站上 5 日线半仓试探、金叉加满；大盘顶背离时减仓并禁止买入 10 天。</p>
-<div class="cm"><span class="cmk">持仓</span><span class="cmv">最多 2 只</span></div>
+<h3>消息股中期策略（中短线趋势跟踪）</h3><p class="tag">在消息股自选池里做中短线：站上 5 日线半仓试探、金叉加满；大盘顶背离时减仓并禁止买入 10 天。</p>
+<div class="cm"><div class="cmrow"><span class="cmk">2023-01 至 2026-10 策略收益</span><span class="cmv na">待回测</span></div><div class="cms">尚无这段时间的回测结果</div></div>
 <div class="cnt">代码 2 · 文档 2</div></a><a class="card" href="s/news-rotation.html"><div class="chips"><span class="chip">聚宽代码 · 4 个版本</span></div>
-<h3>消息股轮换调仓策略</h3><p>消息股池内部轮动：破 5 日线就卖、RSI 过热清仓，强势股涨多了切换到合格但涨得少的标的。</p>
-<div class="cm"><span class="cmk">持仓</span><span class="cmv">最多 3 只</span></div>
+<h3>消息股轮换调仓策略</h3><p class="tag">消息股池内部轮动：破 5 日线就卖、RSI 过热清仓，强势股涨多了切换到合格但涨得少的标的。</p>
+<div class="cm"><div class="cmrow"><span class="cmk">2023-01 至 2026-10 策略收益</span><span class="cmv na">待回测</span></div><div class="cms">尚无这段时间的回测结果</div></div>
 <div class="cnt">代码 4 · 文档 1</div></a><a class="card" href="s/hot-sector.html"><div class="chips"><span class="chip">聚宽代码 · V2.0</span></div>
-<h3>热点板块交易策略</h3><p>在中短线策略基础上加入热点板块环境：判断热点处于启动、扩散、高潮还是退潮，退潮信号出现就分批撤退。</p>
-<div class="cm"><span class="cmk">评分</span><span class="cmv">五维</span></div>
+<h3>热点板块交易策略</h3><p class="tag">在中短线策略基础上加入热点板块环境：判断热点处于启动、扩散、高潮还是退潮，退潮信号出现就分批撤退。</p>
+<div class="cm"><div class="cmrow"><span class="cmk">2023-01 至 2026-10 策略收益</span><span class="cmv na">待回测</span></div><div class="cms">尚无这段时间的回测结果</div></div>
 <div class="cnt">代码 1 · 文档 1</div></a></div></section>
 </main>
 <footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-16</div></footer>
