@@ -8,7 +8,7 @@ from pygments.lexers import PythonLexer
 from pygments.formatters import HtmlFormatter
 import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from content import CATS, S, RET_LABEL
+from content import CATS, S
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 E = html.escape
@@ -261,8 +261,7 @@ document.getElementById("copy").addEventListener("click", async e => {{ const b 
                              f'<span class="fmain"><b>{E(nm)}</b><span>下载</span></span><span class="fsize">{human(sz)}</span></a>')
         links = "".join(f'<a class="file" href="{E(url)}" target="_blank" rel="noopener"><span class="ftype t-html">链接</span><span class="fmain"><b>{E(nm)}</b><span>{E(url)}</span></span></a>' for url, nm in st["links"])
         catname = dict((k, n) for k, n, _ in CATS)[st["cat"]]
-        mets = ([(RET_LABEL, st["ret"][0], st["ret"][1])] if st.get("ret") else [(RET_LABEL, "待回测", "尚无这段时间的回测结果")]) + st["metrics"]
-        kp = "".join(f'<div class="kpi"><div class="k">{E(a)}</div><div class="v">{E(b)}</div><div class="s">{E(c)}</div></div>' for a, b, c in mets)
+        kp = "".join(f'<div class="kpi"><div class="k">{E(a)}</div><div class="v">{E(b)}</div><div class="s">{E(c)}</div></div>' for a, b, c in st["metrics"])
         sec = lambda title, inner: f'<section class="blk"><h2>{title}</h2>{inner}</section>' if inner else ""
         body = f"""<nav class="crumb"><a href="../index.html">策略库</a> / <a href="../index.html#{st['cat']}">{catname}</a></nav>
 <header class="shead"><div class="chips"><span class="chip c-{st['cat']}">{catname}</span><span class="chip">{E(st['status'])}</span></div>
@@ -278,10 +277,10 @@ document.getElementById("copy").addEventListener("click", async e => {{ const b 
 {sec(f"数据 <small>{len(data_html)}</small>", '<div class="files">' + "".join(data_html) + "</div>" if data_html else "")}"""
         os.makedirs(os.path.join(ROOT, "s"), exist_ok=True)
         open(os.path.join(ROOT, "s", f"{slug}.html"), "w", encoding="utf8").write(page(st["title"] + " · 量化策略库", body, 1, st["tagline"]))
-        rv, rs = st["ret"] if st.get("ret") else ("待回测", "尚无这段时间的回测结果")
+        m0 = st["metrics"][0]
         cards[st["cat"]].append(f"""<a class="card" href="s/{slug}.html"><div class="chips"><span class="chip">{E(st['status'])}</span></div>
-<h3>{E(st['title'])}</h3><p class="tag">{E(st['tagline'])}</p>
-<div class="cm"><div class="cmrow"><span class="cmk">{E(RET_LABEL)}</span><span class="cmv{' na' if not st.get('ret') else ''}">{E(rv)}</span></div><div class="cms">{E(rs)}</div></div>
+<h3>{E(st['title'])}</h3><p>{E(st['tagline'])}</p>
+<div class="cm"><span class="cmk">{E(m0[0])}</span><span class="cmv">{E(m0[1])}</span></div>
 <div class="cnt">{"报告 %d · " % len(st['reports']) if st['reports'] else ""}代码 {len(st['code'])}{" · 文档 %d" % len(st['docs']) if st['docs'] else ""}{" · 数据 %d" % len(st['data']) if st['data'] else ""}</div></a>""")
     secs = ""
     for k, n, d in CATS:

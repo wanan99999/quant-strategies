@@ -17,7 +17,7 @@
 <nav class="crumb"><a href="../index.html">策略库</a> / <a href="../index.html#news">消息股策略</a></nav>
 <header class="shead"><div class="chips"><span class="chip c-news">消息股策略</span><span class="chip">聚宽代码 · 4 个版本</span></div>
 <h1>消息股轮换调仓策略</h1><p class="lede">消息股池内部轮动：破 5 日线就卖、RSI 过热清仓，强势股涨多了切换到合格但涨得少的标的。</p></header>
-<div class="kpis"><div class="kpi"><div class="k">2023-01 至 2026-10 策略收益</div><div class="v">待回测</div><div class="s">尚无这段时间的回测结果</div></div><div class="kpi"><div class="k">持仓</div><div class="v">最多 3 只</div><div class="s">每只 33%</div></div><div class="kpi"><div class="k">决策时点</div><div class="v">14:50</div><div class="s">另有收盘数据版</div></div></div>
+<div class="kpis"><div class="kpi"><div class="k">持仓</div><div class="v">最多 3 只</div><div class="s">每只 33%</div></div><div class="kpi"><div class="k">决策时点</div><div class="v">14:50</div><div class="s">另有收盘数据版</div></div></div>
 <div class="cols">
 <section class="blk"><h2>规则要点</h2><ul class='bul'><li>换手率过滤：当日换手率 &lt;3% 不参与</li><li>5 日线防守：14:50 最新价低于动态 MA5 就卖</li><li>RSI 风控：RSI(14) &gt;80 且当日涨幅 &lt;10% 清仓（接近涨停视为强势，保留）</li><li>轮动：持仓涨幅 &gt;5% 或池内分化 &gt;5% 时做高低切换；有现金直接买入合格标的</li><li>合格标准：换手率 ≥3%、站上 MA5、RSI &lt;80、涨幅 &lt;10%</li></ul></section>
 <section class="blk"><h2>结论与注意</h2><ul class='bul'><li>4 个版本：14:50 实时版、收盘数据版（当日收盘卖、次日开盘买）、去掉换手率过滤版、去掉轮动版。</li></ul></section>
