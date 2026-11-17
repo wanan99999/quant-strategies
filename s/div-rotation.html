@@ -14,7 +14,7 @@
 <header class="top"><div class="bar"><a class="brand" href="../index.html">量化策略库</a>
 <nav><a href="../index.html#dividend">股息率策略</a><a href="../index.html#trend">趋势策略</a><a href="../index.html#news">消息股策略</a></nav></div></header>
 <main class="wrap">
-<nav class="crumb"><a href="../index.html">策略库</a> / <a href="../index.html#dividend">股息率策略</a></nav>
+<nav class="crumb"><a class="back" href="../index.html#dividend" data-back>返回</a></nav>
 <header class="shead"><div class="chips"><span class="chip c-dividend">股息率策略</span><span class="chip">已回测 · 聚宽实测</span></div>
 <h1>股息率区间轮动策略</h1><p class="lede">20 家千亿银行，每只按自己的「最常见股息率区间」买卖：股息率高于区间上限买入，跌破下限卖出，最多持 2 只轮动。</p></header>
 <div class="kpis"><div class="kpi"><div class="k">V1.2 聚宽实测（2023-01 至 2026-10）</div><div class="v">+319.5%</div><div class="s">年化 47.5% · 最大回撤 11.1% · 夏普 2.52</div></div><div class="kpi"><div class="k">只用上一年数据（V2 口径，本地）</div><div class="v">约 +106%</div><div class="s">2023–2026 逐年连乘</div></div><div class="kpi"><div class="k">20 家等权持有</div><div class="v">约 +85%</div><div class="s">同期对照</div></div></div>
@@ -27,6 +27,12 @@
 
 <section class="blk"><h2>数据 <small>5</small></h2><div class="files"><a class="file" href="../files/div-rotation/%E8%82%A1%E6%81%AF%E7%8E%87%E5%8C%BA%E9%97%B4%E8%BD%AE%E5%8A%A8%E7%AD%96%E7%95%A5V2.1-V2.4_%E9%80%90%E5%B9%B4%E8%82%A1%E7%A5%A8%E6%B1%A0%E4%B8%8E%E6%9C%80%E5%B8%B8%E8%A7%81%E5%8C%BA%E9%97%B4.xlsx" download><span class="ftype t-xlsx">Excel</span><span class="fmain"><b>V2.1–V2.4 逐年股票池与最常见区间</b><span>下载</span></span><span class="fsize">34 KB</span></a><a class="file" href="../files/div-rotation/%E8%82%A1%E6%81%AF%E7%8E%87%E5%8C%BA%E9%97%B4%E8%BD%AE%E5%8A%A8%E7%AD%96%E7%95%A5_V1.2%E4%B8%8EV2.1-V2.4%E6%9C%80%E5%B8%B8%E8%A7%81%E5%8C%BA%E9%97%B4%E5%AF%B9%E6%AF%94.xlsx" download><span class="ftype t-xlsx">Excel</span><span class="fmain"><b>V1.2 与 V2.x 区间对比</b><span>下载</span></span><span class="fsize">6 KB</span></a><a class="file" href="../files/div-rotation/%E8%82%A1%E6%81%AF%E7%8E%87%E5%8C%BA%E9%97%B4%E8%BD%AE%E5%8A%A8%E7%AD%96%E7%95%A5_V1.2_V2_V3%E4%B8%AA%E8%82%A1%E6%94%B6%E7%9B%8A%E8%B4%A1%E7%8C%AE.xlsx" download><span class="ftype t-xlsx">Excel</span><span class="fmain"><b>V1.2 / V2 / V3 个股收益贡献</b><span>下载</span></span><span class="fsize">14 KB</span></a><a class="file" href="../files/div-rotation/20%E5%AE%B6%E9%93%B6%E8%A1%8C%E8%82%A1_%E8%BF%91%E4%B8%80%E5%B9%B4TTM%E8%82%A1%E6%81%AF%E7%8E%87%E6%9C%80%E5%B8%B8%E8%A7%81%E5%8C%BA%E9%97%B4.xlsx" download><span class="ftype t-xlsx">Excel</span><span class="fmain"><b>20 家银行近一年 TTM 股息率最常见区间</b><span>下载</span></span><span class="fsize">56 KB</span></a><a class="file" href="../files/div-rotation/%E9%AB%98%E8%82%A1%E6%81%AF30%E5%8F%AA_%E8%BF%91%E4%B8%80%E5%B9%B4TTM%E8%82%A1%E6%81%AF%E7%8E%87%E6%9C%80%E5%B8%B8%E8%A7%81%E5%8C%BA%E9%97%B4.xlsx" download><span class="ftype t-xlsx">Excel</span><span class="fmain"><b>高股息 30 只近一年 TTM 股息率最常见区间</b><span>下载</span></span><span class="fsize">86 KB</span></a></div></section>
 </main>
+<script>
+/* 返回键：从本站页面进来就回到上一页（保留原来的滚动位置），直接打开时跳到 href */
+document.querySelectorAll("[data-back]").forEach(a => a.addEventListener("click", e => {
+  try { if (document.referrer && new URL(document.referrer).origin === location.origin && history.length > 1) { e.preventDefault(); history.back(); } } catch (err) {}
+}));
+</script>
 <footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-16</div></footer>
 </body>
 </html>

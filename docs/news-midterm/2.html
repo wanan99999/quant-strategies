@@ -14,7 +14,7 @@
 <header class="top"><div class="bar"><a class="brand" href="../../index.html">量化策略库</a>
 <nav><a href="../../index.html#dividend">股息率策略</a><a href="../../index.html#trend">趋势策略</a><a href="../../index.html#news">消息股策略</a></nav></div></header>
 <main class="wrap">
-<nav class="crumb"><a href="../../index.html">策略库</a> / <a href="../../s/news-midterm.html">消息股中期策略（中短线趋势跟踪）</a></nav>
+<nav class="crumb"><a class="back" href="../../s/news-midterm.html" data-back>返回</a></nav>
 <div class="tools"><span class="mono">中短线交易策略说明书_V2.0.md · 19 KB</span><span class="grow"></span><a class="btn" href="../../files/news-midterm/%E4%B8%AD%E7%9F%AD%E7%BA%BF%E4%BA%A4%E6%98%93%E7%AD%96%E7%95%A5%E8%AF%B4%E6%98%8E%E4%B9%A6_V2.0.md" download>下载原文件</a></div>
 <article class="doc"><h2>中短线交易策略说明书</h2>
 <p><strong>版本：V2.0 | 日期：2026年8月5日</strong></p>
@@ -186,6 +186,12 @@
 <div class="tbl"><table><thead><tr><th>状态</th><th>股票A</th><th>股票B</th><th>总仓位</th><th>可用资金</th></tr></thead><tbody><tr><td>空仓</td><td>0%</td><td>0%</td><td>0%</td><td>100%</td></tr><tr><td>A半仓</td><td>25%</td><td>0%</td><td>25%</td><td>75%</td></tr><tr><td>A全仓</td><td>50%</td><td>0%</td><td>50%</td><td>50%</td></tr><tr><td>A半仓 + B半仓</td><td>25%</td><td>25%</td><td>50%</td><td>50%</td></tr><tr><td>A全仓 + B半仓</td><td>50%</td><td>25%</td><td>75%</td><td>25%</td></tr><tr><td>A全仓 + B全仓</td><td>50%</td><td>50%</td><td>100%</td><td>0%</td></tr><tr><td>A减半（顶背离）</td><td>25%</td><td>50%</td><td>75%</td><td>25%</td></tr><tr><td>A清仓（继续跌10%）</td><td>0%</td><td>50%</td><td>50%</td><td>50%</td></tr></tbody></table></div>
 <hr></article>
 </main>
+<script>
+/* 返回键：从本站页面进来就回到上一页（保留原来的滚动位置），直接打开时跳到 href */
+document.querySelectorAll("[data-back]").forEach(a => a.addEventListener("click", e => {
+  try { if (document.referrer && new URL(document.referrer).origin === location.origin && history.length > 1) { e.preventDefault(); history.back(); } } catch (err) {}
+}));
+</script>
 <footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-16</div></footer>
 </body>
 </html>

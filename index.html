@@ -18,7 +18,7 @@
 <p class="lede">我做过的 A 股策略：每个策略有规则说明、回测报告和可以直接复制到聚宽（JoinQuant）运行的代码。</p>
 <div class="stats"><span><b>12</b> 个策略</span><span><b>13</b> 份报告</span><span><b>51</b> 个代码文件</span><span><b>8</b> 份说明文档</span></div>
 <nav class="catnav"><a href="#dividend"><span class="dot c-dividend"></span>股息率策略<small>5</small></a><a href="#trend"><span class="dot c-trend"></span>趋势策略<small>4</small></a><a href="#news"><span class="dot c-news"></span>消息股策略<small>3</small></a></nav></header>
-<section class="cat" id="dividend"><div class="cathead"><h2><span class="dot c-dividend"></span>股息率策略 <small>5</small></h2><p>围绕银行、煤炭、石油石化等高股息股：用股息率判断贵贱来买卖或定仓位，或在高股息板块里顺势选股。</p></div>
+<section class="cat" id="dividend"><div class="cathead"><h2><span class="dot c-dividend"></span>股息率策略 <small>5</small></h2><p>主要用于银行、煤炭、石油石化等高股息股。</p></div>
 <div class="cards"><a class="card" href="s/div-rotation.html"><div class="chips"><span class="chip">已回测 · 聚宽实测</span></div>
 <h3>股息率区间轮动策略</h3><p>20 家千亿银行，每只按自己的「最常见股息率区间」买卖：股息率高于区间上限买入，跌破下限卖出，最多持 2 只轮动。</p>
 <div class="cm"><span class="cmk">2023 年至今收益率</span><span class="cmv">+319.5%</span></div>
@@ -34,7 +34,7 @@
 <div class="cnt">报告 3 · 代码 1 · 数据 2</div></a><a class="card" href="s/sector-momentum.html"><div class="chips"><span class="chip">本地测算</span></div>
 <h3>板块顺势策略（煤炭 / 石油石化）</h3><p>把银行股顺势规则搬到其他申万一级板块。煤炭、石油石化有效，钢铁略好，有色金属、公用事业跑输。</p>
 <div class="cm"><span class="cmk">2023 年至今收益率</span><span class="cmv">+53.6%</span></div>
-<div class="cnt">报告 1 · 代码 2 · 数据 2</div></a></div></section><section class="cat" id="trend"><div class="cathead"><h2><span class="dot c-trend"></span>趋势策略 <small>4</small></h2><p>强者恒强：买离高点近、均线多头、突破的股票，跌出排名或破位就卖。</p></div>
+<div class="cnt">报告 1 · 代码 2 · 数据 2</div></a></div></section><section class="cat" id="trend"><div class="cathead"><h2><span class="dot c-trend"></span>趋势策略 <small>4</small></h2><p>根据行情变动，分为上行期、下行期、震荡期策略。</p></div>
 <div class="cards"><a class="card" href="s/ma-score.html"><div class="chips"><span class="chip">聚宽代码 · 多版本迭代</span></div>
 <h3>均线多头评分策略</h3><p>均线多头排列的股票按六项指标打分，评分 ≥90 买入；死叉、评分跌破、止损或回撤就卖。</p>
 <div class="cm"><span class="cmk">2023 年至今收益率</span><span class="cmv">无</span></div>
@@ -47,7 +47,7 @@
 <div class="cnt">代码 4 · 文档 1</div></a><a class="card" href="s/turtle.html"><div class="chips"><span class="chip">设计 + 聚宽代码</span></div>
 <h3>海龟交易法则</h3><p>经典通道突破趋势跟踪，按 ATR 波动率标准化仓位，适配 A 股只做多。</p>
 <div class="cm"><span class="cmk">2023 年至今收益率</span><span class="cmv">无</span></div>
-<div class="cnt">代码 3 · 文档 1</div></a></div></section><section class="cat" id="news"><div class="cathead"><h2><span class="dot c-news"></span>消息股策略 <small>3</small></h2><p>围绕消息驱动的自选股和热点板块做中短线：均线确认入场，大盘顶背离和热点退潮时撤退。</p></div>
+<div class="cnt">代码 3 · 文档 1</div></a></div></section><section class="cat" id="news"><div class="cathead"><h2><span class="dot c-news"></span>消息股策略 <small>3</small></h2><p>围绕消息驱动的自选股做中短线。</p></div>
 <div class="cards"><a class="card" href="s/news-midterm.html"><div class="chips"><span class="chip">聚宽代码 · V1 / V2</span></div>
 <h3>消息股中期策略（中短线趋势跟踪）</h3><p>在消息股自选池里做中短线：站上 5 日线半仓试探、金叉加满；大盘顶背离时减仓并禁止买入 10 天。</p>
 <div class="cm"><span class="cmk">2023 年至今收益率</span><span class="cmv">无</span></div>
@@ -59,6 +59,12 @@
 <div class="cm"><span class="cmk">2023 年至今收益率</span><span class="cmv">无</span></div>
 <div class="cnt">代码 1 · 文档 1</div></a></div></section>
 </main>
+<script>
+/* 返回键：从本站页面进来就回到上一页（保留原来的滚动位置），直接打开时跳到 href */
+document.querySelectorAll("[data-back]").forEach(a => a.addEventListener("click", e => {
+  try { if (document.referrer && new URL(document.referrer).origin === location.origin && history.length > 1) { e.preventDefault(); history.back(); } } catch (err) {}
+}));
+</script>
 <footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-16</div></footer>
 </body>
 </html>

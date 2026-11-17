@@ -14,7 +14,7 @@
 <header class="top"><div class="bar"><a class="brand" href="../index.html">量化策略库</a>
 <nav><a href="../index.html#dividend">股息率策略</a><a href="../index.html#trend">趋势策略</a><a href="../index.html#news">消息股策略</a></nav></div></header>
 <main class="wrap">
-<nav class="crumb"><a href="../index.html">策略库</a> / <a href="../index.html#trend">趋势策略</a></nav>
+<nav class="crumb"><a class="back" href="../index.html#trend" data-back>返回</a></nav>
 <header class="shead"><div class="chips"><span class="chip c-trend">趋势策略</span><span class="chip">聚宽代码 · 多版本迭代</span></div>
 <h1>均线多头评分策略</h1><p class="lede">均线多头排列的股票按六项指标打分，评分 ≥90 买入；死叉、评分跌破、止损或回撤就卖。</p></header>
 <div class="kpis"><div class="kpi"><div class="k">评分维度</div><div class="v">6 项</div><div class="s">路径效率、近 5 日涨幅、振幅、距 5 日高点、趋势确认、上行后平台期</div></div><div class="kpi"><div class="k">买入线</div><div class="v">≥ 90 分</div><div class="s">每只 20%，最多 5 只</div></div><div class="kpi"><div class="k">版本</div><div class="v">V1.0 – V2.4</div><div class="s">15 个版本，旧版保留</div></div></div>
@@ -27,6 +27,12 @@
 <section class="blk"><h2>说明文档 <small>1</small></h2><div class="files"><a class="file" href="../docs/ma-score/1.html"><span class="ftype t-md">文档</span><span class="fmain"><b>路径效率 2.0 计算说明</b><span>在线阅读 · 原文件 MD</span></span><span class="fsize">3 KB</span></a></div></section>
 
 </main>
+<script>
+/* 返回键：从本站页面进来就回到上一页（保留原来的滚动位置），直接打开时跳到 href */
+document.querySelectorAll("[data-back]").forEach(a => a.addEventListener("click", e => {
+  try { if (document.referrer && new URL(document.referrer).origin === location.origin && history.length > 1) { e.preventDefault(); history.back(); } } catch (err) {}
+}));
+</script>
 <footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-16</div></footer>
 </body>
 </html>

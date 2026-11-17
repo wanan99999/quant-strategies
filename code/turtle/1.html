@@ -14,7 +14,7 @@
 <header class="top"><div class="bar"><a class="brand" href="../../index.html">量化策略库</a>
 <nav><a href="../../index.html#dividend">股息率策略</a><a href="../../index.html#trend">趋势策略</a><a href="../../index.html#news">消息股策略</a></nav></div></header>
 <main class="wrap">
-<nav class="crumb"><a href="../../index.html">策略库</a> / <a href="../../index.html#trend">趋势策略</a> / <a href="../../s/turtle.html">海龟交易法则</a></nav>
+<nav class="crumb"><a class="back" href="../../s/turtle.html" data-back>返回</a></nav>
 <section class="codehead"><h1>海龟交易法则 · 交易模块</h1><p class="sub">海龟交易法则策略（Turtle Trading）—— 第二部分：交易策略 (聚宽 JoinQuant) 【主策略入口】</p><p class="sub2">职责：入场（通道突破）、金字塔加仓、出场（2N止损 / 通道退出），并串联选股与风控。</p>
 <div class="vers"><a class="vchip on" href="1.html">交易模块</a><a class="vchip" href="2.html">选股模块</a><a class="vchip" href="3.html">风控模块</a></div>
 <div class="tools"><span class="mono">海龟_交易策略.py · 269 行 · 12 KB</span><span class="grow"></span>
@@ -831,6 +831,12 @@ document.getElementById("copy").addEventListener("click", async e => { const b =
   b.textContent = "已复制"; setTimeout(() => b.textContent = "复制代码", 1500); });
 </script>
 </main>
+<script>
+/* 返回键：从本站页面进来就回到上一页（保留原来的滚动位置），直接打开时跳到 href */
+document.querySelectorAll("[data-back]").forEach(a => a.addEventListener("click", e => {
+  try { if (document.referrer && new URL(document.referrer).origin === location.origin && history.length > 1) { e.preventDefault(); history.back(); } } catch (err) {}
+}));
+</script>
 <footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-16</div></footer>
 </body>
 </html>

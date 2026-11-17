@@ -180,6 +180,12 @@ def page(title, body, depth=0, desc=""):
 <main class="wrap">
 {body}
 </main>
+<script>
+/* 返回键：从本站页面进来就回到上一页（保留原来的滚动位置），直接打开时跳到 href */
+document.querySelectorAll("[data-back]").forEach(a => a.addEventListener("click", e => {{
+  try {{ if (document.referrer && new URL(document.referrer).origin === location.origin && history.length > 1) {{ e.preventDefault(); history.back(); }} }} catch (err) {{}}
+}}));
+</script>
 <footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 {TODAY}</div></footer>
 </body>
 </html>
@@ -229,7 +235,7 @@ def build():
                              f'<a href="../{u("files", slug, fn)}" download>下载</a></td></tr>')
         for idx, ver, fn, sz, t, title_line, detail in code_items:
             others = "".join(f'<a class="vchip{" on" if j == idx else ""}" href="{j+1}.html">{E(v)}</a>' for j, v, *_ in code_items)
-            body = f"""<nav class="crumb"><a href="../../index.html">策略库</a> / <a href="../../index.html#{st['cat']}">{dict((k, n) for k, n, _ in CATS)[st['cat']]}</a> / <a href="../../s/{slug}.html">{E(st['title'])}</a></nav>
+            body = f"""<nav class="crumb"><a class="back" href="../../s/{slug}.html" data-back>返回</a></nav>
 <section class="codehead"><h1>{E(st['title'])} · {E(ver)}</h1><p class="sub">{E(title_line)}</p>{f'<p class="sub2">{E(detail)}</p>' if detail and detail != title_line else ''}
 <div class="vers">{others}</div>
 <div class="tools"><span class="mono">{E(fn)} · {t.count(chr(10)) + 1} 行 · {human(sz)}</span><span class="grow"></span>
@@ -247,7 +253,7 @@ document.getElementById("copy").addEventListener("click", async e => {{ const b 
         for k, (src, nm) in enumerate(st["docs"]):
             ext = src.rsplit(".", 1)[1].lower(); fn, sz = copy(src); stats["d"] += 1
             inner = md2html(read_text(src)) if ext == "md" else docx2html(src)
-            body = f"""<nav class="crumb"><a href="../../index.html">策略库</a> / <a href="../../s/{slug}.html">{E(st['title'])}</a></nav>
+            body = f"""<nav class="crumb"><a class="back" href="../../s/{slug}.html" data-back>返回</a></nav>
 <div class="tools"><span class="mono">{E(fn)} · {human(sz)}</span><span class="grow"></span><a class="btn" href="../../{u('files', slug, fn)}" download>下载原文件</a></div>
 <article class="doc">{inner}</article>"""
             open(os.path.join(ddir, f"{k+1}.html"), "w", encoding="utf8").write(page(f"{nm} · {st['title']}", body, 2, nm))
@@ -263,7 +269,7 @@ document.getElementById("copy").addEventListener("click", async e => {{ const b 
         catname = dict((k, n) for k, n, _ in CATS)[st["cat"]]
         kp = "".join(f'<div class="kpi"><div class="k">{E(a)}</div><div class="v">{E(b)}</div><div class="s">{E(c)}</div></div>' for a, b, c in st["metrics"])
         sec = lambda title, inner: f'<section class="blk"><h2>{title}</h2>{inner}</section>' if inner else ""
-        body = f"""<nav class="crumb"><a href="../index.html">策略库</a> / <a href="../index.html#{st['cat']}">{catname}</a></nav>
+        body = f"""<nav class="crumb"><a class="back" href="../index.html#{st['cat']}" data-back>返回</a></nav>
 <header class="shead"><div class="chips"><span class="chip c-{st['cat']}">{catname}</span><span class="chip">{E(st['status'])}</span></div>
 <h1>{E(st['title'])}</h1><p class="lede">{E(st['tagline'])}</p></header>
 <div class="kpis">{kp}</div>
