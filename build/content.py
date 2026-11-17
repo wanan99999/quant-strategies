@@ -12,7 +12,7 @@ CATS = [
 # 每个策略：slug, cat, title, status, tagline, metrics[(标签, 数值, 说明)], rules[], notes[],
 #          reports[(路径, 名称, 说明)], code[(路径, 版本名, 说明 或 None=取文件头)], docs[(路径, 名称)], data[(路径, 名称)], links[(url, 名称)]
 S = [
- dict(slug="div-rotation", ret="+319.5%", cat="dividend", title="股息率区间轮动策略", status="已回测 · 聚宽实测",
+ dict(slug="div-rotation", ret="+105.7%", cat="dividend", title="股息率区间轮动策略", status="已回测 · 聚宽实测",
   tagline="20 家千亿银行，每只按自己的「最常见股息率区间」买卖：股息率高于区间上限买入，跌破下限卖出，最多持 2 只轮动。",
   metrics=[("V1.2 聚宽实测（2023-01 至 2026-10）", "+319.5%", "年化 47.5% · 最大回撤 11.1% · 夏普 2.52"),
            ("只用上一年数据（V2 口径，本地）", "约 +106%", "2023–2026 逐年连乘"),
