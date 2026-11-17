@@ -41,10 +41,12 @@ h2 { font-family: var(--f-display); font-size: 21px; line-height: 1.4; margin: 0
 .cat { display: grid; gap: 14px } .cathead { display: grid; gap: 4px } .cathead h2 { display: flex; align-items: center; gap: 10px } .cathead p { margin: 0; color: var(--ink-2) }
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px }
 .card { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 16px 18px; display: grid; gap: 8px; align-content: start; color: var(--ink); transition: border-color .15s, transform .15s }
+/* 同一行卡片共用行轨道：描述长短不同，分割线仍在同一高度 */
+@supports (grid-template-rows: subgrid) { .card { grid-row: span 5; grid-template-rows: subgrid; row-gap: 8px; align-content: stretch } .card p { align-self: start } }
 .card:hover { text-decoration: none; border-color: var(--accent); transform: translateY(-1px) }
 .card h3 { margin: 0; font-size: 17px; line-height: 1.4 } .card p { margin: 0; color: var(--ink-2); font-size: 13.5px; line-height: 1.6 }
 .cm { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; border-top: 1px dashed var(--rule); padding-top: 8px; margin-top: 2px }
-.cmk { font-size: 12.5px; color: var(--ink-3) } .cmv { font-family: var(--f-mono); font-size: 17px; white-space: nowrap }
+.cmk { font-size: 12.5px; color: var(--ink-3) } .cmv { font-family: var(--f-body); font-size: 17px; white-space: nowrap }
 .cnt { font-size: 12px; color: var(--ink-3) }
 .empty { color: var(--ink-3) }
 /* chips */

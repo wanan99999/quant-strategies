@@ -277,10 +277,9 @@ document.getElementById("copy").addEventListener("click", async e => {{ const b 
 {sec(f"数据 <small>{len(data_html)}</small>", '<div class="files">' + "".join(data_html) + "</div>" if data_html else "")}"""
         os.makedirs(os.path.join(ROOT, "s"), exist_ok=True)
         open(os.path.join(ROOT, "s", f"{slug}.html"), "w", encoding="utf8").write(page(st["title"] + " · 量化策略库", body, 1, st["tagline"]))
-        m0 = st["metrics"][0]
         cards[st["cat"]].append(f"""<a class="card" href="s/{slug}.html"><div class="chips"><span class="chip">{E(st['status'])}</span></div>
 <h3>{E(st['title'])}</h3><p>{E(st['tagline'])}</p>
-<div class="cm"><span class="cmk">{E(m0[0])}</span><span class="cmv">{E(m0[1])}</span></div>
+<div class="cm"><span class="cmk">2023 年至今收益率</span><span class="cmv">{E(st['ret'] or '无')}</span></div>
 <div class="cnt">{"报告 %d · " % len(st['reports']) if st['reports'] else ""}代码 {len(st['code'])}{" · 文档 %d" % len(st['docs']) if st['docs'] else ""}{" · 数据 %d" % len(st['data']) if st['data'] else ""}</div></a>""")
     secs = ""
     for k, n, d in CATS:
