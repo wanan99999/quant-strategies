@@ -17,8 +17,8 @@
 <header class="hero"><h1>量化策略库</h1>
 <p class="lede">我做过的 A 股策略：每个策略有规则说明、回测报告和可以直接复制到聚宽（JoinQuant）运行的代码。</p>
 <div class="stats"><span><b>12</b> 个策略</span><span><b>13</b> 份报告</span><span><b>51</b> 个代码文件</span><span><b>8</b> 份说明文档</span></div>
-<nav class="catnav"><a href="#dividend"><span class="dot c-dividend"></span>股息率策略<small>3</small></a><a href="#trend"><span class="dot c-trend"></span>趋势策略<small>6</small></a><a href="#news"><span class="dot c-news"></span>消息股策略<small>3</small></a></nav></header>
-<section class="cat" id="dividend"><div class="cathead"><h2><span class="dot c-dividend"></span>股息率策略 <small>3</small></h2><p>用股息率判断贵贱：股息率高时买、低时卖，或用股息率决定仓位。主要用于银行等高股息股。</p></div>
+<nav class="catnav"><a href="#dividend"><span class="dot c-dividend"></span>股息率策略<small>5</small></a><a href="#trend"><span class="dot c-trend"></span>趋势策略<small>4</small></a><a href="#news"><span class="dot c-news"></span>消息股策略<small>3</small></a></nav></header>
+<section class="cat" id="dividend"><div class="cathead"><h2><span class="dot c-dividend"></span>股息率策略 <small>5</small></h2><p>围绕银行、煤炭、石油石化等高股息股：用股息率判断贵贱来买卖或定仓位，或在高股息板块里顺势选股。</p></div>
 <div class="cards"><a class="card" href="s/div-rotation.html"><div class="chips"><span class="chip">已回测 · 聚宽实测</span></div>
 <h3>股息率区间轮动策略</h3><p>20 家千亿银行，每只按自己的「最常见股息率区间」买卖：股息率高于区间上限买入，跌破下限卖出，最多持 2 只轮动。</p>
 <div class="cm"><span class="cmk">2023 年至今收益率</span><span class="cmv">+319.5%</span></div>
@@ -28,14 +28,14 @@
 <div class="cnt">报告 1 · 代码 2 · 数据 1</div></a><a class="card" href="s/div-momentum-position.html"><div class="chips"><span class="chip">本地测算 · 待聚宽验证</span></div>
 <h3>银行股顺势 + 股息率定仓位</h3><p>买哪几只由顺势决定，买多少由股息率决定：20 家银行平均股息率 ≤3% 空仓、≥5% 满仓，中间线性加减。</p>
 <div class="cm"><span class="cmk">2023 年至今收益率</span><span class="cmv">+135.5%</span></div>
-<div class="cnt">报告 1 · 代码 1 · 数据 1</div></a></div></section><section class="cat" id="trend"><div class="cathead"><h2><span class="dot c-trend"></span>趋势策略 <small>6</small></h2><p>强者恒强：买离高点近、均线多头、突破的股票，跌出排名或破位就卖。</p></div>
-<div class="cards"><a class="card" href="s/bank-momentum.html"><div class="chips"><span class="chip">本地测算 · 最终版</span></div>
+<div class="cnt">报告 1 · 代码 1 · 数据 1</div></a><a class="card" href="s/bank-momentum.html"><div class="chips"><span class="chip">本地测算 · 最终版</span></div>
 <h3>银行股顺势策略</h3><p>银行股里强者恒强：持有离一年高点最近的 4 只，掉出前 6 名才卖，不追近期已大涨的。</p>
 <div class="cm"><span class="cmk">2023 年至今收益率</span><span class="cmv">+134.3%</span></div>
 <div class="cnt">报告 3 · 代码 1 · 数据 2</div></a><a class="card" href="s/sector-momentum.html"><div class="chips"><span class="chip">本地测算</span></div>
 <h3>板块顺势策略（煤炭 / 石油石化）</h3><p>把银行股顺势规则搬到其他申万一级板块。煤炭、石油石化有效，钢铁略好，有色金属、公用事业跑输。</p>
 <div class="cm"><span class="cmk">2023 年至今收益率</span><span class="cmv">+53.6%</span></div>
-<div class="cnt">报告 1 · 代码 2 · 数据 2</div></a><a class="card" href="s/ma-score.html"><div class="chips"><span class="chip">聚宽代码 · 多版本迭代</span></div>
+<div class="cnt">报告 1 · 代码 2 · 数据 2</div></a></div></section><section class="cat" id="trend"><div class="cathead"><h2><span class="dot c-trend"></span>趋势策略 <small>4</small></h2><p>强者恒强：买离高点近、均线多头、突破的股票，跌出排名或破位就卖。</p></div>
+<div class="cards"><a class="card" href="s/ma-score.html"><div class="chips"><span class="chip">聚宽代码 · 多版本迭代</span></div>
 <h3>均线多头评分策略</h3><p>均线多头排列的股票按六项指标打分，评分 ≥90 买入；死叉、评分跌破、止损或回撤就卖。</p>
 <div class="cm"><span class="cmk">2023 年至今收益率</span><span class="cmv">无</span></div>
 <div class="cnt">代码 14 · 文档 1</div></a><a class="card" href="s/adaptive-momentum.html"><div class="chips"><span class="chip">设计 + 聚宽代码</span></div>
