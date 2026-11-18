@@ -282,11 +282,17 @@ document.getElementById("copy").addEventListener("click", async e => {{ const b 
 {sec(f"策略代码 <small>{len(code_rows)} 个文件 · 聚宽 JoinQuant</small>", '<div class="tblwrap"><table class="ctbl"><thead><tr><th>版本</th><th>说明</th><th>长度</th><th></th></tr></thead><tbody>' + "".join(code_rows) + "</tbody></table></div>" if code_rows else "")}
 {sec(f"说明文档 <small>{len(doc_html)}</small>", '<div class="files">' + "".join(doc_html) + "</div>" if doc_html else "")}
 {sec(f"数据 <small>{len(data_html)}</small>", '<div class="files">' + "".join(data_html) + "</div>" if data_html else "")}"""
+        def finfo(src, fn=None):
+            fn = fn or os.path.basename(src)
+            return dict(ext=src.rsplit(".", 1)[1].lower(), size=human(os.path.getsize(src)), url="files/%s/%s" % (slug, fn))
         feed.append(dict(slug=slug, cat=st["cat"], catname=catname, title=st["title"], status=st["status"], ret=st.get("ret") or "",
             tagline=st["tagline"], metrics=[list(m) for m in st["metrics"]], rules=st["rules"], notes=st["notes"],
-            reports=[dict(name=nm, desc=ds, url="files/%s/%s" % (slug, os.path.basename(src) if not src.endswith("index.html") else "板块顺势可视化报告.html")) for src, nm, ds in st["reports"]],
-            code=[dict(ver=ver, detail=detail or title_line, lines=t.count(chr(10)) + 1, url="files/%s/%s" % (slug, fn)) for idx, ver, fn, sz, t, title_line, detail in code_items],
-            docs=[dict(name=nm, url="docs/%s/%d.html" % (slug, k + 1)) for k, (src, nm) in enumerate(st["docs"])]))
+            reports=[dict(finfo(src, os.path.basename(src) if not src.endswith("index.html") else "板块顺势可视化报告.html"), name=nm, desc=ds) for src, nm, ds in st["reports"]],
+            links=[dict(url=url, name=nm) for url, nm in st["links"]],
+            code=[dict(ver=ver, title=title_line, detail=detail or title_line, lines=t.count(chr(10)) + 1, size=human(sz), file=fn,
+                       url="files/%s/%s" % (slug, fn), page="code/%s/%d.html" % (slug, idx + 1)) for idx, ver, fn, sz, t, title_line, detail in code_items],
+            docs=[dict(finfo(src), name=nm, page="docs/%s/%d.html" % (slug, k + 1)) for k, (src, nm) in enumerate(st["docs"])],
+            data=[dict(finfo(src), name=nm) for src, nm in st["data"]]))
         os.makedirs(os.path.join(ROOT, "s"), exist_ok=True)
         open(os.path.join(ROOT, "s", f"{slug}.html"), "w", encoding="utf8").write(page(st["title"] + " · 量化策略库", body, 1, st["tagline"]))
         cards[st["cat"]].append((float(st["ret"].replace("%", "")) if st.get("ret") else float("-inf"), f"""<a class="card" href="s/{slug}.html"><div class="chips"><span class="chip">{E(st['status'])}</span></div>
@@ -307,7 +313,7 @@ document.getElementById("copy").addEventListener("click", async e => {{ const b 
     open(os.path.join(ROOT, "index.html"), "w", encoding="utf8").write(page("量化策略库", body, 0, "A 股量化策略：股息率、趋势、消息股策略的报告与聚宽代码"))
     order = {k: i for i, (k, _, _) in enumerate(CATS)}
     feed.sort(key=lambda x: (order[x["cat"]], -(float(x["ret"].replace("%", "")) if x["ret"] else float("-inf"))))
-    json.dump(dict(updated=datetime.datetime.now().strftime("%Y-%m-%d %H:%M"), cats=[dict(id=k, name=n, desc=d) for k, n, d in CATS], strategies=feed),
+    json.dump(dict(updated=datetime.datetime.now().strftime("%Y-%m-%d %H:%M"), today=TODAY, stats=stats, cats=[dict(id=k, name=n, desc=d) for k, n, d in CATS], strategies=feed),
               open(os.path.join(ROOT, "strategies.json"), "w", encoding="utf8"), ensure_ascii=False)
     open(os.path.join(ROOT, ".nojekyll"), "w").write("")
     print("done", stats)
