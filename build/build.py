@@ -297,9 +297,9 @@ document.getElementById("copy").addEventListener("click", async e => {{ const b 
         open(os.path.join(ROOT, "s", f"{slug}.html"), "w", encoding="utf8").write(page(st["title"] + " · 量化策略库", body, 1, st["tagline"]))
         cards[st["cat"]].append((float(st["ret"].replace("%", "")) if st.get("ret") else float("-inf"), f"""<a class="card" href="s/{slug}.html"><div class="chips"><span class="chip">{E(st['status'])}</span></div>
 <h3>{E(st['title'])}</h3><p>{E(st['tagline'])}</p>
-<div class="cm"><span class="cmk">2023 年至今收益率</span><span class="cmv">{E(st['ret'] or '无')}</span></div>
+<div class="cm"><span class="cmk">2023 年至今年化收益率</span><span class="cmv">{E(st['ret'] or '无')}</span></div>
 <div class="cnt">{"报告 %d · " % len(st['reports']) if st['reports'] else ""}代码 {len(st['code'])}{" · 文档 %d" % len(st['docs']) if st['docs'] else ""}{" · 数据 %d" % len(st['data']) if st['data'] else ""}</div></a>"""))
-    # 卡片按「2023 年至今收益率」从高到低排，没有收益率的放最后（同类保持原顺序）
+    # 卡片按「2023 年至今年化收益率」从高到低排，没有收益率的放最后（同类保持原顺序）
     for k in cards: cards[k] = [h for _, h in sorted(cards[k], key=lambda x: -x[0])]
     secs = ""
     for k, n, d in CATS:
