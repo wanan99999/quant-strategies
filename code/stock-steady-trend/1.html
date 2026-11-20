@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>个股稳健趋势完整版 V1.0 代码</title>
-<meta name="description" content="个股稳健趋势完整版 V1.0 —— 聚宽回测代码（方向 A：选股 + 轮换 + 仓位 + 风控）">
+<title>大盘股熊市震荡市稳健策略 V1.1 代码</title>
+<meta name="description" content="大盘股熊市震荡市稳健策略 V1.1 —— 聚宽回测代码（原名「个股稳健趋势完整版」，方向 A：选股 + 轮换 + 仓位 + 风控）">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="../../assets/site.css">
@@ -15,10 +15,10 @@
 <nav><a href="../../index.html#dividend">股息率策略</a><a href="../../index.html#trend">趋势策略</a><a href="../../index.html#news">消息股策略</a></nav></div></header>
 <main class="wrap">
 <nav class="crumb"><a class="back" href="../../s/stock-steady-trend.html" data-back>返回</a></nav>
-<section class="codehead"><h1>个股稳健趋势完整版 · V1.0</h1><p class="sub">个股稳健趋势完整版 V1.0 —— 聚宽回测代码（方向 A：选股 + 轮换 + 仓位 + 风控）</p><p class="sub2">首版：股票池、打分、轮换、波动率控仓、止损与回撤风控五个模块</p>
-<div class="vers"><a class="vchip on" href="1.html">V1.0</a></div>
-<div class="tools"><span class="mono">个股稳健趋势完整版.py · 223 行 · 10 KB</span><span class="grow"></span>
-<button class="btn" id="copy" type="button">复制代码</button><a class="btn" href="../../files/stock-steady-trend/%E4%B8%AA%E8%82%A1%E7%A8%B3%E5%81%A5%E8%B6%8B%E5%8A%BF%E5%AE%8C%E6%95%B4%E7%89%88.py" download>下载 .py</a></div></section>
+<section class="codehead"><h1>大盘股熊市震荡市稳健策略 · V1.1</h1><p class="sub">大盘股熊市震荡市稳健策略 V1.1 —— 聚宽回测代码（原名「个股稳健趋势完整版」，方向 A：选股 + 轮换 + 仓位 + 风控）</p><p class="sub2">修复科创板市价单需保护价、高价股不足 1 手报错；改名，规则不变</p>
+<div class="vers"><a class="vchip on" href="1.html">V1.1</a><a class="vchip" href="2.html">V1.0</a></div>
+<div class="tools"><span class="mono">大盘股熊市震荡市稳健策略_V1.1.py · 254 行 · 12 KB</span><span class="grow"></span>
+<button class="btn" id="copy" type="button">复制代码</button><a class="btn" href="../../files/stock-steady-trend/%E5%A4%A7%E7%9B%98%E8%82%A1%E7%86%8A%E5%B8%82%E9%9C%87%E8%8D%A1%E5%B8%82%E7%A8%B3%E5%81%A5%E7%AD%96%E7%95%A5_V1.1.py" download>下载 .py</a></div></section>
 <div class="codebox"><div class="hl"><table class="hltable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">  1</span>
 <span class="normal">  2</span>
 <span class="normal">  3</span>
@@ -240,9 +240,47 @@
 <span class="normal">219</span>
 <span class="normal">220</span>
 <span class="normal">221</span>
-<span class="normal">222</span></pre></div></td><td class="code"><div><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span></pre></div></td><td class="code"><div><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">个股稳健趋势完整版 V1.0 —— 聚宽回测代码（方向 A：选股 + 轮换 + 仓位 + 风控）</span>
+<span class="sd">大盘股熊市震荡市稳健策略 V1.1 —— 聚宽回测代码（原名「个股稳健趋势完整版」，方向 A：选股 + 轮换 + 仓位 + 风控）</span>
+
+<span class="sd">V1.1 修改（相对 V1.0）：</span>
+<span class="sd">    1. 所有委托改为带保护价的市价单：买入保护价 = 当前价 × 1.02（不超过涨停价），卖出 = 当前价 × 0.98（不低于跌停价）。</span>
+<span class="sd">       修复科创板（688）报错「科创板市价单需要指定保护限价」，之前科创板股票一直买不进。</span>
+<span class="sd">    2. 下单前按 100 股取整：调整量不足 1 手就不下单（清仓卖出除外）。修复贵州茅台这类高价股</span>
+<span class="sd">       小幅加仓时报错「开仓数量不能小于 100」。</span>
+<span class="sd">    3. 策略更名为「大盘股熊市震荡市稳健策略」，规则和参数不变。</span>
 
 <span class="sd">① 股票池（每次调仓时重算）</span>
 <span class="sd">    上市满 365 天、非 ST、非停牌、非北交所 → 流通市值前 800（≈中证800）</span>
@@ -279,7 +317,7 @@
 <span class="nb">sum</span><span class="p">,</span> <span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="nb">abs</span><span class="p">,</span> <span class="nb">any</span><span class="p">,</span> <span class="nb">all</span><span class="p">,</span> <span class="nb">round</span> <span class="o">=</span> <span class="p">(</span><span class="n">builtins</span><span class="o">.</span><span class="n">sum</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">abs</span><span class="p">,</span>
                                        <span class="n">builtins</span><span class="o">.</span><span class="n">any</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">all</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">round</span><span class="p">)</span>
 
-<span class="n">VERSION</span> <span class="o">=</span> <span class="s2">&quot;个股稳健趋势完整版 V1.0&quot;</span>
+<span class="n">VERSION</span> <span class="o">=</span> <span class="s2">&quot;大盘股熊市震荡市稳健策略 V1.1&quot;</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">Cfg</span><span class="p">:</span>
@@ -400,6 +438,31 @@
     <span class="k">return</span> <span class="n">pick</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">place</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">target_value</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;V1.1：带保护价的市价单 + 按手取整。target_value = 0 表示清仓。&quot;&quot;&quot;</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">cd</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
+    <span class="n">price</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">last_price</span>
+    <span class="k">if</span> <span class="n">price</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">price</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">d</span><span class="o">.</span><span class="n">paused</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">positions</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">total_amount</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">pos</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">target_value</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cur</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">can_sell</span><span class="p">(</span><span class="n">cd</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+            <span class="n">order_target</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">MarketOrderStyle</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">price</span> <span class="o">*</span> <span class="mf">0.98</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">low_limit</span><span class="p">)))</span>
+        <span class="k">return</span>
+    <span class="n">tgt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">target_value</span> <span class="o">/</span> <span class="n">price</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+    <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;688&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">cur</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">tgt</span> <span class="o">&lt;</span> <span class="mi">200</span><span class="p">:</span>   <span class="c1"># 科创板首次买入至少 200 股</span>
+        <span class="k">return</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">tgt</span> <span class="o">-</span> <span class="n">cur</span>
+    <span class="k">if</span> <span class="n">delta</span> <span class="o">&gt;=</span> <span class="mi">100</span> <span class="ow">and</span> <span class="n">can_buy</span><span class="p">(</span><span class="n">cd</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="n">order</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">MarketOrderStyle</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">price</span> <span class="o">*</span> <span class="mf">1.02</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">high_limit</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="n">delta</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mi">100</span> <span class="ow">and</span> <span class="n">can_sell</span><span class="p">(</span><span class="n">cd</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="n">sell</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="o">-</span><span class="n">delta</span><span class="p">,</span> <span class="n">pos</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">closeable_amount</span><span class="p">)</span>
+        <span class="n">sell</span> <span class="o">=</span> <span class="n">sell</span> <span class="k">if</span> <span class="n">sell</span> <span class="o">==</span> <span class="n">cur</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">sell</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+        <span class="k">if</span> <span class="n">sell</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">order</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="o">-</span><span class="n">sell</span><span class="p">,</span> <span class="n">MarketOrderStyle</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">price</span> <span class="o">*</span> <span class="mf">0.98</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">low_limit</span><span class="p">)))</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">rebalance_to</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">picks</span><span class="p">,</span> <span class="n">expo</span><span class="p">):</span>
     <span class="n">total</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">total_value</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">CASH_BUFFER</span><span class="p">)</span>
     <span class="n">tv</span> <span class="o">=</span> <span class="n">total</span> <span class="o">*</span> <span class="n">expo</span> <span class="o">/</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">HOLD_N</span>
@@ -409,15 +472,14 @@
         <span class="k">if</span> <span class="n">pos</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">total_amount</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="k">if</span> <span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">picks</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">can_sell</span><span class="p">(</span><span class="n">cd</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
-                <span class="n">order_target_value</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">pos</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;</span> <span class="n">tv</span> <span class="o">*</span> <span class="mf">1.05</span> <span class="ow">and</span> <span class="n">can_sell</span><span class="p">(</span><span class="n">cd</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
-            <span class="n">order_target_value</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">tv</span><span class="p">)</span>
+            <span class="n">place</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">pos</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;</span> <span class="n">tv</span> <span class="o">*</span> <span class="mf">1.05</span><span class="p">:</span>
+            <span class="n">place</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">tv</span><span class="p">)</span>
     <span class="c1"># 再买</span>
     <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">picks</span><span class="p">:</span>
         <span class="n">cur</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">pos</span> <span class="k">else</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="n">cur</span> <span class="o">&lt;</span> <span class="n">tv</span> <span class="o">*</span> <span class="mf">0.95</span> <span class="ow">and</span> <span class="n">can_buy</span><span class="p">(</span><span class="n">cd</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
-            <span class="n">order_target_value</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">tv</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cur</span> <span class="o">&lt;</span> <span class="n">tv</span> <span class="o">*</span> <span class="mf">0.95</span><span class="p">:</span>
+            <span class="n">place</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">tv</span><span class="p">)</span>
 
 
 <span class="c1"># ---------------- 主流程 ----------------</span>
@@ -429,7 +491,7 @@
         <span class="n">p</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">total_amount</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">avg_cost</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">cd</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">last_price</span> <span class="o">/</span> <span class="n">p</span><span class="o">.</span><span class="n">avg_cost</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">Cfg</span><span class="o">.</span><span class="n">STOP_LOSS</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">can_sell</span><span class="p">(</span><span class="n">cd</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
-                <span class="n">order_target_value</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">place</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">picks</span><span class="p">:</span>
                     <span class="n">g</span><span class="o">.</span><span class="n">picks</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;止损 </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> 亏损 </span><span class="si">%.1f%%</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">cd</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">cd</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">last_price</span> <span class="o">/</span> <span class="n">p</span><span class="o">.</span><span class="n">avg_cost</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">))</span>
@@ -466,7 +528,14 @@
 </div>
 <textarea id="raw" hidden># -*- coding: utf-8 -*-
 &quot;&quot;&quot;
-个股稳健趋势完整版 V1.0 —— 聚宽回测代码（方向 A：选股 + 轮换 + 仓位 + 风控）
+大盘股熊市震荡市稳健策略 V1.1 —— 聚宽回测代码（原名「个股稳健趋势完整版」，方向 A：选股 + 轮换 + 仓位 + 风控）
+
+V1.1 修改（相对 V1.0）：
+    1. 所有委托改为带保护价的市价单：买入保护价 = 当前价 × 1.02（不超过涨停价），卖出 = 当前价 × 0.98（不低于跌停价）。
+       修复科创板（688）报错「科创板市价单需要指定保护限价」，之前科创板股票一直买不进。
+    2. 下单前按 100 股取整：调整量不足 1 手就不下单（清仓卖出除外）。修复贵州茅台这类高价股
+       小幅加仓时报错「开仓数量不能小于 100」。
+    3. 策略更名为「大盘股熊市震荡市稳健策略」，规则和参数不变。
 
 ① 股票池（每次调仓时重算）
     上市满 365 天、非 ST、非停牌、非北交所 → 流通市值前 800（≈中证800）
@@ -503,7 +572,7 @@ import pandas as pd
 sum, min, max, abs, any, all, round = (builtins.sum, builtins.min, builtins.max, builtins.abs,
                                        builtins.any, builtins.all, builtins.round)
 
-VERSION = &quot;个股稳健趋势完整版 V1.0&quot;
+VERSION = &quot;大盘股熊市震荡市稳健策略 V1.1&quot;
 
 
 class Cfg:
@@ -624,6 +693,31 @@ def select(context, sc):
     return pick
 
 
+def place(context, cd, s, target_value):
+    &quot;&quot;&quot;V1.1：带保护价的市价单 + 按手取整。target_value = 0 表示清仓。&quot;&quot;&quot;
+    d = cd[s]
+    price = d.last_price
+    if price is None or price &lt;= 0 or d.paused:
+        return
+    pos = context.portfolio.positions
+    cur = pos[s].total_amount if s in pos else 0
+    if target_value &lt;= 0:
+        if cur &gt; 0 and can_sell(cd, s):
+            order_target(s, 0, MarketOrderStyle(max(price * 0.98, d.low_limit)))
+        return
+    tgt = int(target_value / price / 100) * 100
+    if s.startswith(&quot;688&quot;) and cur == 0 and tgt &lt; 200:   # 科创板首次买入至少 200 股
+        return
+    delta = tgt - cur
+    if delta &gt;= 100 and can_buy(cd, s):
+        order(s, delta, MarketOrderStyle(min(price * 1.02, d.high_limit)))
+    elif delta &lt;= -100 and can_sell(cd, s):
+        sell = min(-delta, pos[s].closeable_amount)
+        sell = sell if sell == cur else int(sell / 100) * 100
+        if sell &gt; 0:
+            order(s, -sell, MarketOrderStyle(max(price * 0.98, d.low_limit)))
+
+
 def rebalance_to(context, cd, picks, expo):
     total = context.portfolio.total_value * (1 - Cfg.CASH_BUFFER)
     tv = total * expo / Cfg.HOLD_N
@@ -633,15 +727,14 @@ def rebalance_to(context, cd, picks, expo):
         if pos[s].total_amount == 0:
             continue
         if s not in picks:
-            if can_sell(cd, s):
-                order_target_value(s, 0)
-        elif pos[s].value &gt; tv * 1.05 and can_sell(cd, s):
-            order_target_value(s, tv)
+            place(context, cd, s, 0)
+        elif pos[s].value &gt; tv * 1.05:
+            place(context, cd, s, tv)
     # 再买
     for s in picks:
         cur = pos[s].value if s in pos else 0
-        if cur &lt; tv * 0.95 and can_buy(cd, s):
-            order_target_value(s, tv)
+        if cur &lt; tv * 0.95:
+            place(context, cd, s, tv)
 
 
 # ---------------- 主流程 ----------------
@@ -653,7 +746,7 @@ def trade(context):
         p = pos[s]
         if p.total_amount &gt; 0 and p.avg_cost &gt; 0 and cd[s].last_price / p.avg_cost - 1 &lt; -Cfg.STOP_LOSS:
             if can_sell(cd, s):
-                order_target_value(s, 0)
+                place(context, cd, s, 0)
                 if s in g.picks:
                     g.picks.remove(s)
                 log.info(&quot;止损 %s %s 亏损 %.1f%%&quot; % (s, cd[s].name, (cd[s].last_price / p.avg_cost - 1) * 100))
