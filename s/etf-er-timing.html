@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>宽基 ETF 路径效率择时 · 量化策略库</title>
+<meta name="description" content="沪深300、中证500、中证1000、创业板四只 ETF 各占 1/4：过去 20 天走得「直」且站上 20 日线就持有，否则空仓买货币基金。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 22l6-7 5 4 9-11' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="top"><div class="bar"><a class="brand" href="../index.html">量化策略库</a>
+<nav><a href="../index.html#dividend">股息率策略</a><a href="../index.html#trend">趋势策略</a><a href="../index.html#news">消息股策略</a></nav></div></header>
+<main class="wrap">
+<nav class="crumb"><a class="back" href="../index.html#trend" data-back>返回</a></nav>
+<header class="shead"><div class="chips"><span class="chip c-trend">趋势策略</span><span class="chip">已回测 · 聚宽实测</span></div>
+<h1>宽基 ETF 路径效率择时</h1><p class="lede">沪深300、中证500、中证1000、创业板四只 ETF 各占 1/4：过去 20 天走得「直」且站上 20 日线就持有，否则空仓买货币基金。</p></header>
+<div class="kpis"><div class="kpi"><div class="k">聚宽实测（2023-01 至 2026-11）</div><div class="v">+35.6%</div><div class="s">年化 8.5% · 最大回撤 14.8%</div></div><div class="kpi"><div class="k">本地 2011-06 起（指数全收益）</div><div class="v">年化 +10.7%</div><div class="s">最大回撤 -16.8% · 夏普 0.75；四指数买入持有 +5.0% / -62%</div></div><div class="kpi"><div class="k">样本外 2023 年起（本地）</div><div class="v">年化 +9.2%</div><div class="s">最大回撤 -13.6%；买入持有 +2.2%</div></div></div>
+<div class="cols">
+<section class="blk"><h2>规则要点</h2><ul class='bul'><li>路径效率 ER = (今天价 − 20 天前收盘) ÷ 20 天每日涨跌绝对值之和</li><li>ER &gt; 0.2 且价格 &gt; 20 日均线 → 持有该 ETF（总资产 1/4），否则卖出、这份资金买货币 ETF 511880</li><li>每天 14:50 用指数实时价算信号、当场下单；偏离目标市值 20% 以上才调整</li><li>四只 ETF：510300←沪深300、510500←中证500、512100←中证1000、159915←创业板指</li></ul></section>
+<section class="blk"><h2>结论与注意</h2><ul class='bul'><li>这是躲大跌的策略：平均只有约 28% 的时间持股，慢牛年份（2019–2021、2025）跑输持有。</li><li>23 种趋势规则里最稳；参数（窗口 10–20、阈值 0–0.3、均线 20/40）附近都有效。晚一天成交年化少约 3 个点。</li><li>沪深300 单独效果弱，收益主要来自中证1000 和创业板。弱点是 2024-10-08 这种急涨后急跌。</li><li>同一轮研究里，申万行业轮动和个股趋势选股（纯价格信号）都无效，回测表格放在「数据」里。</li></ul></section>
+</div>
+<section class="blk"><h2>报告 <small>1</small></h2><div class="files"><a class="file" href="../files/etf-er-timing/%E5%AE%BD%E5%9F%BAETF%E8%B7%AF%E5%BE%84%E6%95%88%E7%8E%87%E6%8B%A9%E6%97%B6_%E5%8F%AF%E8%A7%86%E5%8C%96%E6%8A%A5%E5%91%8A.html" target="_blank" rel="noopener"><span class="ftype t-html">网页</span><span class="fmain"><b>可视化报告</b><span>净值、回撤、四个指数、逐年、规则对比、参数平原、聚宽实测、当前信号</span></span><span class="fsize">139 KB</span></a></div></section>
+<section class="blk"><h2>策略代码 <small>1 个文件 · 聚宽 JoinQuant</small></h2><div class="tblwrap"><table class="ctbl"><thead><tr><th>版本</th><th>说明</th><th>长度</th><th></th></tr></thead><tbody><tr><td><a href="../code/etf-er-timing/1.html"><b>V1.0</b></a></td><td class="cn">四只宽基 ETF，资金各占 1/4，各自按自己跟踪的指数决定持有还是空仓：</td><td class="num">139 行</td><td class="act"><a href="../code/etf-er-timing/1.html">查看</a><a href="../files/etf-er-timing/%E5%AE%BD%E5%9F%BAETF%E8%B7%AF%E5%BE%84%E6%95%88%E7%8E%87%E6%8B%A9%E6%97%B6.py" download>下载</a></td></tr></tbody></table></div></section>
+
+<section class="blk"><h2>数据 <small>3</small></h2><div class="files"><a class="file" href="../files/etf-er-timing/%E5%AE%BD%E5%9F%BA%E6%8C%87%E6%95%B0%E8%B6%8B%E5%8A%BF%E6%8B%A9%E6%97%B6_%E5%9B%9E%E6%B5%8B.xlsx" download><span class="ftype t-xlsx">Excel</span><span class="fmain"><b>宽基指数趋势择时回测（行情状态 + 23 种规则 + 稳健性）</b><span>下载</span></span><span class="fsize">50 KB</span></a><a class="file" href="../files/etf-er-timing/%E7%94%B3%E4%B8%87%E8%A1%8C%E4%B8%9A%E8%BD%AE%E5%8A%A8_%E5%9B%9E%E6%B5%8B.xlsx" download><span class="ftype t-xlsx">Excel</span><span class="fmain"><b>相关研究：申万一级行业轮动（无效）</b><span>下载</span></span><span class="fsize">16 KB</span></a><a class="file" href="../files/etf-er-timing/%E4%B8%AA%E8%82%A1%E8%B6%8B%E5%8A%BF_%E5%9B%9E%E6%B5%8B.xlsx" download><span class="ftype t-xlsx">Excel</span><span class="fmain"><b>相关研究：个股趋势选股（纯趋势无效）</b><span>下载</span></span><span class="fsize">39 KB</span></a></div></section>
+</main>
+<script>
+/* 返回键：从本站页面进来就回到上一页（保留原来的滚动位置），直接打开时跳到 href */
+document.querySelectorAll("[data-back]").forEach(a => a.addEventListener("click", e => {
+  try { if (document.referrer && new URL(document.referrer).origin === location.origin && history.length > 1) { e.preventDefault(); history.back(); } } catch (err) {}
+}));
+</script>
+<footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-19</div></footer>
+</body>
+</html>
