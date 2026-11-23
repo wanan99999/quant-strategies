@@ -16,11 +16,14 @@ TODAY = datetime.date.today().isoformat()
 
 # ---------------------------------------------------------------- 读文件
 def read_text(p):
+    """读文本并统一成 LF 换行：CRLF 原样保留的话，Windows 文本模式写出会变成 CR CR LF，网页「复制代码」每行后多一个空行，反斜杠续行就断了"""
     b = open(p, "rb").read()
-    if b[:2] in (b"\xff\xfe", b"\xfe\xff"): return b.decode("utf-16")
-    if b[:3] == b"\xef\xbb\xbf": return b[3:].decode("utf8")
-    try: return b.decode("utf8")
-    except UnicodeDecodeError: return b.decode("gbk", errors="replace")
+    if b[:2] in (b"\xff\xfe", b"\xfe\xff"): t = b.decode("utf-16")
+    elif b[:3] == b"\xef\xbb\xbf": t = b[3:].decode("utf8")
+    else:
+        try: t = b.decode("utf8")
+        except UnicodeDecodeError: t = b.decode("gbk", errors="replace")
+    return t.replace("\r\n", "\n").replace("\r", "\n")
 
 def human(n):
     return f"{n/1024/1024:.1f} MB" if n >= 1024 * 1024 else f"{max(1, round(n/1024))} KB"
