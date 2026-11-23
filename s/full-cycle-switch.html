@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>全行情切换组合策略 · 量化策略库</title>
+<meta name="description" content="下行期、震荡期跑「大盘股熊市震荡市稳健策略」；中小盘一走出趋势，资金切到上行期个股（小市值 + 反转）或上行期板块（申万二级行业动量）。三个版本。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 22l6-7 5 4 9-11' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="top"><div class="bar"><a class="brand" href="../index.html">量化策略库</a>
+<nav><a href="../index.html#dividend">股息率策略</a><a href="../index.html#trend">趋势策略</a><a href="../index.html#news">消息股策略</a></nav></div></header>
+<main class="wrap">
+<nav class="crumb"><a class="back" href="../index.html#trend" data-back>返回</a></nav>
+<header class="shead"><div class="chips"><span class="chip c-trend">趋势策略</span><span class="chip">本地测算 · 待聚宽验证</span></div>
+<h1>全行情切换组合策略</h1><p class="lede">下行期、震荡期跑「大盘股熊市震荡市稳健策略」；中小盘一走出趋势，资金切到上行期个股（小市值 + 反转）或上行期板块（申万二级行业动量）。三个版本。</p></header>
+<div class="kpis"><div class="kpi"><div class="k">个股 + 板块 + 稳健 · 2023 年起</div><div class="v">年化 +39.6%</div><div class="s">最大回撤 -14.5% · 夏普 1.68；稳健策略单独 +19.0% / -10.5%</div></div><div class="kpi"><div class="k">个股 + 稳健 · 2023 年起</div><div class="v">年化 +35.1%</div><div class="s">最大回撤 -13.1% · 夏普 1.55</div></div><div class="kpi"><div class="k">板块 + 稳健 · 2023 年起</div><div class="v">年化 +34.8%</div><div class="s">最大回撤 -19.5% · 夏普 1.58；上行期日子年化 +80%</div></div><div class="kpi"><div class="k">参数稳健性（2023 起）</div><div class="v">组合年化中位约 29%</div><div class="s">个股块 45 组、板块块 12 组换参数后，与稳健策略组合的年化中位 +29.4% / +28.8%</div></div><div class="kpi"><div class="k">参考：2015 年起（数据较久远）</div><div class="v">年化 +19.2% ~ +20.2%</div><div class="s">最大回撤 -19.5% ~ -27.8%</div></div></div>
+<div class="cols">
+<section class="blk"><h2>规则要点</h2><ul class='bul'><li>开关 1「中证1000 趋势」：ER20 = (当前价 − 20 日前收盘) ÷ 20 天每日涨跌绝对值之和；ER20 &gt; 0.2 且 当前价 &gt; MA20（2023 年以来约 24% 的交易日成立）</li><li>开关 2「上行期」：开关 1 成立，且沪深300 &gt; MA120、MA120 高于 20 日前、申万一级站上 60 日线 ≥ 50%（约 12% 的交易日）</li><li>个股块：去掉成交额后 30%，小市值排名 + 20 日反转排名 前 20 只等权，每 5 日调仓，缓冲 40</li><li>板块块：自身 ER20 &gt; 0.2 且 &gt; MA20 的申万二级行业里取 60 日涨幅前 3，每 10 日换；每个行业买流通市值前 5 只</li><li>稳健块：大盘股熊市震荡市稳健策略 V1.1 原规则</li><li>资金分配：个股+稳健 = 开关 1 开时 100% 个股；板块+稳健 = 开关 2 开时 100% 板块；个股+板块+稳健 = 开关 2 开时个股、板块各 50%，只有开关 1 开时 100% 个股；其余时间 100% 稳健</li></ul></section>
+<section class="blk"><h2>结论与注意</h2><ul class='bul'><li>上行期追涨在 A 股是亏的：20/60 日动量、放量突破、创新高、高换手的前 30 只，2023 年起年化 -30% 到 -60%；有效的是在中小盘有趋势时买小市值、近期跌得多的股票。</li><li>板块：申万一级 31 个行业任何轮动都跑不赢等权；申万二级不择时一周一调换手 20–45 倍，扣成本后全亏；只在上行期做 60 日动量才有效。</li><li>收益集中在 2024 年（个股+稳健 +97%）；2025 年稳健策略只赚 0.2%，加入上行块后 +9% 到 +20%。</li><li>开关务必 14:50 实时执行：个股块开关晚一天，单独年化从 19.9% 降到 12.3%。本地三块各自回测后按资金比例拼接，聚宽版在一个账户合并下单，结果会有差异。</li></ul></section>
+</div>
+<section class="blk"><h2>报告 <small>1</small></h2><div class="files"><a class="file" href="../files/full-cycle-switch/%E5%85%A8%E8%A1%8C%E6%83%85%E5%88%87%E6%8D%A2%E7%BB%84%E5%90%88%E7%AD%96%E7%95%A5_%E5%8F%AF%E8%A7%86%E5%8C%96%E6%8A%A5%E5%91%8A.html" target="_blank" rel="noopener"><span class="ftype t-html">网页</span><span class="fmain"><b>可视化报告</b><span>以 2023 年起为主：三块资金与两个开关、净值与资金归属、三版本对比、分行情、逐年、大涨段、个股/板块研究、参数稳健性；2015 起作参考</span></span><span class="fsize">239 KB</span></a></div></section>
+<section class="blk"><h2>策略代码 <small>5 个文件 · 聚宽 JoinQuant</small></h2><div class="tblwrap"><table class="ctbl"><thead><tr><th>版本</th><th>说明</th><th>长度</th><th></th></tr></thead><tbody><tr><td><a href="../code/full-cycle-switch/1.html"><b>个股+板块+稳健 V1.0</b></a></td><td class="cn">开关 2 时个股、板块各半；只有开关 1 时全个股；其余稳健</td><td class="num">395 行</td><td class="act"><a href="../code/full-cycle-switch/1.html">查看</a><a href="../files/full-cycle-switch/%E5%85%A8%E8%A1%8C%E6%83%85%E5%88%87%E6%8D%A2%E7%BB%84%E5%90%88_%E4%B8%AA%E8%82%A1%2B%E6%9D%BF%E5%9D%97%2B%E7%A8%B3%E5%81%A5_V1.0.py" download>下载</a></td></tr><tr><td><a href="../code/full-cycle-switch/2.html"><b>个股+稳健 V1.0</b></a></td><td class="cn">开关 1 时全个股；其余稳健</td><td class="num">395 行</td><td class="act"><a href="../code/full-cycle-switch/2.html">查看</a><a href="../files/full-cycle-switch/%E5%85%A8%E8%A1%8C%E6%83%85%E5%88%87%E6%8D%A2%E7%BB%84%E5%90%88_%E4%B8%AA%E8%82%A1%2B%E7%A8%B3%E5%81%A5_V1.0.py" download>下载</a></td></tr><tr><td><a href="../code/full-cycle-switch/3.html"><b>板块+稳健 V1.0</b></a></td><td class="cn">开关 2 时全板块；其余稳健</td><td class="num">395 行</td><td class="act"><a href="../code/full-cycle-switch/3.html">查看</a><a href="../files/full-cycle-switch/%E5%85%A8%E8%A1%8C%E6%83%85%E5%88%87%E6%8D%A2%E7%BB%84%E5%90%88_%E6%9D%BF%E5%9D%97%2B%E7%A8%B3%E5%81%A5_V1.0.py" download>下载</a></td></tr><tr><td><a href="../code/full-cycle-switch/4.html"><b>个股块单独 V1.0</b></a></td><td class="cn">开关外空仓</td><td class="num">225 行</td><td class="act"><a href="../code/full-cycle-switch/4.html">查看</a><a href="../files/full-cycle-switch/%E4%B8%8A%E8%A1%8C%E6%9C%9F%E4%B8%AA%E8%82%A1_%E5%B0%8F%E5%B8%82%E5%80%BC%E5%8F%8D%E8%BD%AC_V1.0.py" download>下载</a></td></tr><tr><td><a href="../code/full-cycle-switch/5.html"><b>板块块单独 V1.0</b></a></td><td class="cn">开关外空仓</td><td class="num">270 行</td><td class="act"><a href="../code/full-cycle-switch/5.html">查看</a><a href="../files/full-cycle-switch/%E4%B8%8A%E8%A1%8C%E6%9C%9F%E6%9D%BF%E5%9D%97_%E4%BA%8C%E7%BA%A7%E8%A1%8C%E4%B8%9A%E5%8A%A8%E9%87%8F_V1.0.py" download>下载</a></td></tr></tbody></table></div></section>
+
+<section class="blk"><h2>数据 <small>2</small></h2><div class="files"><a class="file" href="../files/full-cycle-switch/%E4%B8%8A%E8%A1%8C%E6%9C%9F%E4%B8%AA%E8%82%A1%E6%9D%BF%E5%9D%97%E7%AD%96%E7%95%A5_%E5%9B%9E%E6%B5%8B.xlsx" download><span class="ftype t-xlsx">Excel</span><span class="fmain"><b>上行期个股 / 板块研究（定稿与组合、逐年、大涨段、个股信号、二级行业规则、参数网格）</b><span>下载</span></span><span class="fsize">107 KB</span></a><a class="file" href="../files/full-cycle-switch/%E4%B8%8A%E8%A1%8C%E6%9C%9F%E7%AD%96%E7%95%A5%E7%A0%94%E7%A9%B6_%E5%9B%9E%E6%B5%8B.xlsx" download><span class="ftype t-xlsx">Excel</span><span class="fmain"><b>上一轮：宽基 ETF 进攻型 / 趋势型（对照）</b><span>下载</span></span><span class="fsize">81 KB</span></a></div></section>
+</main>
+<script>
+/* 返回键：从本站页面进来就回到上一页（保留原来的滚动位置），直接打开时跳到 href */
+document.querySelectorAll("[data-back]").forEach(a => a.addEventListener("click", e => {
+  try { if (document.referrer && new URL(document.referrer).origin === location.origin && history.length > 1) { e.preventDefault(); history.back(); } } catch (err) {}
+}));
+</script>
+<footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-22</div></footer>
+</body>
+</html>
