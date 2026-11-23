@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>全行情切换组合策略 个股+稳健 V1.0 代码</title>
-<meta name="description" content="全行情切换组合 · 个股+稳健 V1.0 —— 聚宽回测代码">
+<title>全行情切换组合策略 个股+稳健 V1.1 代码</title>
+<meta name="description" content="全行情切换组合 · 个股+稳健 V1.1 —— 聚宽回测代码">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="../../assets/site.css">
@@ -15,10 +15,10 @@
 <nav><a href="../../index.html#dividend">股息率策略</a><a href="../../index.html#trend">趋势策略</a><a href="../../index.html#news">消息股策略</a></nav></div></header>
 <main class="wrap">
 <nav class="crumb"><a class="back" href="../../s/full-cycle-switch.html" data-back>返回</a></nav>
-<section class="codehead"><h1>全行情切换组合策略 · 个股+稳健 V1.0</h1><p class="sub">全行情切换组合 · 个股+稳健 V1.0 —— 聚宽回测代码</p><p class="sub2">开关 1 时全个股；其余稳健</p>
-<div class="vers"><a class="vchip" href="1.html">个股+板块+稳健 V1.0</a><a class="vchip on" href="2.html">个股+稳健 V1.0</a><a class="vchip" href="3.html">板块+稳健 V1.0</a><a class="vchip" href="4.html">个股块单独 V1.0</a><a class="vchip" href="5.html">板块块单独 V1.0</a></div>
-<div class="tools"><span class="mono">全行情切换组合_个股+稳健_V1.0.py · 395 行 · 18 KB</span><span class="grow"></span>
-<button class="btn" id="copy" type="button">复制代码</button><a class="btn" href="../../files/full-cycle-switch/%E5%85%A8%E8%A1%8C%E6%83%85%E5%88%87%E6%8D%A2%E7%BB%84%E5%90%88_%E4%B8%AA%E8%82%A1%2B%E7%A8%B3%E5%81%A5_V1.0.py" download>下载 .py</a></div></section>
+<section class="codehead"><h1>全行情切换组合策略 · 个股+稳健 V1.1</h1><p class="sub">全行情切换组合 · 个股+稳健 V1.1 —— 聚宽回测代码</p><p class="sub2">持股 ≤10；同上修复</p>
+<div class="vers"><a class="vchip" href="1.html">个股+板块+稳健 V1.1</a><a class="vchip on" href="2.html">个股+稳健 V1.1</a><a class="vchip" href="3.html">板块+稳健 V1.1</a><a class="vchip" href="4.html">个股+板块+稳健 V1.0</a><a class="vchip" href="5.html">个股+稳健 V1.0</a><a class="vchip" href="6.html">板块+稳健 V1.0</a><a class="vchip" href="7.html">个股块单独 V1.0</a><a class="vchip" href="8.html">板块块单独 V1.0</a></div>
+<div class="tools"><span class="mono">全行情切换组合_个股+稳健_V1.1.py · 429 行 · 20 KB</span><span class="grow"></span>
+<button class="btn" id="copy" type="button">复制代码</button><a class="btn" href="../../files/full-cycle-switch/%E5%85%A8%E8%A1%8C%E6%83%85%E5%88%87%E6%8D%A2%E7%BB%84%E5%90%88_%E4%B8%AA%E8%82%A1%2B%E7%A8%B3%E5%81%A5_V1.1.py" download>下载 .py</a></div></section>
 <div class="codebox"><div class="hl"><table class="hltable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">  1</span>
 <span class="normal">  2</span>
 <span class="normal">  3</span>
@@ -412,31 +412,71 @@
 <span class="normal">391</span>
 <span class="normal">392</span>
 <span class="normal">393</span>
-<span class="normal">394</span></pre></div></td><td class="code"><div><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span></pre></div></td><td class="code"><div><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">全行情切换组合 · 个股+稳健 V1.0 —— 聚宽回测代码</span>
+<span class="sd">全行情切换组合 · 个股+稳健 V1.1 —— 聚宽回测代码</span>
+
+<span class="sd">V1.1 修改（相对 V1.0）：</span>
+<span class="sd">    1. 同时持股不超过 10 只：稳健块 30 → 10 只（缓冲 60 → 20，同一行业最多 5 → 3 只）；个股块 20 → 10 只（缓冲 20）；</span>
+<span class="sd">       板块块每个行业 5 → 3 只（3 个行业共 9 只）。「个股+板块+稳健」在上行期为 个股 4 只 + 板块 3 个行业各 2 只 = 10 只</span>
+<span class="sd">    2. 修复货币 ETF（511880）减仓报错「平仓数量不能小于 100」：减仓数量按 100 份向上取整，剩余不足 100 份就全部卖出</span>
+<span class="sd">    3. 修复「资金不足 / 开仓数量不能小于 100」：买入前按当前可用资金封顶并按手取整，不够 1 手就不下单</span>
 
 <span class="sd">一个账户里跑三块资金，按行情开关分配（每天 14:50）：</span>
-<span class="sd">    稳健块：「大盘股熊市震荡市稳健策略 V1.1」原规则（大盘 800 盈利股、距一年高点 + 低波动前 30、波动率控仓、回撤风控、单只止损）</span>
-<span class="sd">    个股块：「上行期个股·小市值反转 V1.0」（流动性池 小市值排名 + 20 日反转排名 前 20，每 5 日调仓）</span>
-<span class="sd">    板块块：「上行期板块·申万二级行业动量 V1.0」（自身趋势成立的二级行业里 60 日涨幅前 3，每行业市值前 5 只，每 10 日调仓）</span>
+<span class="sd">    稳健块：「大盘股熊市震荡市稳健策略 V1.1」规则，持股改为 10 只（大盘 800 盈利股、距一年高点 + 低波动前 10、波动率控仓、回撤风控、单只止损）</span>
+<span class="sd">    个股块：「上行期个股·小市值反转 V1.0」（流动性池 小市值排名 + 20 日反转排名 前 10，每 5 日调仓）</span>
+<span class="sd">    板块块：「上行期板块·申万二级行业动量 V1.0」（自身趋势成立的二级行业里 60 日涨幅前 3，每行业流通市值前 3 只，每 10 日调仓）</span>
 
 <span class="sd">开关：</span>
 <span class="sd">    开关1「中证1000趋势」：中证1000 ER20 &gt; 0.2 且 当前价 &gt; MA20</span>
 <span class="sd">           ER20 = (当前价 − 20 日前收盘) ÷ 20 天每日涨跌绝对值之和</span>
 <span class="sd">    开关2「上行期」：开关1 成立，且 沪深300 &gt; MA120、MA120 高于 20 日前、申万一级站上 60 日线 ≥ 50%（后三项用前一日收盘）</span>
 <span class="sd">本版本资金分配（MODE = &quot;个股+稳健&quot;）：</span>
-<span class="sd">    开关1 成立 → 100% 个股块；否则 → 100% 稳健块（2023 年以来开关1 约 24% 的交易日成立）</span>
+<span class="sd">    开关1 成立 → 100% 个股块（10 只）；否则 → 100% 稳健块（10 只）（2023 年以来开关1 约 24% 的交易日成立）</span>
 
 <span class="sd">本地测算（后复权日线，单边 0.15%，当日收盘成交；切换时稳健块另计 0.15%；主要看 2023 起）：</span>
-<span class="sd">    2023 起：年化 +35.1%、最大回撤 -13.1%、夏普 1.55；上行期日子 +42% · 震荡期 +44% · 下行期 +13%</span>
-<span class="sd">    参数附近 45 组（开关窗口/阈值、反转窗口、持股数）2023 起年化中位 +29.4%（10%~90%：+17.8% ~ +36.1%），回撤中位 -20%</span>
-<span class="sd">    2015 起（参考）：+19.2% / -25.4%；稳健策略单独 2023 起 +19.0% / -10.5%</span>
+<span class="sd">    V1.1（持股 ≤10）2023 起：年化 +40.1%、最大回撤 -13.6%、夏普 1.66；上行期日子 +38% · 震荡期 +60% · 下行期 +10%</span>
+<span class="sd">    逐年：2023 +24.9%、2024 +118.7%、2025 +8.4%、2026 至今 +18.2%；2015 起（参考）+19.1% / -33.6%</span>
+<span class="sd">    V1.0（稳健 30 只 + 个股 20 只）：2023 起 +35.1% / -13.1%；稳健块单独 10 只 +16.6% / -18.5%（30 只 +19.0% / -10.5%）</span>
 <span class="sd">与本地口径的差异：</span>
 <span class="sd">    本地三块各自满额回测再按当日资金比例拼接；这里在一个账户里按目标市值合并下单，同一只股票两块都要时合并持有</span>
-<span class="sd">    板块块本地直接持有行业指数，这里用每个行业流通市值前 5 只；行业排名用前一日收盘</span>
+<span class="sd">    板块块本地直接持有行业指数，这里用每个行业流通市值前 3 只（与个股块同时持有时 2 只）；行业排名用前一日收盘</span>
 <span class="sd">    稳健块在两次调仓之间只在总仓位变动 ≥10% 或开关切换时调整</span>
-<span class="sd">建议回测：2019-01-01 起（看 2023 起为主），分钟频率，初始资金 ≥ 200 万（最多同时持有 30 + 20 + 15 只）</span>
+<span class="sd">建议回测：2019-01-01 起（看 2023 起为主），分钟频率，初始资金 ≥ 100 万（同时持股不超过 10 只，切换当天新旧两块交接、跌停卖不出时可能短暂多于 10 只）</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">builtins</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jqdata</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
@@ -445,7 +485,7 @@
 <span class="nb">sum</span><span class="p">,</span> <span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="nb">abs</span><span class="p">,</span> <span class="nb">any</span><span class="p">,</span> <span class="nb">all</span><span class="p">,</span> <span class="nb">round</span> <span class="o">=</span> <span class="p">(</span><span class="n">builtins</span><span class="o">.</span><span class="n">sum</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">abs</span><span class="p">,</span>
                                        <span class="n">builtins</span><span class="o">.</span><span class="n">any</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">all</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">round</span><span class="p">)</span>
 
-<span class="n">VERSION</span> <span class="o">=</span> <span class="s2">&quot;全行情切换组合·个股+稳健 V1.0&quot;</span>
+<span class="n">VERSION</span> <span class="o">=</span> <span class="s2">&quot;全行情切换组合·个股+稳健 V1.1&quot;</span>
 <span class="n">MODE</span> <span class="o">=</span> <span class="s2">&quot;个股+稳健&quot;</span>     <span class="c1"># &quot;个股+稳健&quot; / &quot;板块+稳健&quot; / &quot;个股+板块+稳健&quot;</span>
 
 
@@ -461,12 +501,12 @@
     <span class="n">REG_MA</span><span class="p">,</span> <span class="n">REG_SLOPE</span><span class="p">,</span> <span class="n">BR_MA</span><span class="p">,</span> <span class="n">BR_MIN</span> <span class="o">=</span> <span class="mi">120</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mf">0.50</span>
     <span class="c1"># ---- 稳健块（V1.1）----</span>
     <span class="n">A_POOL</span> <span class="o">=</span> <span class="mi">800</span><span class="p">;</span> <span class="n">A_LIST_DAYS</span> <span class="o">=</span> <span class="mi">365</span><span class="p">;</span> <span class="n">A_ROE_MIN</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">;</span> <span class="n">A_HIGH_N</span> <span class="o">=</span> <span class="mi">250</span><span class="p">;</span> <span class="n">A_VOL_N</span> <span class="o">=</span> <span class="mi">60</span>
-    <span class="n">A_HOLD</span> <span class="o">=</span> <span class="mi">30</span><span class="p">;</span> <span class="n">A_BUFFER</span> <span class="o">=</span> <span class="mi">60</span><span class="p">;</span> <span class="n">A_REBAL</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span> <span class="n">A_IND_MAX</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span> <span class="n">A_STOP</span> <span class="o">=</span> <span class="mf">0.10</span>
+    <span class="n">A_HOLD</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span> <span class="n">A_BUFFER</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span> <span class="n">A_REBAL</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span> <span class="n">A_IND_MAX</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span> <span class="n">A_STOP</span> <span class="o">=</span> <span class="mf">0.10</span>
     <span class="n">A_VOL_TARGET</span> <span class="o">=</span> <span class="mf">0.15</span><span class="p">;</span> <span class="n">A_VOL_WIN</span> <span class="o">=</span> <span class="mi">40</span><span class="p">;</span> <span class="n">A_EXPO_BAND</span> <span class="o">=</span> <span class="mf">0.10</span><span class="p">;</span> <span class="n">A_DD_HALF</span> <span class="o">=</span> <span class="mf">0.15</span><span class="p">;</span> <span class="n">A_DD_OUT</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">;</span> <span class="n">A_DD_LOOK</span> <span class="o">=</span> <span class="mi">250</span>
     <span class="c1"># ---- 个股块 ----</span>
-    <span class="n">S_LIST_DAYS</span> <span class="o">=</span> <span class="mi">365</span><span class="p">;</span> <span class="n">S_AMT_N</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span> <span class="n">S_AMT_DROP</span> <span class="o">=</span> <span class="mf">0.30</span><span class="p">;</span> <span class="n">S_REV_N</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span> <span class="n">S_HOLD</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span> <span class="n">S_BUFFER</span> <span class="o">=</span> <span class="mi">40</span><span class="p">;</span> <span class="n">S_REBAL</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">S_LIST_DAYS</span> <span class="o">=</span> <span class="mi">365</span><span class="p">;</span> <span class="n">S_AMT_N</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span> <span class="n">S_AMT_DROP</span> <span class="o">=</span> <span class="mf">0.30</span><span class="p">;</span> <span class="n">S_REV_N</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span> <span class="n">S_HOLD</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span> <span class="n">S_HOLD_MIX</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span> <span class="n">S_BUFFER</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span> <span class="n">S_REBAL</span> <span class="o">=</span> <span class="mi">5</span>
     <span class="c1"># ---- 板块块 ----</span>
-    <span class="n">B_MOM_N</span> <span class="o">=</span> <span class="mi">60</span><span class="p">;</span> <span class="n">B_IND_N</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span> <span class="n">B_PER_IND</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span> <span class="n">B_REBAL</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">B_MOM_N</span> <span class="o">=</span> <span class="mi">60</span><span class="p">;</span> <span class="n">B_IND_N</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span> <span class="n">B_PER_IND</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span> <span class="n">B_PER_IND_MIX</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="n">B_REBAL</span> <span class="o">=</span> <span class="mi">10</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
@@ -521,7 +561,13 @@
         <span class="k">return</span>
     <span class="n">delta</span> <span class="o">=</span> <span class="n">tgt</span> <span class="o">-</span> <span class="n">cur</span>
     <span class="k">if</span> <span class="n">delta</span> <span class="o">&gt;=</span> <span class="mi">100</span> <span class="ow">and</span> <span class="n">can_buy</span><span class="p">(</span><span class="n">cd</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
-        <span class="n">order</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">MarketOrderStyle</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">price</span> <span class="o">*</span> <span class="mf">1.02</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">high_limit</span><span class="p">)))</span>
+        <span class="n">lim</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">price</span> <span class="o">*</span> <span class="mf">1.02</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">high_limit</span><span class="p">)</span>
+        <span class="n">afford</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">available_cash</span> <span class="o">*</span> <span class="mf">0.995</span> <span class="o">/</span> <span class="p">(</span><span class="n">lim</span> <span class="o">*</span> <span class="mf">1.0003</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>   <span class="c1"># 按可用资金封顶（含佣金余量）</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">delta</span><span class="p">,</span> <span class="n">afford</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;688&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">cur</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">delta</span> <span class="o">&lt;</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">delta</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">:</span>
+            <span class="n">order</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">MarketOrderStyle</span><span class="p">(</span><span class="n">lim</span><span class="p">))</span>
     <span class="k">elif</span> <span class="n">delta</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mi">100</span> <span class="ow">and</span> <span class="n">can_sell</span><span class="p">(</span><span class="n">cd</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
         <span class="n">sell</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="o">-</span><span class="n">delta</span><span class="p">,</span> <span class="n">pos</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">closeable_amount</span><span class="p">)</span>
         <span class="n">sell</span> <span class="o">=</span> <span class="n">sell</span> <span class="k">if</span> <span class="n">sell</span> <span class="o">==</span> <span class="n">cur</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">sell</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
@@ -559,6 +605,23 @@
     <span class="n">secs</span> <span class="o">=</span> <span class="n">secs</span><span class="p">[</span><span class="n">secs</span><span class="o">.</span><span class="n">start_date</span> <span class="o">&lt;=</span> <span class="n">day</span> <span class="o">-</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">list_days</span><span class="p">)]</span>
     <span class="n">ss</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">secs</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">s</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;92&quot;</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">s</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.BJ&quot;</span><span class="p">)]</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">ss</span> <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">cd</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">is_st</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">cd</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">paused</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;退&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cd</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">sell_cash_etf</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;卖出约 value 元的货币 ETF：按 100 份向上取整；卖完剩余不足 100 份就全部卖出&quot;&quot;&quot;</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">CASH_ETF</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">positions</span>
+    <span class="k">if</span> <span class="n">e</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pos</span> <span class="ow">or</span> <span class="n">pos</span><span class="p">[</span><span class="n">e</span><span class="p">]</span><span class="o">.</span><span class="n">closeable_amount</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">cd</span><span class="p">[</span><span class="n">e</span><span class="p">]</span><span class="o">.</span><span class="n">paused</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">price</span> <span class="o">=</span> <span class="n">cd</span><span class="p">[</span><span class="n">e</span><span class="p">]</span><span class="o">.</span><span class="n">last_price</span>
+    <span class="k">if</span> <span class="n">price</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">price</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">have</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">e</span><span class="p">]</span><span class="o">.</span><span class="n">closeable_amount</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">value</span> <span class="o">/</span> <span class="n">price</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">))</span> <span class="o">*</span> <span class="mi">100</span>
+    <span class="k">if</span> <span class="n">have</span> <span class="o">-</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">:</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">have</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">order</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="o">-</span><span class="nb">min</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">have</span><span class="p">))</span>
 
 
 <span class="c1"># ================= 开关 =================</span>
@@ -668,7 +731,7 @@
 
 
 <span class="c1"># ================= 个股块 =================</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">s_select</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">s_select</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
     <span class="n">day</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">previous_date</span>
     <span class="n">stocks</span> <span class="o">=</span> <span class="n">base_stocks</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">S_LIST_DAYS</span><span class="p">)</span>
     <span class="n">amt</span> <span class="o">=</span> <span class="n">get_price</span><span class="p">(</span><span class="n">stocks</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">day</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">Cfg</span><span class="o">.</span><span class="n">S_AMT_N</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;money&quot;</span><span class="p">],</span> <span class="n">panel</span><span class="o">=</span><span class="kc">False</span>
@@ -684,23 +747,23 @@
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;cap&quot;</span><span class="p">:</span> <span class="n">cap</span><span class="p">,</span> <span class="s2">&quot;ret&quot;</span><span class="p">:</span> <span class="n">ret</span><span class="p">})</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
     <span class="n">sc</span> <span class="o">=</span> <span class="p">((</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;cap&quot;</span><span class="p">]))</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">pct</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;ret&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">pct</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">codes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">index</span><span class="p">);</span> <span class="n">rank</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">codes</span><span class="p">)}</span>
-    <span class="n">pick</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">s_picks</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">rank</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">9</span><span class="p">))</span> <span class="k">if</span> <span class="n">rank</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">9</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">S_BUFFER</span><span class="p">][:</span><span class="n">Cfg</span><span class="o">.</span><span class="n">S_HOLD</span><span class="p">]</span>
+    <span class="n">pick</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">s_picks</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">rank</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">9</span><span class="p">))</span> <span class="k">if</span> <span class="n">rank</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">9</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">S_BUFFER</span><span class="p">][:</span><span class="n">n</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">codes</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pick</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">S_HOLD</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pick</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">n</span><span class="p">:</span>
             <span class="k">break</span>
         <span class="k">if</span> <span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pick</span><span class="p">:</span>
             <span class="n">pick</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">pick</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">s_update</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">share</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">s_update</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">share</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">share</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">g</span><span class="o">.</span><span class="n">s_on</span> <span class="o">=</span> <span class="kc">False</span><span class="p">;</span> <span class="n">g</span><span class="o">.</span><span class="n">s_picks</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">return</span> <span class="p">{}</span>
-    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">g</span><span class="o">.</span><span class="n">s_on</span><span class="p">)</span> <span class="ow">or</span> <span class="n">g</span><span class="o">.</span><span class="n">day</span> <span class="o">%</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">S_REBAL</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">g</span><span class="o">.</span><span class="n">s_picks</span><span class="p">:</span>
-        <span class="n">g</span><span class="o">.</span><span class="n">s_picks</span> <span class="o">=</span> <span class="n">s_select</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">g</span><span class="o">.</span><span class="n">s_on</span><span class="p">)</span> <span class="ow">or</span> <span class="n">g</span><span class="o">.</span><span class="n">day</span> <span class="o">%</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">S_REBAL</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">g</span><span class="o">.</span><span class="n">s_picks</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">s_picks</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">s_picks</span> <span class="o">=</span> <span class="n">s_select</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
     <span class="n">g</span><span class="o">.</span><span class="n">s_on</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">tv</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">total_value</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">CASH_BUFFER</span><span class="p">)</span> <span class="o">*</span> <span class="n">share</span> <span class="o">/</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">S_HOLD</span>
+    <span class="n">tv</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">total_value</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">CASH_BUFFER</span><span class="p">)</span> <span class="o">*</span> <span class="n">share</span> <span class="o">/</span> <span class="n">n</span>
     <span class="k">return</span> <span class="p">{</span><span class="n">s</span><span class="p">:</span> <span class="n">tv</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">s_picks</span><span class="p">}</span>
 
 
@@ -717,7 +780,7 @@
     <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">mom</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="o">-</span><span class="n">mom</span><span class="p">[</span><span class="n">k</span><span class="p">]),</span> <span class="n">ok</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">b_stocks_of</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">b_stocks_of</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
     <span class="n">day</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">previous_date</span>
     <span class="n">ss</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">get_industry_stocks</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">day</span><span class="p">)</span>
           <span class="k">if</span> <span class="ow">not</span> <span class="n">s</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;92&quot;</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">s</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.BJ&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">cd</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">is_st</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">cd</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">paused</span><span class="p">)</span>
@@ -726,10 +789,10 @@
         <span class="k">return</span> <span class="p">[]</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">get_fundamentals</span><span class="p">(</span><span class="n">query</span><span class="p">(</span><span class="n">valuation</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">valuation</span><span class="o">.</span><span class="n">circulating_market_cap</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">valuation</span><span class="o">.</span><span class="n">code</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">ss</span><span class="p">)),</span>
                           <span class="n">date</span><span class="o">=</span><span class="n">day</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;circulating_market_cap&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">code</span><span class="p">[:</span><span class="n">Cfg</span><span class="o">.</span><span class="n">B_PER_IND</span><span class="p">])</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">code</span><span class="p">[:</span><span class="n">k</span><span class="p">])</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">b_update</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">share</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">b_update</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">share</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">share</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">g</span><span class="o">.</span><span class="n">b_on</span> <span class="o">=</span> <span class="kc">False</span><span class="p">;</span> <span class="n">g</span><span class="o">.</span><span class="n">b_inds</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">g</span><span class="o">.</span><span class="n">b_stocks</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">return</span> <span class="p">{}</span>
@@ -737,6 +800,8 @@
     <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">b_inds</span><span class="p">):</span>                 <span class="c1"># 行业自身趋势失效当天卖出</span>
         <span class="k">if</span> <span class="n">ind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ok</span><span class="p">:</span>
             <span class="n">g</span><span class="o">.</span><span class="n">b_inds</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ind</span><span class="p">);</span> <span class="n">g</span><span class="o">.</span><span class="n">b_stocks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">k</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">b_stocks</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>          <span class="c1"># 每行业只数变少时立即截断</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">b_stocks</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">v</span><span class="p">[:</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">b_stocks</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">g</span><span class="o">.</span><span class="n">b_on</span><span class="p">)</span> <span class="ow">or</span> <span class="n">g</span><span class="o">.</span><span class="n">day</span> <span class="o">%</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">B_REBAL</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">new</span> <span class="o">=</span> <span class="n">order_</span><span class="p">[:</span><span class="n">Cfg</span><span class="o">.</span><span class="n">B_IND_N</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">b_inds</span><span class="p">):</span>
@@ -744,9 +809,9 @@
                 <span class="n">g</span><span class="o">.</span><span class="n">b_inds</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">ind</span><span class="p">);</span> <span class="n">g</span><span class="o">.</span><span class="n">b_stocks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">new</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">b_inds</span><span class="p">:</span>
-                <span class="n">g</span><span class="o">.</span><span class="n">b_inds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ind</span><span class="p">);</span> <span class="n">g</span><span class="o">.</span><span class="n">b_stocks</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">b_stocks_of</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">ind</span><span class="p">)</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">b_inds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ind</span><span class="p">);</span> <span class="n">g</span><span class="o">.</span><span class="n">b_stocks</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">b_stocks_of</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
     <span class="n">g</span><span class="o">.</span><span class="n">b_on</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">tv</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">total_value</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">CASH_BUFFER</span><span class="p">)</span> <span class="o">*</span> <span class="n">share</span> <span class="o">/</span> <span class="p">(</span><span class="n">Cfg</span><span class="o">.</span><span class="n">B_IND_N</span> <span class="o">*</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">B_PER_IND</span><span class="p">)</span>
+    <span class="n">tv</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">total_value</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">CASH_BUFFER</span><span class="p">)</span> <span class="o">*</span> <span class="n">share</span> <span class="o">/</span> <span class="p">(</span><span class="n">Cfg</span><span class="o">.</span><span class="n">B_IND_N</span> <span class="o">*</span> <span class="n">k</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">{</span><span class="n">s</span><span class="p">:</span> <span class="n">tv</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">b_inds</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">b_stocks</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="p">[])}</span>
 
 
@@ -762,7 +827,10 @@
                  <span class="o">%</span> <span class="p">(</span><span class="n">a_sh</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">s_sh</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">b_sh</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">))</span>
         <span class="n">g</span><span class="o">.</span><span class="n">last_alloc</span> <span class="o">=</span> <span class="p">(</span><span class="n">a_sh</span><span class="p">,</span> <span class="n">s_sh</span><span class="p">,</span> <span class="n">b_sh</span><span class="p">)</span>
     <span class="n">tgt</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="p">(</span><span class="n">s_update</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">s_sh</span><span class="p">),</span> <span class="n">b_update</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">b_sh</span><span class="p">),</span> <span class="n">a_update</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">a_sh</span><span class="p">)):</span>
+    <span class="n">mix</span> <span class="o">=</span> <span class="n">s_sh</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">b_sh</span> <span class="o">&gt;</span> <span class="mi">0</span>                     <span class="c1"># 个股、板块同时持有时各自减少只数，合计 ≤ 10</span>
+    <span class="n">n_s</span> <span class="o">=</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">S_HOLD_MIX</span> <span class="k">if</span> <span class="n">mix</span> <span class="k">else</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">S_HOLD</span>
+    <span class="n">k_b</span> <span class="o">=</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">B_PER_IND_MIX</span> <span class="k">if</span> <span class="n">mix</span> <span class="k">else</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">B_PER_IND</span>
+    <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="p">(</span><span class="n">s_update</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">s_sh</span><span class="p">,</span> <span class="n">n_s</span><span class="p">),</span> <span class="n">b_update</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">b_sh</span><span class="p">,</span> <span class="n">k_b</span><span class="p">),</span> <span class="n">a_update</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">a_sh</span><span class="p">)):</span>
         <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">part</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">tgt</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">tgt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">+</span> <span class="n">v</span>
     <span class="c1"># 1. 卖：不在目标里的清仓，超出目标太多的减仓</span>
@@ -780,7 +848,7 @@
     <span class="k">if</span> <span class="n">need</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">pos</span> <span class="ow">and</span> <span class="n">pos</span><span class="p">[</span><span class="n">e</span><span class="p">]</span><span class="o">.</span><span class="n">total_amount</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cd</span><span class="p">[</span><span class="n">e</span><span class="p">]</span><span class="o">.</span><span class="n">paused</span><span class="p">:</span>
         <span class="n">pf</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">portfolio</span>
         <span class="k">if</span> <span class="n">need</span> <span class="o">&gt;</span> <span class="n">pf</span><span class="o">.</span><span class="n">available_cash</span><span class="p">:</span>
-            <span class="n">order_target_value</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pos</span><span class="p">[</span><span class="n">e</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">-</span> <span class="p">(</span><span class="n">need</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">available_cash</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.02</span><span class="p">))</span>
+            <span class="n">sell_cash_etf</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="p">(</span><span class="n">need</span> <span class="o">-</span> <span class="n">pf</span><span class="o">.</span><span class="n">available_cash</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.02</span><span class="p">)</span>
     <span class="c1"># 3. 买</span>
     <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">tgt</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">cur</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">pos</span> <span class="k">else</span> <span class="mi">0</span>
@@ -810,29 +878,35 @@
 </div>
 <textarea id="raw" hidden># -*- coding: utf-8 -*-
 &quot;&quot;&quot;
-全行情切换组合 · 个股+稳健 V1.0 —— 聚宽回测代码
+全行情切换组合 · 个股+稳健 V1.1 —— 聚宽回测代码
+
+V1.1 修改（相对 V1.0）：
+    1. 同时持股不超过 10 只：稳健块 30 → 10 只（缓冲 60 → 20，同一行业最多 5 → 3 只）；个股块 20 → 10 只（缓冲 20）；
+       板块块每个行业 5 → 3 只（3 个行业共 9 只）。「个股+板块+稳健」在上行期为 个股 4 只 + 板块 3 个行业各 2 只 = 10 只
+    2. 修复货币 ETF（511880）减仓报错「平仓数量不能小于 100」：减仓数量按 100 份向上取整，剩余不足 100 份就全部卖出
+    3. 修复「资金不足 / 开仓数量不能小于 100」：买入前按当前可用资金封顶并按手取整，不够 1 手就不下单
 
 一个账户里跑三块资金，按行情开关分配（每天 14:50）：
-    稳健块：「大盘股熊市震荡市稳健策略 V1.1」原规则（大盘 800 盈利股、距一年高点 + 低波动前 30、波动率控仓、回撤风控、单只止损）
-    个股块：「上行期个股·小市值反转 V1.0」（流动性池 小市值排名 + 20 日反转排名 前 20，每 5 日调仓）
-    板块块：「上行期板块·申万二级行业动量 V1.0」（自身趋势成立的二级行业里 60 日涨幅前 3，每行业市值前 5 只，每 10 日调仓）
+    稳健块：「大盘股熊市震荡市稳健策略 V1.1」规则，持股改为 10 只（大盘 800 盈利股、距一年高点 + 低波动前 10、波动率控仓、回撤风控、单只止损）
+    个股块：「上行期个股·小市值反转 V1.0」（流动性池 小市值排名 + 20 日反转排名 前 10，每 5 日调仓）
+    板块块：「上行期板块·申万二级行业动量 V1.0」（自身趋势成立的二级行业里 60 日涨幅前 3，每行业流通市值前 3 只，每 10 日调仓）
 
 开关：
     开关1「中证1000趋势」：中证1000 ER20 &gt; 0.2 且 当前价 &gt; MA20
            ER20 = (当前价 − 20 日前收盘) ÷ 20 天每日涨跌绝对值之和
     开关2「上行期」：开关1 成立，且 沪深300 &gt; MA120、MA120 高于 20 日前、申万一级站上 60 日线 ≥ 50%（后三项用前一日收盘）
 本版本资金分配（MODE = &quot;个股+稳健&quot;）：
-    开关1 成立 → 100% 个股块；否则 → 100% 稳健块（2023 年以来开关1 约 24% 的交易日成立）
+    开关1 成立 → 100% 个股块（10 只）；否则 → 100% 稳健块（10 只）（2023 年以来开关1 约 24% 的交易日成立）
 
 本地测算（后复权日线，单边 0.15%，当日收盘成交；切换时稳健块另计 0.15%；主要看 2023 起）：
-    2023 起：年化 +35.1%、最大回撤 -13.1%、夏普 1.55；上行期日子 +42% · 震荡期 +44% · 下行期 +13%
-    参数附近 45 组（开关窗口/阈值、反转窗口、持股数）2023 起年化中位 +29.4%（10%~90%：+17.8% ~ +36.1%），回撤中位 -20%
-    2015 起（参考）：+19.2% / -25.4%；稳健策略单独 2023 起 +19.0% / -10.5%
+    V1.1（持股 ≤10）2023 起：年化 +40.1%、最大回撤 -13.6%、夏普 1.66；上行期日子 +38% · 震荡期 +60% · 下行期 +10%
+    逐年：2023 +24.9%、2024 +118.7%、2025 +8.4%、2026 至今 +18.2%；2015 起（参考）+19.1% / -33.6%
+    V1.0（稳健 30 只 + 个股 20 只）：2023 起 +35.1% / -13.1%；稳健块单独 10 只 +16.6% / -18.5%（30 只 +19.0% / -10.5%）
 与本地口径的差异：
     本地三块各自满额回测再按当日资金比例拼接；这里在一个账户里按目标市值合并下单，同一只股票两块都要时合并持有
-    板块块本地直接持有行业指数，这里用每个行业流通市值前 5 只；行业排名用前一日收盘
+    板块块本地直接持有行业指数，这里用每个行业流通市值前 3 只（与个股块同时持有时 2 只）；行业排名用前一日收盘
     稳健块在两次调仓之间只在总仓位变动 ≥10% 或开关切换时调整
-建议回测：2019-01-01 起（看 2023 起为主），分钟频率，初始资金 ≥ 200 万（最多同时持有 30 + 20 + 15 只）
+建议回测：2019-01-01 起（看 2023 起为主），分钟频率，初始资金 ≥ 100 万（同时持股不超过 10 只，切换当天新旧两块交接、跌停卖不出时可能短暂多于 10 只）
 &quot;&quot;&quot;
 import builtins
 from jqdata import *
@@ -841,7 +915,7 @@ import pandas as pd
 sum, min, max, abs, any, all, round = (builtins.sum, builtins.min, builtins.max, builtins.abs,
                                        builtins.any, builtins.all, builtins.round)
 
-VERSION = &quot;全行情切换组合·个股+稳健 V1.0&quot;
+VERSION = &quot;全行情切换组合·个股+稳健 V1.1&quot;
 MODE = &quot;个股+稳健&quot;     # &quot;个股+稳健&quot; / &quot;板块+稳健&quot; / &quot;个股+板块+稳健&quot;
 
 
@@ -857,12 +931,12 @@ class Cfg:
     REG_MA, REG_SLOPE, BR_MA, BR_MIN = 120, 20, 60, 0.50
     # ---- 稳健块（V1.1）----
     A_POOL = 800; A_LIST_DAYS = 365; A_ROE_MIN = 0.05; A_HIGH_N = 250; A_VOL_N = 60
-    A_HOLD = 30; A_BUFFER = 60; A_REBAL = 5; A_IND_MAX = 5; A_STOP = 0.10
+    A_HOLD = 10; A_BUFFER = 20; A_REBAL = 5; A_IND_MAX = 3; A_STOP = 0.10
     A_VOL_TARGET = 0.15; A_VOL_WIN = 40; A_EXPO_BAND = 0.10; A_DD_HALF = 0.15; A_DD_OUT = 0.25; A_DD_LOOK = 250
     # ---- 个股块 ----
-    S_LIST_DAYS = 365; S_AMT_N = 20; S_AMT_DROP = 0.30; S_REV_N = 20; S_HOLD = 20; S_BUFFER = 40; S_REBAL = 5
+    S_LIST_DAYS = 365; S_AMT_N = 20; S_AMT_DROP = 0.30; S_REV_N = 20; S_HOLD = 10; S_HOLD_MIX = 4; S_BUFFER = 20; S_REBAL = 5
     # ---- 板块块 ----
-    B_MOM_N = 60; B_IND_N = 3; B_PER_IND = 5; B_REBAL = 10
+    B_MOM_N = 60; B_IND_N = 3; B_PER_IND = 3; B_PER_IND_MIX = 2; B_REBAL = 10
 
 
 def initialize(context):
@@ -917,7 +991,13 @@ def place(context, cd, s, target_value):
         return
     delta = tgt - cur
     if delta &gt;= 100 and can_buy(cd, s):
-        order(s, delta, MarketOrderStyle(min(price * 1.02, d.high_limit)))
+        lim = min(price * 1.02, d.high_limit)
+        afford = int(context.portfolio.available_cash * 0.995 / (lim * 1.0003) / 100) * 100   # 按可用资金封顶（含佣金余量）
+        delta = min(delta, afford)
+        if s.startswith(&quot;688&quot;) and cur == 0 and delta &lt; 200:
+            return
+        if delta &gt;= 100:
+            order(s, delta, MarketOrderStyle(lim))
     elif delta &lt;= -100 and can_sell(cd, s):
         sell = min(-delta, pos[s].closeable_amount)
         sell = sell if sell == cur else int(sell / 100) * 100
@@ -955,6 +1035,23 @@ def base_stocks(context, cd, list_days):
     secs = secs[secs.start_date &lt;= day - pd.Timedelta(days=list_days)]
     ss = [s for s in secs.index if not s.startswith((&quot;4&quot;, &quot;8&quot;, &quot;92&quot;)) and not s.endswith(&quot;.BJ&quot;)]
     return [s for s in ss if (not cd[s].is_st) and (not cd[s].paused) and &quot;退&quot; not in cd[s].name]
+
+
+def sell_cash_etf(context, cd, value):
+    &quot;&quot;&quot;卖出约 value 元的货币 ETF：按 100 份向上取整；卖完剩余不足 100 份就全部卖出&quot;&quot;&quot;
+    e = Cfg.CASH_ETF
+    pos = context.portfolio.positions
+    if e not in pos or pos[e].closeable_amount &lt;= 0 or cd[e].paused:
+        return
+    price = cd[e].last_price
+    if price is None or price &lt;= 0:
+        return
+    have = pos[e].closeable_amount
+    n = int(np.ceil(value / price / 100.0)) * 100
+    if have - n &lt; 100:
+        n = have
+    if n &gt; 0:
+        order(e, -min(n, have))
 
 
 # ================= 开关 =================
@@ -1064,7 +1161,7 @@ def a_update(context, cd, share):
 
 
 # ================= 个股块 =================
-def s_select(context, cd):
+def s_select(context, cd, n):
     day = context.previous_date
     stocks = base_stocks(context, cd, Cfg.S_LIST_DAYS)
     amt = get_price(stocks, end_date=day, count=Cfg.S_AMT_N, fields=[&quot;money&quot;], panel=False
@@ -1080,23 +1177,23 @@ def s_select(context, cd):
     df = pd.DataFrame({&quot;cap&quot;: cap, &quot;ret&quot;: ret}).dropna()
     sc = ((-np.log(df[&quot;cap&quot;])).rank(pct=True) + (-df[&quot;ret&quot;]).rank(pct=True)).sort_values(ascending=False)
     codes = list(sc.index); rank = {s: i for i, s in enumerate(codes)}
-    pick = [s for s in sorted(g.s_picks, key=lambda x: rank.get(x, 10 ** 9)) if rank.get(s, 10 ** 9) &lt; Cfg.S_BUFFER][:Cfg.S_HOLD]
+    pick = [s for s in sorted(g.s_picks, key=lambda x: rank.get(x, 10 ** 9)) if rank.get(s, 10 ** 9) &lt; Cfg.S_BUFFER][:n]
     for s in codes:
-        if len(pick) &gt;= Cfg.S_HOLD:
+        if len(pick) &gt;= n:
             break
         if s not in pick:
             pick.append(s)
     return pick
 
 
-def s_update(context, cd, share):
+def s_update(context, cd, share, n):
     if share &lt;= 0:
         g.s_on = False; g.s_picks = []
         return {}
-    if (not g.s_on) or g.day % Cfg.S_REBAL == 0 or not g.s_picks:
-        g.s_picks = s_select(context, cd)
+    if (not g.s_on) or g.day % Cfg.S_REBAL == 0 or not g.s_picks or len(g.s_picks) != n:
+        g.s_picks = s_select(context, cd, n)
     g.s_on = True
-    tv = context.portfolio.total_value * (1 - Cfg.CASH_BUFFER) * share / Cfg.S_HOLD
+    tv = context.portfolio.total_value * (1 - Cfg.CASH_BUFFER) * share / n
     return {s: tv for s in g.s_picks}
 
 
@@ -1113,7 +1210,7 @@ def b_rank(context):
     return sorted(mom, key=lambda k: -mom[k]), ok
 
 
-def b_stocks_of(context, cd, ind):
+def b_stocks_of(context, cd, ind, k):
     day = context.previous_date
     ss = [s for s in get_industry_stocks(ind, date=day)
           if not s.startswith((&quot;4&quot;, &quot;8&quot;, &quot;92&quot;)) and not s.endswith(&quot;.BJ&quot;) and (not cd[s].is_st) and (not cd[s].paused)
@@ -1122,10 +1219,10 @@ def b_stocks_of(context, cd, ind):
         return []
     df = get_fundamentals(query(valuation.code, valuation.circulating_market_cap).filter(valuation.code.in_(ss)),
                           date=day).dropna().sort_values(&quot;circulating_market_cap&quot;, ascending=False)
-    return list(df.code[:Cfg.B_PER_IND])
+    return list(df.code[:k])
 
 
-def b_update(context, cd, share):
+def b_update(context, cd, share, k):
     if share &lt;= 0:
         g.b_on = False; g.b_inds = []; g.b_stocks = {}
         return {}
@@ -1133,6 +1230,8 @@ def b_update(context, cd, share):
     for ind in list(g.b_inds):                 # 行业自身趋势失效当天卖出
         if ind not in ok:
             g.b_inds.remove(ind); g.b_stocks.pop(ind, None)
+    if any(len(v) &gt; k for v in g.b_stocks.values()):          # 每行业只数变少时立即截断
+        g.b_stocks = {i: v[:k] for i, v in g.b_stocks.items()}
     if (not g.b_on) or g.day % Cfg.B_REBAL == 0:
         new = order_[:Cfg.B_IND_N]
         for ind in list(g.b_inds):
@@ -1140,9 +1239,9 @@ def b_update(context, cd, share):
                 g.b_inds.remove(ind); g.b_stocks.pop(ind, None)
         for ind in new:
             if ind not in g.b_inds:
-                g.b_inds.append(ind); g.b_stocks[ind] = b_stocks_of(context, cd, ind)
+                g.b_inds.append(ind); g.b_stocks[ind] = b_stocks_of(context, cd, ind, k)
     g.b_on = True
-    tv = context.portfolio.total_value * (1 - Cfg.CASH_BUFFER) * share / (Cfg.B_IND_N * Cfg.B_PER_IND)
+    tv = context.portfolio.total_value * (1 - Cfg.CASH_BUFFER) * share / (Cfg.B_IND_N * k)
     return {s: tv for i in g.b_inds for s in g.b_stocks.get(i, [])}
 
 
@@ -1158,7 +1257,10 @@ def trade(context):
                  % (a_sh * 100, s_sh * 100, b_sh * 100, g1, g2))
         g.last_alloc = (a_sh, s_sh, b_sh)
     tgt = {}
-    for part in (s_update(context, cd, s_sh), b_update(context, cd, b_sh), a_update(context, cd, a_sh)):
+    mix = s_sh &gt; 0 and b_sh &gt; 0                     # 个股、板块同时持有时各自减少只数，合计 ≤ 10
+    n_s = Cfg.S_HOLD_MIX if mix else Cfg.S_HOLD
+    k_b = Cfg.B_PER_IND_MIX if mix else Cfg.B_PER_IND
+    for part in (s_update(context, cd, s_sh, n_s), b_update(context, cd, b_sh, k_b), a_update(context, cd, a_sh)):
         for s, v in part.items():
             tgt[s] = tgt.get(s, 0.0) + v
     # 1. 卖：不在目标里的清仓，超出目标太多的减仓
@@ -1176,7 +1278,7 @@ def trade(context):
     if need &gt; 0 and e in pos and pos[e].total_amount &gt; 0 and not cd[e].paused:
         pf = context.portfolio
         if need &gt; pf.available_cash:
-            order_target_value(e, max(0.0, pos[e].value - (need - pf.available_cash) * 1.02))
+            sell_cash_etf(context, cd, (need - pf.available_cash) * 1.02)
     # 3. 买
     for s, v in tgt.items():
         cur = pos[s].value if s in pos else 0
