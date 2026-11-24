@@ -144,7 +144,7 @@ td.sep, th.sep { border-left: 1px solid var(--rule) }
     <h1>全行情切换组合策略</h1>
     <p class="lede">市场没起色时，钱交给<b>稳健块</b>：买 10 只走势平稳的大盘好公司。中小盘股票整体涨起来时，钱换给<b>个股块</b>，追小盘股的反弹。整个大盘也进入上涨期时，再分一半给<b>板块块</b>，买最强行业的 ETF。
       本地回测 2023 年以来，三块合起来<b>年化 <span id="k_ann"></span></b>，从最高点最多跌过 <span id="k_dd"></span>；同期沪深300 年化只有 <span id="k_i3"></span>。</p>
-    <div class="meta"><span>任何时候最多持有 10 只股票或 ETF</span><span>每天下午 2:50 检查一次</span><span>手续费按单边 0.15%（ETF 0.08%）扣除</span><span>三块都已在聚宽上单独验证，三合一 V1.3 待跑</span></div>
+    <div class="meta"><span>任何时候最多持有 10 只股票或 ETF</span><span>每天下午 2:50 检查一次</span><span>手续费按单边 0.15%（ETF 0.08%）扣除</span><span>三合一 V1.3 聚宽实测：2023 年以来年化 35.7%</span></div>
   </header>
 
   <section><div class="kpis" id="kpis"></div></section>
@@ -217,9 +217,9 @@ td.sep, th.sep { border-left: 1px solid var(--rule) }
   <section>
     <div class="sec-head"><h2>需要知道的风险</h2></div>
     <ul class="notes">
-      <li><b>本地数字偏乐观，聚宽实测更低</b>：三合一早期版本（当时板块块因数据问题一直没买入）在聚宽上 2023 年以来年化 27.7%，本地是 44%。逐笔对照后发现主要有三个原因：
+      <li><b>聚宽实测比本地低一些</b>：三合一 V1.3 在聚宽上 2023 年以来累计 +213%、年化 35.7%、最多跌 16.3%，本地是年化 41.8%、最多跌 13.1%（早期版本板块块没生效时只有 27.7%）。差距主要有三个原因：
         <ul><li>下午 2:50 的成交价比收盘价略差，每买卖一个来回少赚约 0.3%；</li>
-          <li>个股块买到了后来被 ST 的股票，跌停卖不掉；</li>
+          <li>个股块买到了后来被 ST 的股票，跌停卖不掉：V1.3 里 6 笔 ST 股一共亏了约 22 万（本金 100 万），最大一笔 *ST紫天 亏 10 万；</li>
           <li>本地数据缺了后来退市的股票，个股块的本地收益被高估了。</li></ul>
         所以个股块在聚宽上是 14.8%，本地是 23.7%。</li>
       <li><b>稳健块在聚宽上反而更好</b>（24.9%，本地 16.6%）。只持 10 只股票时，选到哪几只对结果影响很大，好坏两个方向都会被放大。</li>
@@ -247,7 +247,7 @@ function hideTip() { tip.style.display = "none"; }
 const row = (k, v) => `<div class="r"><span>${k}</span><b>${v}</b></div>`;
 const NM = { combo: "三合一", a: "稳健块（10 只）", s: "个股块（10 只）", b: "板块块（ETF）", i3: "沪深300" };
 const COL = { combo: "var(--c3)", a: "var(--ca)", s: "var(--cs)", b: "var(--cb)", i3: "var(--ci)" };
-const JQ = { combo: [null, null, "早期版本 27.7%（板块块未生效）"], a: [0.2492, -0.1055, "24.9%"], s: [0.1476, -0.1626, "14.8%"], b: [0.1351, -0.1694, "13.5%"] };
+const JQ = { combo: [0.3571, -0.1630, "35.7%"], a: [0.2492, -0.1055, "24.9%"], s: [0.1476, -0.1626, "14.8%"], b: [0.1351, -0.1694, "13.5%"] };
 const T = D.tab;
 $("asof").textContent = D.asof; $("k_ann").textContent = pct(T.combo.s23.ann); $("k_dd").textContent = pc0(-T.combo.s23.dd); $("k_i3").textContent = pct(T.i3.s23.ann);
 $("sh_a").textContent = pc0(D.share23.a); $("sh_s").textContent = pc0(D.share23.s); $("sh_sb").textContent = pc0(D.share23.sb); $("sh_sb2").textContent = pc0(D.share23.sb);
