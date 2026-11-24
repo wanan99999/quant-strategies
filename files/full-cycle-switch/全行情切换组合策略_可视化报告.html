@@ -144,7 +144,7 @@ td.sep, th.sep { border-left: 1px solid var(--rule) }
     <h1>全行情切换组合策略</h1>
     <p class="lede">市场没起色时，钱交给<b>稳健块</b>：买 10 只走势平稳的大盘好公司。中小盘股票整体涨起来时，钱换给<b>个股块</b>，追小盘股的反弹。整个大盘也进入上涨期时，再分一半给<b>板块块</b>，买最强行业的 ETF。
       本地回测 2023 年以来，三块合起来<b>年化 <span id="k_ann"></span></b>，从最高点最多跌过 <span id="k_dd"></span>；同期沪深300 年化只有 <span id="k_i3"></span>。</p>
-    <div class="meta"><span>任何时候最多持有 10 只股票或 ETF</span><span>每天下午 2:50 检查一次</span><span>手续费按单边 0.15%（ETF 0.08%）扣除</span><span>板块块 ETF 版还没在聚宽上验证</span></div>
+    <div class="meta"><span>任何时候最多持有 10 只股票或 ETF</span><span>每天下午 2:50 检查一次</span><span>手续费按单边 0.15%（ETF 0.08%）扣除</span><span>三块都已在聚宽上单独验证，三合一 V1.3 待跑</span></div>
   </header>
 
   <section><div class="kpis" id="kpis"></div></section>
@@ -223,7 +223,7 @@ td.sep, th.sep { border-left: 1px solid var(--rule) }
           <li>本地数据缺了后来退市的股票，个股块的本地收益被高估了。</li></ul>
         所以个股块在聚宽上是 14.8%，本地是 23.7%。</li>
       <li><b>稳健块在聚宽上反而更好</b>（24.9%，本地 16.6%）。只持 10 只股票时，选到哪几只对结果影响很大，好坏两个方向都会被放大。</li>
-      <li><b>板块块的 ETF 做法还没在聚宽上跑过</b>。聚宽没有申万二级行业的现成行情，需要用成分股自己算行业指数，选出来的行业可能和本地有出入。</li>
+      <li><b>板块块在聚宽上比本地还好</b>：聚宽实测 2023 年以来年化 13.5%、最多跌 16.9%，本地是 9.4%。聚宽没有申万二级行业的现成行情，是用成分股自己算的行业指数，选出来的行业和本地不完全一样；行业和 ETF 的配对大多合理（如通信设备配通信 ETF、电池配锂电池 ETF），个别比较勉强（如视听器材配工业母机 ETF）。</li>
       <li><b>收益集中在少数几段急涨行情</b>。中小盘来回拉锯时（比如 2025 年 5 月），钱会在几块之间频繁切换，买进后两三天又卖出，白白亏掉手续费和差价。</li>
       <li><b>下一步改进</b>：个股块剔除容易被 ST、退市的股票，比如净资产为负、营收很小且亏损、股价低于 2 元的公司。</li>
     </ul>
@@ -247,7 +247,7 @@ function hideTip() { tip.style.display = "none"; }
 const row = (k, v) => `<div class="r"><span>${k}</span><b>${v}</b></div>`;
 const NM = { combo: "三合一", a: "稳健块（10 只）", s: "个股块（10 只）", b: "板块块（ETF）", i3: "沪深300" };
 const COL = { combo: "var(--c3)", a: "var(--ca)", s: "var(--cs)", b: "var(--cb)", i3: "var(--ci)" };
-const JQ = { combo: [null, null, "早期版本 27.7%（板块块未生效）"], a: [0.2492, -0.1055, "24.9%"], s: [0.1476, -0.1626, "14.8%"], b: [null, null, "尚未验证"] };
+const JQ = { combo: [null, null, "早期版本 27.7%（板块块未生效）"], a: [0.2492, -0.1055, "24.9%"], s: [0.1476, -0.1626, "14.8%"], b: [0.1351, -0.1694, "13.5%"] };
 const T = D.tab;
 $("asof").textContent = D.asof; $("k_ann").textContent = pct(T.combo.s23.ann); $("k_dd").textContent = pc0(-T.combo.s23.dd); $("k_i3").textContent = pct(T.i3.s23.ann);
 $("sh_a").textContent = pc0(D.share23.a); $("sh_s").textContent = pc0(D.share23.s); $("sh_sb").textContent = pc0(D.share23.sb); $("sh_sb2").textContent = pc0(D.share23.sb);

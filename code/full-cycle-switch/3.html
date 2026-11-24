@@ -910,7 +910,7 @@
         <span class="k">return</span> <span class="p">{}</span>
     <span class="n">day</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">previous_date</span>
     <span class="n">inds</span> <span class="o">=</span> <span class="n">get_industries</span><span class="p">(</span><span class="s2">&quot;sw_l2&quot;</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">day</span><span class="p">)</span>
-    <span class="n">inds</span> <span class="o">=</span> <span class="n">inds</span><span class="p">[</span><span class="n">inds</span><span class="o">.</span><span class="n">start_date</span> <span class="o">&lt;=</span> <span class="n">day</span><span class="p">]</span>
+    <span class="n">inds</span> <span class="o">=</span> <span class="n">inds</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">inds</span><span class="o">.</span><span class="n">start_date</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">day</span><span class="p">)]</span>   <span class="c1"># 统一成时间戳比较，避免 pandas 警告刷屏</span>
     <span class="n">need</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">Cfg</span><span class="o">.</span><span class="n">B_CORR_N</span><span class="p">,</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">B_MOM_N</span> <span class="o">+</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">ER_N</span><span class="p">)</span> <span class="o">+</span> <span class="mi">5</span>
     <span class="n">px</span> <span class="o">=</span> <span class="n">l2_close</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">inds</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="n">need</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">px</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">px</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">B_MOM_N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
@@ -1408,7 +1408,7 @@ def b_update(context, cd, share, k=None):
         return {}
     day = context.previous_date
     inds = get_industries(&quot;sw_l2&quot;, date=day)
-    inds = inds[inds.start_date &lt;= day]
+    inds = inds[pd.to_datetime(inds.start_date) &lt;= pd.Timestamp(day)]   # 统一成时间戳比较，避免 pandas 警告刷屏
     need = max(Cfg.B_CORR_N, Cfg.B_MOM_N + Cfg.ER_N) + 5
     px = l2_close(context, list(inds.index), need)
     if px is None or len(px) &lt; Cfg.B_MOM_N + 1:

@@ -394,7 +394,7 @@ def b_update(context, cd, share, k=None):
         return {}
     day = context.previous_date
     inds = get_industries("sw_l2", date=day)
-    inds = inds[inds.start_date <= day]
+    inds = inds[pd.to_datetime(inds.start_date) <= pd.Timestamp(day)]   # 统一成时间戳比较，避免 pandas 警告刷屏
     need = max(Cfg.B_CORR_N, Cfg.B_MOM_N + Cfg.ER_N) + 5
     px = l2_close(context, list(inds.index), need)
     if px is None or len(px) < Cfg.B_MOM_N + 1:
