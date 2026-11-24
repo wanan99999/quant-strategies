@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>全行情切换组合策略 板块+稳健 V1.3 代码</title>
-<meta name="description" content="全行情切换组合 · 板块+稳健 V1.3 —— 聚宽回测代码">
+<title>全行情切换组合策略 诊断：仅个股块（V1.4 过滤） 代码</title>
+<meta name="description" content="全行情切换组合 V1.4 诊断 · 仅个股块（含退市 / ST 风险过滤）—— 聚宽回测代码（验证用，不是交易策略）">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="../../assets/site.css">
@@ -15,10 +15,10 @@
 <nav><a href="../../index.html#dividend">股息率策略</a><a href="../../index.html#trend">趋势策略</a><a href="../../index.html#news">消息股策略</a></nav></div></header>
 <main class="wrap">
 <nav class="crumb"><a class="back" href="../../s/full-cycle-switch.html" data-back>返回</a></nav>
-<section class="codehead"><h1>全行情切换组合策略 · 板块+稳健 V1.3</h1><p class="sub">全行情切换组合 · 板块+稳健 V1.3 —— 聚宽回测代码</p><p class="sub2">板块块 ETF 版 + 稳健块</p>
-<div class="vers"><a class="vchip" href="1.html">个股+板块+稳健 V1.3</a><a class="vchip on" href="2.html">板块+稳健 V1.3</a><a class="vchip" href="3.html">诊断：仅板块块（ETF）</a><a class="vchip" href="4.html">个股+板块+稳健 V1.2</a><a class="vchip" href="5.html">个股+稳健 V1.2</a><a class="vchip" href="6.html">板块+稳健 V1.2</a><a class="vchip" href="7.html">个股+板块+稳健 V1.1</a><a class="vchip" href="8.html">个股+板块+稳健 V1.0</a></div>
-<div class="tools"><span class="mono">全行情切换组合_板块+稳健_V1.3.py · 523 行 · 26 KB</span><span class="grow"></span>
-<button class="btn" id="copy" type="button">复制代码</button><a class="btn" href="../../files/full-cycle-switch/%E5%85%A8%E8%A1%8C%E6%83%85%E5%88%87%E6%8D%A2%E7%BB%84%E5%90%88_%E6%9D%BF%E5%9D%97%2B%E7%A8%B3%E5%81%A5_V1.3.py" download>下载 .py</a></div></section>
+<section class="codehead"><h1>全行情切换组合策略 · 诊断：仅个股块（V1.4 过滤）</h1><p class="sub">全行情切换组合 V1.4 诊断 · 仅个股块（含退市 / ST 风险过滤）—— 聚宽回测代码（验证用，不是交易策略）</p><p class="sub2">只跑个股块，其余时间空仓；对照不过滤时的聚宽年化 14.8%</p>
+<div class="vers"><a class="vchip" href="1.html">个股+板块+稳健 V1.4</a><a class="vchip on" href="2.html">诊断：仅个股块（V1.4 过滤）</a><a class="vchip" href="3.html">个股+板块+稳健 V1.3</a><a class="vchip" href="4.html">板块+稳健 V1.3</a><a class="vchip" href="5.html">诊断：仅板块块（ETF）</a><a class="vchip" href="6.html">个股+板块+稳健 V1.2</a><a class="vchip" href="7.html">个股+稳健 V1.2</a><a class="vchip" href="8.html">板块+稳健 V1.2</a><a class="vchip" href="9.html">个股+板块+稳健 V1.1</a><a class="vchip" href="10.html">个股+板块+稳健 V1.0</a></div>
+<div class="tools"><span class="mono">诊断_全行情切换V1.4_仅个股.py · 530 行 · 26 KB</span><span class="grow"></span>
+<button class="btn" id="copy" type="button">复制代码</button><a class="btn" href="../../files/full-cycle-switch/%E8%AF%8A%E6%96%AD_%E5%85%A8%E8%A1%8C%E6%83%85%E5%88%87%E6%8D%A2V1.4_%E4%BB%85%E4%B8%AA%E8%82%A1.py" download>下载 .py</a></div></section>
 <div class="codebox"><div class="hl"><table class="hltable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">  1</span>
 <span class="normal">  2</span>
 <span class="normal">  3</span>
@@ -540,47 +540,26 @@
 <span class="normal">519</span>
 <span class="normal">520</span>
 <span class="normal">521</span>
-<span class="normal">522</span></pre></div></td><td class="code"><div><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="normal">522</span>
+<span class="normal">523</span>
+<span class="normal">524</span>
+<span class="normal">525</span>
+<span class="normal">526</span>
+<span class="normal">527</span>
+<span class="normal">528</span>
+<span class="normal">529</span></pre></div></td><td class="code"><div><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">全行情切换组合 · 板块+稳健 V1.3 —— 聚宽回测代码</span>
+<span class="sd">全行情切换组合 V1.4 诊断 · 仅个股块（含退市 / ST 风险过滤）—— 聚宽回测代码（验证用，不是交易策略）</span>
 
-<span class="sd">V1.3 修改（相对 V1.2）：</span>
-<span class="sd">    板块块改买 ETF：用申万二级行业指数（成分股按流通市值合成）挑出走势顺、60 日涨幅前 3 的行业，</span>
-<span class="sd">    每个行业买一只近 120 日日收益相关系数最高（≥0.85）的行业 / 主题 ETF，3 只各 1/3；匹配每 20 个交易日更新。</span>
-<span class="sd">    「个股+板块+稳健」上行期改为 个股 5 只 + ETF 3 只（共 8 只）。</span>
-<span class="sd">    本地测算（2023-01 至 2026-11）：板块块单独年化 +9.4%（行业用前一日收盘 +8.5%）；三合一年化 +41.8%、最大回撤 -13.1%</span>
+<span class="sd">规则：中小盘走强（中证1000 近 20 日净涨幅 ≥ 来回波动的 20% 且高于 20 日均价）时，100% 资金给个股块；否则空仓（货币 ETF）。</span>
+<span class="sd">个股块：去掉成交额最小的 30%，「流通市值越小 + 近 20 日跌得越多」前 10 只等权，每 5 个交易日重排，跌出前 20 才卖。</span>
+<span class="sd">V1.4 新增风险过滤：股价 &lt; 2 元、每股净资产 ≤ 0 不买；1–4 月最近四季合计亏损的不买；4 月 15 日起上年年报未披露的不买；</span>
+<span class="sd">                  持有的股票被 ST 当天卖出。设 Cfg.S_RISK_FILTER = False 即为不过滤的对照。</span>
+<span class="sd">其余代码与「全行情切换组合 V1.4」完全相同。</span>
 
-<span class="sd">V1.2 修改（相对 V1.1）：</span>
-<span class="sd">    修复板块块从未下单：聚宽 finance.SW1_DAILY_PRICE 只有申万一级行业行情，查不到二级行业，V1.0/V1.1 里板块块</span>
-<span class="sd">    分到资金的日子全部空仓（诊断回测「仅板块」0 笔交易）。现在查不到的二级行业改用成分股按流通市值加权合成行业指数。</span>
-
-<span class="sd">V1.1 修改（相对 V1.0）：</span>
-<span class="sd">    1. 同时持股不超过 10 只：稳健块 30 → 10 只（缓冲 60 → 20，同一行业最多 5 → 3 只）；个股块 20 → 10 只（缓冲 20）；</span>
-<span class="sd">       板块块每个行业 5 → 3 只（3 个行业共 9 只）。「个股+板块+稳健」在上行期为 个股 4 只 + 板块 3 个行业各 2 只 = 10 只</span>
-<span class="sd">    2. 修复货币 ETF（511880）减仓报错「平仓数量不能小于 100」：减仓数量按 100 份向上取整，剩余不足 100 份就全部卖出</span>
-<span class="sd">    3. 修复「资金不足 / 开仓数量不能小于 100」：买入前按当前可用资金封顶并按手取整，不够 1 手就不下单</span>
-
-<span class="sd">一个账户里跑三块资金，按行情开关分配（每天 14:50）：</span>
-<span class="sd">    稳健块：「大盘股熊市震荡市稳健策略 V1.1」规则，持股改为 10 只（大盘 800 盈利股、距一年高点 + 低波动前 10、波动率控仓、回撤风控、单只止损）</span>
-<span class="sd">    个股块：「上行期个股·小市值反转 V1.0」（流动性池 小市值排名 + 20 日反转排名 前 10，每 5 日调仓）</span>
-<span class="sd">    板块块：申万二级行业里自身走势顺、60 日涨幅前 3 的行业，各买一只走势最像它的 ETF，每 10 日调仓</span>
-
-<span class="sd">开关：</span>
-<span class="sd">    开关1「中证1000趋势」：中证1000 ER20 &gt; 0.2 且 当前价 &gt; MA20</span>
-<span class="sd">           ER20 = (当前价 − 20 日前收盘) ÷ 20 天每日涨跌绝对值之和</span>
-<span class="sd">    开关2「上行期」：开关1 成立，且 沪深300 &gt; MA120、MA120 高于 20 日前、申万一级站上 60 日线 ≥ 50%（后三项用前一日收盘）</span>
-<span class="sd">本版本资金分配（MODE = &quot;板块+稳健&quot;）：</span>
-<span class="sd">    中小盘走强且大盘在上涨期 → 100% 板块块（3 只 ETF）；否则 → 100% 稳健块（10 只）</span>
-
-<span class="sd">本地测算（后复权日线，单边 0.15%，当日收盘成交；切换时稳健块另计 0.15%；主要看 2023 起）：</span>
-<span class="sd">    2023 起：年化 +28.4%、最大回撤 -26%、夏普 1.39；逐年 2023 +28%、2024 +42%、2025 +5%、2026 至今 +32%</span>
-<span class="sd">    注意：本地稳健块 10 只在上行期是亏的（-10%），聚宽实测稳健块这些日子是赚的，所以聚宽上此版本相对「仅稳健」的提升会更小</span>
-<span class="sd">与本地口径的差异：</span>
-<span class="sd">    本地三块各自满额回测再按当日资金比例拼接；这里在一个账户里按目标市值合并下单，同一只股票两块都要时合并持有</span>
-<span class="sd">    板块块本地用申万官方二级行业指数，这里用成分股合成的行业指数（前一日收盘），选出的行业和 ETF 可能有出入</span>
-<span class="sd">    稳健块在两次调仓之间只在总仓位变动 ≥10% 或开关切换时调整</span>
-<span class="sd">聚宽实测（2023-01 至 2026-11-15）：V1.1 三合一 年化 27.7%（当时板块块未生效）；诊断：稳健块 10 只单独 24.9%、个股块单独 14.8%</span>
-<span class="sd">建议回测：2019-01-01 起（看 2023 起为主），分钟频率，初始资金 ≥ 100 万（同时持股不超过 10 只，切换当天新旧两块交接、跌停卖不出时可能短暂多于 10 只）</span>
+<span class="sd">对照：V1.1 诊断「仅个股」（同样 10 只、不过滤）聚宽实测 累计 +67.4%、年化 14.8%、最大回撤 -16.3%</span>
+<span class="sd">看日志：「个股块风险过滤」一行显示每次剔除多少只、各因哪条规则；「被 ST，卖出」一行显示持有中被 ST 的股票。</span>
+<span class="sd">聚宽设置：2023-01-01 至 2026-11-15，¥1,000,000，分钟频率</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">builtins</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">jqdata</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
@@ -589,8 +568,8 @@
 <span class="nb">sum</span><span class="p">,</span> <span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="nb">abs</span><span class="p">,</span> <span class="nb">any</span><span class="p">,</span> <span class="nb">all</span><span class="p">,</span> <span class="nb">round</span> <span class="o">=</span> <span class="p">(</span><span class="n">builtins</span><span class="o">.</span><span class="n">sum</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">abs</span><span class="p">,</span>
                                        <span class="n">builtins</span><span class="o">.</span><span class="n">any</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">all</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">round</span><span class="p">)</span>
 
-<span class="n">VERSION</span> <span class="o">=</span> <span class="s2">&quot;全行情切换组合·板块+稳健 V1.3&quot;</span>
-<span class="n">MODE</span> <span class="o">=</span> <span class="s2">&quot;板块+稳健&quot;</span>     <span class="c1"># &quot;个股+稳健&quot; / &quot;板块+稳健&quot; / &quot;个股+板块+稳健&quot;</span>
+<span class="n">VERSION</span> <span class="o">=</span> <span class="s2">&quot;全行情切换组合 V1.4 诊断·仅个股块（含退市/ST 风险过滤）&quot;</span>
+<span class="n">MODE</span> <span class="o">=</span> <span class="s2">&quot;个股+稳健&quot;</span>   <span class="c1"># 不计算大盘上涨期，个股块始终 10 只</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">Cfg</span><span class="p">:</span>
@@ -609,6 +588,7 @@
     <span class="n">A_VOL_TARGET</span> <span class="o">=</span> <span class="mf">0.15</span><span class="p">;</span> <span class="n">A_VOL_WIN</span> <span class="o">=</span> <span class="mi">40</span><span class="p">;</span> <span class="n">A_EXPO_BAND</span> <span class="o">=</span> <span class="mf">0.10</span><span class="p">;</span> <span class="n">A_DD_HALF</span> <span class="o">=</span> <span class="mf">0.15</span><span class="p">;</span> <span class="n">A_DD_OUT</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">;</span> <span class="n">A_DD_LOOK</span> <span class="o">=</span> <span class="mi">250</span>
     <span class="c1"># ---- 个股块 ----</span>
     <span class="n">S_LIST_DAYS</span> <span class="o">=</span> <span class="mi">365</span><span class="p">;</span> <span class="n">S_AMT_N</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span> <span class="n">S_AMT_DROP</span> <span class="o">=</span> <span class="mf">0.30</span><span class="p">;</span> <span class="n">S_REV_N</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span> <span class="n">S_HOLD</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span> <span class="n">S_HOLD_MIX</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span> <span class="n">S_BUFFER</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span> <span class="n">S_REBAL</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">S_RISK_FILTER</span> <span class="o">=</span> <span class="kc">True</span><span class="p">;</span> <span class="n">S_MIN_PRICE</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">;</span> <span class="n">S_SEASON_END_MONTH</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span> <span class="n">S_LATE_DAY</span> <span class="o">=</span> <span class="mi">15</span>   <span class="c1"># V1.4 退市 / ST 风险过滤</span>
     <span class="c1"># ---- 板块块 ----</span>
     <span class="n">B_MOM_N</span> <span class="o">=</span> <span class="mi">60</span><span class="p">;</span> <span class="n">B_IND_N</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span> <span class="n">B_REBAL</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span> <span class="n">B_PER_IND</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">B_PER_IND_MIX</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">B_CORR_N</span> <span class="o">=</span> <span class="mi">120</span><span class="p">;</span> <span class="n">B_CORR_MIN</span> <span class="o">=</span> <span class="mf">0.85</span><span class="p">;</span> <span class="n">B_MAP_DAYS</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span> <span class="n">B_ETF_DAYS</span> <span class="o">=</span> <span class="mi">120</span><span class="p">;</span> <span class="n">B_ETF_MONEY</span> <span class="o">=</span> <span class="mf">3e7</span>   <span class="c1"># 行业→ETF 匹配</span>
@@ -757,7 +737,8 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">allocation</span><span class="p">(</span><span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;返回 (稳健块, 个股块, 板块块) 资金占比&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;诊断版：只让个股块工作（中证1000 趋势成立时 100%），其余时间空仓（资金放货币 ETF）&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="k">if</span> <span class="n">g1</span> <span class="k">else</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">MODE</span> <span class="o">==</span> <span class="s2">&quot;个股+稳健&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="k">if</span> <span class="n">g1</span> <span class="k">else</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">MODE</span> <span class="o">==</span> <span class="s2">&quot;板块+稳健&quot;</span><span class="p">:</span>
@@ -838,12 +819,41 @@
 
 
 <span class="c1"># ================= 个股块 =================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">s_risk_drop</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">stocks</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;V1.4 退市 / ST 风险过滤：返回要剔除的股票集合</span>
+<span class="sd">    1. 股价 &lt; 2 元（连续 20 天低于 1 元会退市）</span>
+<span class="sd">    2. 每股净资产 ≤ 0（资不抵债，年报后会被 *ST）</span>
+<span class="sd">    3. 年报季（1 月 1 日–4 月 30 日）：最近四个季度合计亏损的不买（亏损公司年报后最容易被 ST）</span>
+<span class="sd">    4. 4 月 15 日–4 月 30 日：上一年年报还没披露的不买（拖到最后几天才披露的公司，常伴随审计问题、被 ST）&quot;&quot;&quot;</span>
+    <span class="n">day</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">previous_date</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">get_fundamentals</span><span class="p">(</span><span class="n">query</span><span class="p">(</span><span class="n">valuation</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">valuation</span><span class="o">.</span><span class="n">pe_ratio</span><span class="p">,</span> <span class="n">valuation</span><span class="o">.</span><span class="n">pb_ratio</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">valuation</span><span class="o">.</span><span class="n">code</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">stocks</span><span class="p">)),</span>
+                         <span class="n">date</span><span class="o">=</span><span class="n">day</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;code&quot;</span><span class="p">)</span>
+    <span class="n">drop</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">stocks</span> <span class="k">if</span> <span class="n">cd</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">last_price</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">cd</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">last_price</span> <span class="o">&lt;</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">S_MIN_PRICE</span><span class="p">)</span>
+    <span class="n">drop</span> <span class="o">|=</span> <span class="nb">set</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">pb_ratio</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">n_base</span><span class="p">,</span> <span class="n">n_loss</span><span class="p">,</span> <span class="n">n_late</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">drop</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">day</span><span class="o">.</span><span class="n">month</span> <span class="o">&lt;=</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">S_SEASON_END_MONTH</span><span class="p">:</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">pe_ratio</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">n_loss</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">loss</span> <span class="o">-</span> <span class="n">drop</span><span class="p">);</span> <span class="n">drop</span> <span class="o">|=</span> <span class="n">loss</span>
+    <span class="k">if</span> <span class="n">day</span><span class="o">.</span><span class="n">month</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">day</span><span class="o">.</span><span class="n">day</span> <span class="o">&gt;=</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">S_LATE_DAY</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">get_fundamentals</span><span class="p">(</span><span class="n">query</span><span class="p">(</span><span class="n">indicator</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">indicator</span><span class="o">.</span><span class="n">statDate</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">indicator</span><span class="o">.</span><span class="n">code</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">stocks</span><span class="p">)),</span> <span class="n">date</span><span class="o">=</span><span class="n">day</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;code&quot;</span><span class="p">)</span>
+        <span class="n">done</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">statDate</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">day</span><span class="o">.</span><span class="n">year</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">31</span><span class="p">)])</span>
+        <span class="n">late</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">stocks</span><span class="p">)</span> <span class="o">-</span> <span class="n">done</span>
+        <span class="n">n_late</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">late</span> <span class="o">-</span> <span class="n">drop</span><span class="p">);</span> <span class="n">drop</span> <span class="o">|=</span> <span class="n">late</span>
+    <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">day</span> <span class="o">%</span> <span class="mi">20</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">n_late</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;个股块风险过滤：候选 </span><span class="si">%d</span><span class="s2"> 只，剔除 </span><span class="si">%d</span><span class="s2"> 只（股价&lt;2元或净资产≤0：</span><span class="si">%d</span><span class="s2">，年报季亏损：</span><span class="si">%d</span><span class="s2">，年报未披露：</span><span class="si">%d</span><span class="s2">）&quot;</span>
+                 <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">stocks</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">drop</span><span class="p">),</span> <span class="n">n_base</span><span class="p">,</span> <span class="n">n_loss</span><span class="p">,</span> <span class="n">n_late</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">drop</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">s_select</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
     <span class="n">day</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">previous_date</span>
     <span class="n">stocks</span> <span class="o">=</span> <span class="n">base_stocks</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">S_LIST_DAYS</span><span class="p">)</span>
     <span class="n">amt</span> <span class="o">=</span> <span class="n">get_price</span><span class="p">(</span><span class="n">stocks</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">day</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">Cfg</span><span class="o">.</span><span class="n">S_AMT_N</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;money&quot;</span><span class="p">],</span> <span class="n">panel</span><span class="o">=</span><span class="kc">False</span>
                     <span class="p">)</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="s2">&quot;code&quot;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="s2">&quot;money&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
     <span class="n">amt</span> <span class="o">=</span> <span class="n">amt</span><span class="p">[</span><span class="n">amt</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">];</span> <span class="n">pool</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">amt</span><span class="p">[</span><span class="n">amt</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">pct</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">S_AMT_DROP</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">S_RISK_FILTER</span><span class="p">:</span>
+        <span class="n">bad</span> <span class="o">=</span> <span class="n">s_risk_drop</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">pool</span><span class="p">)</span>
+        <span class="n">pool</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">pool</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">bad</span><span class="p">]</span>
     <span class="n">cap</span> <span class="o">=</span> <span class="n">get_fundamentals</span><span class="p">(</span><span class="n">query</span><span class="p">(</span><span class="n">valuation</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">valuation</span><span class="o">.</span><span class="n">circulating_market_cap</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">valuation</span><span class="o">.</span><span class="n">code</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">pool</span><span class="p">)),</span>
                            <span class="n">date</span><span class="o">=</span><span class="n">day</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;code&quot;</span><span class="p">)[</span><span class="s2">&quot;circulating_market_cap&quot;</span><span class="p">]</span>
     <span class="n">cap</span> <span class="o">=</span> <span class="n">cap</span><span class="p">[</span><span class="n">cap</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
@@ -867,6 +877,10 @@
     <span class="k">if</span> <span class="n">share</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">g</span><span class="o">.</span><span class="n">s_on</span> <span class="o">=</span> <span class="kc">False</span><span class="p">;</span> <span class="n">g</span><span class="o">.</span><span class="n">s_picks</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">return</span> <span class="p">{}</span>
+    <span class="n">hit</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">s_picks</span> <span class="k">if</span> <span class="n">cd</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">is_st</span> <span class="ow">or</span> <span class="s2">&quot;退&quot;</span> <span class="ow">in</span> <span class="n">cd</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>      <span class="c1"># 持有期间被 ST：当天就换掉（跌停卖不出会顺延）</span>
+    <span class="k">if</span> <span class="n">hit</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;个股块：</span><span class="si">%s</span><span class="s2"> 被 ST，卖出&quot;</span> <span class="o">%</span> <span class="s2">&quot;、&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cd</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">hit</span><span class="p">))</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">s_picks</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">s_picks</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hit</span><span class="p">]</span>
     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">g</span><span class="o">.</span><span class="n">s_on</span><span class="p">)</span> <span class="ow">or</span> <span class="n">g</span><span class="o">.</span><span class="n">day</span> <span class="o">%</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">S_REBAL</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">g</span><span class="o">.</span><span class="n">s_picks</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">s_picks</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n</span><span class="p">:</span>
         <span class="n">g</span><span class="o">.</span><span class="n">s_picks</span> <span class="o">=</span> <span class="n">s_select</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
     <span class="n">g</span><span class="o">.</span><span class="n">s_on</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1066,45 +1080,17 @@
 </div>
 <textarea id="raw" hidden># -*- coding: utf-8 -*-
 &quot;&quot;&quot;
-全行情切换组合 · 板块+稳健 V1.3 —— 聚宽回测代码
+全行情切换组合 V1.4 诊断 · 仅个股块（含退市 / ST 风险过滤）—— 聚宽回测代码（验证用，不是交易策略）
 
-V1.3 修改（相对 V1.2）：
-    板块块改买 ETF：用申万二级行业指数（成分股按流通市值合成）挑出走势顺、60 日涨幅前 3 的行业，
-    每个行业买一只近 120 日日收益相关系数最高（≥0.85）的行业 / 主题 ETF，3 只各 1/3；匹配每 20 个交易日更新。
-    「个股+板块+稳健」上行期改为 个股 5 只 + ETF 3 只（共 8 只）。
-    本地测算（2023-01 至 2026-11）：板块块单独年化 +9.4%（行业用前一日收盘 +8.5%）；三合一年化 +41.8%、最大回撤 -13.1%
+规则：中小盘走强（中证1000 近 20 日净涨幅 ≥ 来回波动的 20% 且高于 20 日均价）时，100% 资金给个股块；否则空仓（货币 ETF）。
+个股块：去掉成交额最小的 30%，「流通市值越小 + 近 20 日跌得越多」前 10 只等权，每 5 个交易日重排，跌出前 20 才卖。
+V1.4 新增风险过滤：股价 &lt; 2 元、每股净资产 ≤ 0 不买；1–4 月最近四季合计亏损的不买；4 月 15 日起上年年报未披露的不买；
+                  持有的股票被 ST 当天卖出。设 Cfg.S_RISK_FILTER = False 即为不过滤的对照。
+其余代码与「全行情切换组合 V1.4」完全相同。
 
-V1.2 修改（相对 V1.1）：
-    修复板块块从未下单：聚宽 finance.SW1_DAILY_PRICE 只有申万一级行业行情，查不到二级行业，V1.0/V1.1 里板块块
-    分到资金的日子全部空仓（诊断回测「仅板块」0 笔交易）。现在查不到的二级行业改用成分股按流通市值加权合成行业指数。
-
-V1.1 修改（相对 V1.0）：
-    1. 同时持股不超过 10 只：稳健块 30 → 10 只（缓冲 60 → 20，同一行业最多 5 → 3 只）；个股块 20 → 10 只（缓冲 20）；
-       板块块每个行业 5 → 3 只（3 个行业共 9 只）。「个股+板块+稳健」在上行期为 个股 4 只 + 板块 3 个行业各 2 只 = 10 只
-    2. 修复货币 ETF（511880）减仓报错「平仓数量不能小于 100」：减仓数量按 100 份向上取整，剩余不足 100 份就全部卖出
-    3. 修复「资金不足 / 开仓数量不能小于 100」：买入前按当前可用资金封顶并按手取整，不够 1 手就不下单
-
-一个账户里跑三块资金，按行情开关分配（每天 14:50）：
-    稳健块：「大盘股熊市震荡市稳健策略 V1.1」规则，持股改为 10 只（大盘 800 盈利股、距一年高点 + 低波动前 10、波动率控仓、回撤风控、单只止损）
-    个股块：「上行期个股·小市值反转 V1.0」（流动性池 小市值排名 + 20 日反转排名 前 10，每 5 日调仓）
-    板块块：申万二级行业里自身走势顺、60 日涨幅前 3 的行业，各买一只走势最像它的 ETF，每 10 日调仓
-
-开关：
-    开关1「中证1000趋势」：中证1000 ER20 &gt; 0.2 且 当前价 &gt; MA20
-           ER20 = (当前价 − 20 日前收盘) ÷ 20 天每日涨跌绝对值之和
-    开关2「上行期」：开关1 成立，且 沪深300 &gt; MA120、MA120 高于 20 日前、申万一级站上 60 日线 ≥ 50%（后三项用前一日收盘）
-本版本资金分配（MODE = &quot;板块+稳健&quot;）：
-    中小盘走强且大盘在上涨期 → 100% 板块块（3 只 ETF）；否则 → 100% 稳健块（10 只）
-
-本地测算（后复权日线，单边 0.15%，当日收盘成交；切换时稳健块另计 0.15%；主要看 2023 起）：
-    2023 起：年化 +28.4%、最大回撤 -26%、夏普 1.39；逐年 2023 +28%、2024 +42%、2025 +5%、2026 至今 +32%
-    注意：本地稳健块 10 只在上行期是亏的（-10%），聚宽实测稳健块这些日子是赚的，所以聚宽上此版本相对「仅稳健」的提升会更小
-与本地口径的差异：
-    本地三块各自满额回测再按当日资金比例拼接；这里在一个账户里按目标市值合并下单，同一只股票两块都要时合并持有
-    板块块本地用申万官方二级行业指数，这里用成分股合成的行业指数（前一日收盘），选出的行业和 ETF 可能有出入
-    稳健块在两次调仓之间只在总仓位变动 ≥10% 或开关切换时调整
-聚宽实测（2023-01 至 2026-11-15）：V1.1 三合一 年化 27.7%（当时板块块未生效）；诊断：稳健块 10 只单独 24.9%、个股块单独 14.8%
-建议回测：2019-01-01 起（看 2023 起为主），分钟频率，初始资金 ≥ 100 万（同时持股不超过 10 只，切换当天新旧两块交接、跌停卖不出时可能短暂多于 10 只）
+对照：V1.1 诊断「仅个股」（同样 10 只、不过滤）聚宽实测 累计 +67.4%、年化 14.8%、最大回撤 -16.3%
+看日志：「个股块风险过滤」一行显示每次剔除多少只、各因哪条规则；「被 ST，卖出」一行显示持有中被 ST 的股票。
+聚宽设置：2023-01-01 至 2026-11-15，¥1,000,000，分钟频率
 &quot;&quot;&quot;
 import builtins
 from jqdata import *
@@ -1113,8 +1099,8 @@ import pandas as pd
 sum, min, max, abs, any, all, round = (builtins.sum, builtins.min, builtins.max, builtins.abs,
                                        builtins.any, builtins.all, builtins.round)
 
-VERSION = &quot;全行情切换组合·板块+稳健 V1.3&quot;
-MODE = &quot;板块+稳健&quot;     # &quot;个股+稳健&quot; / &quot;板块+稳健&quot; / &quot;个股+板块+稳健&quot;
+VERSION = &quot;全行情切换组合 V1.4 诊断·仅个股块（含退市/ST 风险过滤）&quot;
+MODE = &quot;个股+稳健&quot;   # 不计算大盘上涨期，个股块始终 10 只
 
 
 class Cfg:
@@ -1133,6 +1119,7 @@ class Cfg:
     A_VOL_TARGET = 0.15; A_VOL_WIN = 40; A_EXPO_BAND = 0.10; A_DD_HALF = 0.15; A_DD_OUT = 0.25; A_DD_LOOK = 250
     # ---- 个股块 ----
     S_LIST_DAYS = 365; S_AMT_N = 20; S_AMT_DROP = 0.30; S_REV_N = 20; S_HOLD = 10; S_HOLD_MIX = 5; S_BUFFER = 20; S_REBAL = 5
+    S_RISK_FILTER = True; S_MIN_PRICE = 2.0; S_SEASON_END_MONTH = 4; S_LATE_DAY = 15   # V1.4 退市 / ST 风险过滤
     # ---- 板块块 ----
     B_MOM_N = 60; B_IND_N = 3; B_REBAL = 10; B_PER_IND = 1; B_PER_IND_MIX = 1
     B_CORR_N = 120; B_CORR_MIN = 0.85; B_MAP_DAYS = 20; B_ETF_DAYS = 120; B_ETF_MONEY = 3e7   # 行业→ETF 匹配
@@ -1281,7 +1268,8 @@ def uptrend(context):
 
 
 def allocation(g1, g2):
-    &quot;&quot;&quot;返回 (稳健块, 个股块, 板块块) 资金占比&quot;&quot;&quot;
+    &quot;&quot;&quot;诊断版：只让个股块工作（中证1000 趋势成立时 100%），其余时间空仓（资金放货币 ETF）&quot;&quot;&quot;
+    return (0.0, 1.0, 0.0) if g1 else (0.0, 0.0, 0.0)
     if MODE == &quot;个股+稳健&quot;:
         return (0.0, 1.0, 0.0) if g1 else (1.0, 0.0, 0.0)
     if MODE == &quot;板块+稳健&quot;:
@@ -1362,12 +1350,41 @@ def a_update(context, cd, share):
 
 
 # ================= 个股块 =================
+def s_risk_drop(context, cd, stocks):
+    &quot;&quot;&quot;V1.4 退市 / ST 风险过滤：返回要剔除的股票集合
+    1. 股价 &lt; 2 元（连续 20 天低于 1 元会退市）
+    2. 每股净资产 ≤ 0（资不抵债，年报后会被 *ST）
+    3. 年报季（1 月 1 日–4 月 30 日）：最近四个季度合计亏损的不买（亏损公司年报后最容易被 ST）
+    4. 4 月 15 日–4 月 30 日：上一年年报还没披露的不买（拖到最后几天才披露的公司，常伴随审计问题、被 ST）&quot;&quot;&quot;
+    day = context.previous_date
+    v = get_fundamentals(query(valuation.code, valuation.pe_ratio, valuation.pb_ratio).filter(valuation.code.in_(stocks)),
+                         date=day).set_index(&quot;code&quot;)
+    drop = set(s for s in stocks if cd[s].last_price is not None and cd[s].last_price &lt; Cfg.S_MIN_PRICE)
+    drop |= set(v.index[v.pb_ratio &lt;= 0])
+    n_base, n_loss, n_late = len(drop), 0, 0
+    if day.month &lt;= Cfg.S_SEASON_END_MONTH:
+        loss = set(v.index[v.pe_ratio &lt; 0])
+        n_loss = len(loss - drop); drop |= loss
+    if day.month == 4 and day.day &gt;= Cfg.S_LATE_DAY:
+        r = get_fundamentals(query(indicator.code, indicator.statDate).filter(indicator.code.in_(stocks)), date=day).set_index(&quot;code&quot;)
+        done = set(r.index[pd.to_datetime(r.statDate) &gt;= pd.Timestamp(day.year - 1, 12, 31)])
+        late = set(stocks) - done
+        n_late = len(late - drop); drop |= late
+    if g.day % 20 == 0 or n_late:
+        log.info(&quot;个股块风险过滤：候选 %d 只，剔除 %d 只（股价&lt;2元或净资产≤0：%d，年报季亏损：%d，年报未披露：%d）&quot;
+                 % (len(stocks), len(drop), n_base, n_loss, n_late))
+    return drop
+
+
 def s_select(context, cd, n):
     day = context.previous_date
     stocks = base_stocks(context, cd, Cfg.S_LIST_DAYS)
     amt = get_price(stocks, end_date=day, count=Cfg.S_AMT_N, fields=[&quot;money&quot;], panel=False
                     ).pivot(index=&quot;time&quot;, columns=&quot;code&quot;, values=&quot;money&quot;).mean()
     amt = amt[amt &gt; 0]; pool = list(amt[amt.rank(pct=True) &gt; Cfg.S_AMT_DROP].index)
+    if Cfg.S_RISK_FILTER:
+        bad = s_risk_drop(context, cd, pool)
+        pool = [s for s in pool if s not in bad]
     cap = get_fundamentals(query(valuation.code, valuation.circulating_market_cap).filter(valuation.code.in_(pool)),
                            date=day).dropna().set_index(&quot;code&quot;)[&quot;circulating_market_cap&quot;]
     cap = cap[cap &gt; 0]
@@ -1391,6 +1408,10 @@ def s_update(context, cd, share, n):
     if share &lt;= 0:
         g.s_on = False; g.s_picks = []
         return {}
+    hit = [s for s in g.s_picks if cd[s].is_st or &quot;退&quot; in cd[s].name]      # 持有期间被 ST：当天就换掉（跌停卖不出会顺延）
+    if hit:
+        log.info(&quot;个股块：%s 被 ST，卖出&quot; % &quot;、&quot;.join(cd[s].name for s in hit))
+        g.s_picks = [s for s in g.s_picks if s not in hit]
     if (not g.s_on) or g.day % Cfg.S_REBAL == 0 or not g.s_picks or len(g.s_picks) != n:
         g.s_picks = s_select(context, cd, n)
     g.s_on = True
