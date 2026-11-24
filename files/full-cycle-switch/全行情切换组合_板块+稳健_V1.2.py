@@ -1,28 +1,40 @@
 # -*- coding: utf-8 -*-
 """
-全行情切换组合 · 板块+稳健 V1.0 —— 聚宽回测代码
+全行情切换组合 · 板块+稳健 V1.2 —— 聚宽回测代码
+
+V1.2 修改（相对 V1.1）：
+    修复板块块从未下单：聚宽 finance.SW1_DAILY_PRICE 只有申万一级行业行情，查不到二级行业，V1.0/V1.1 里板块块
+    分到资金的日子全部空仓（诊断回测「仅板块」0 笔交易）。现在查不到的二级行业改用成分股按流通市值加权合成行业指数。
+
+V1.1 修改（相对 V1.0）：
+    1. 同时持股不超过 10 只：稳健块 30 → 10 只（缓冲 60 → 20，同一行业最多 5 → 3 只）；个股块 20 → 10 只（缓冲 20）；
+       板块块每个行业 5 → 3 只（3 个行业共 9 只）。「个股+板块+稳健」在上行期为 个股 4 只 + 板块 3 个行业各 2 只 = 10 只
+    2. 修复货币 ETF（511880）减仓报错「平仓数量不能小于 100」：减仓数量按 100 份向上取整，剩余不足 100 份就全部卖出
+    3. 修复「资金不足 / 开仓数量不能小于 100」：买入前按当前可用资金封顶并按手取整，不够 1 手就不下单
 
 一个账户里跑三块资金，按行情开关分配（每天 14:50）：
-    稳健块：「大盘股熊市震荡市稳健策略 V1.1」原规则（大盘 800 盈利股、距一年高点 + 低波动前 30、波动率控仓、回撤风控、单只止损）
-    个股块：「上行期个股·小市值反转 V1.0」（流动性池 小市值排名 + 20 日反转排名 前 20，每 5 日调仓）
-    板块块：「上行期板块·申万二级行业动量 V1.0」（自身趋势成立的二级行业里 60 日涨幅前 3，每行业市值前 5 只，每 10 日调仓）
+    稳健块：「大盘股熊市震荡市稳健策略 V1.1」规则，持股改为 10 只（大盘 800 盈利股、距一年高点 + 低波动前 10、波动率控仓、回撤风控、单只止损）
+    个股块：「上行期个股·小市值反转 V1.0」（流动性池 小市值排名 + 20 日反转排名 前 10，每 5 日调仓）
+    板块块：「上行期板块·申万二级行业动量 V1.0」（自身趋势成立的二级行业里 60 日涨幅前 3，每行业流通市值前 3 只，每 10 日调仓）
 
 开关：
     开关1「中证1000趋势」：中证1000 ER20 > 0.2 且 当前价 > MA20
            ER20 = (当前价 − 20 日前收盘) ÷ 20 天每日涨跌绝对值之和
     开关2「上行期」：开关1 成立，且 沪深300 > MA120、MA120 高于 20 日前、申万一级站上 60 日线 ≥ 50%（后三项用前一日收盘）
 本版本资金分配（MODE = "板块+稳健"）：
-    开关2 成立 → 100% 板块块；否则 → 100% 稳健块（2023 年以来开关2 约 12% 的交易日成立）
+    开关2 成立 → 100% 板块块（3 个行业各 3 只）；否则 → 100% 稳健块（10 只）（2023 年以来开关2 约 12% 的交易日成立）
 
 本地测算（后复权日线，单边 0.15%，当日收盘成交；切换时稳健块另计 0.15%；主要看 2023 起）：
-    2023 起：年化 +34.8%、最大回撤 -19.5%、夏普 1.58；上行期日子 +80% · 震荡期 +26% · 下行期 +16%
-    参数附近 12 组（20/60 日动量、持 3/5 个行业、5/10 日调仓）2023 起年化中位 +28.8%（+24.9% ~ +33.9%），回撤中位 -22%
-    2015 起（参考，当时只有 69 个二级行业有数据）：+20.2% / -19.5%；稳健策略单独 2023 起 +19.0% / -10.5%
+    （以下为 V1.1 本地测算；V1.2 规则相同，只修复板块块下单）
+    V1.1（持股 ≤10）2023 起：年化 +33.9%、最大回撤 -22.1%、夏普 1.54；上行期日子 +75% · 震荡期 +27% · 下行期 +13%
+    逐年：2023 +28.2%、2024 +50.7%、2025 +11.4%、2026 至今 +37.3%；2015 起（参考）+19.8% / -22.4%
+    V1.0（稳健 30 只）：2023 起 +34.8% / -19.5%；本地板块块按行业指数测算，聚宽每行业 3 只的跟踪误差未计入
 与本地口径的差异：
     本地三块各自满额回测再按当日资金比例拼接；这里在一个账户里按目标市值合并下单，同一只股票两块都要时合并持有
-    板块块本地直接持有行业指数，这里用每个行业流通市值前 5 只；行业排名用前一日收盘
+    板块块本地直接持有行业指数，这里用每个行业流通市值前 3 只（与个股块同时持有时 2 只）；行业排名用前一日收盘
     稳健块在两次调仓之间只在总仓位变动 ≥10% 或开关切换时调整
-建议回测：2019-01-01 起（看 2023 起为主），分钟频率，初始资金 ≥ 200 万（最多同时持有 30 + 20 + 15 只）
+聚宽实测（2023-01 至 2026-11-15，V1.0/V1.1 板块块未生效）：V1.1 个股+板块+稳健 累计 +149.5%、年化 27.7%、回撤 -16.3%；V1.0 同版本累计 +108.3%
+建议回测：2019-01-01 起（看 2023 起为主），分钟频率，初始资金 ≥ 100 万（同时持股不超过 10 只，切换当天新旧两块交接、跌停卖不出时可能短暂多于 10 只）
 """
 import builtins
 from jqdata import *
@@ -31,7 +43,7 @@ import pandas as pd
 sum, min, max, abs, any, all, round = (builtins.sum, builtins.min, builtins.max, builtins.abs,
                                        builtins.any, builtins.all, builtins.round)
 
-VERSION = "全行情切换组合·板块+稳健 V1.0"
+VERSION = "全行情切换组合·板块+稳健 V1.2"
 MODE = "板块+稳健"     # "个股+稳健" / "板块+稳健" / "个股+板块+稳健"
 
 
@@ -47,12 +59,12 @@ class Cfg:
     REG_MA, REG_SLOPE, BR_MA, BR_MIN = 120, 20, 60, 0.50
     # ---- 稳健块（V1.1）----
     A_POOL = 800; A_LIST_DAYS = 365; A_ROE_MIN = 0.05; A_HIGH_N = 250; A_VOL_N = 60
-    A_HOLD = 30; A_BUFFER = 60; A_REBAL = 5; A_IND_MAX = 5; A_STOP = 0.10
+    A_HOLD = 10; A_BUFFER = 20; A_REBAL = 5; A_IND_MAX = 3; A_STOP = 0.10
     A_VOL_TARGET = 0.15; A_VOL_WIN = 40; A_EXPO_BAND = 0.10; A_DD_HALF = 0.15; A_DD_OUT = 0.25; A_DD_LOOK = 250
     # ---- 个股块 ----
-    S_LIST_DAYS = 365; S_AMT_N = 20; S_AMT_DROP = 0.30; S_REV_N = 20; S_HOLD = 20; S_BUFFER = 40; S_REBAL = 5
+    S_LIST_DAYS = 365; S_AMT_N = 20; S_AMT_DROP = 0.30; S_REV_N = 20; S_HOLD = 10; S_HOLD_MIX = 4; S_BUFFER = 20; S_REBAL = 5
     # ---- 板块块 ----
-    B_MOM_N = 60; B_IND_N = 3; B_PER_IND = 5; B_REBAL = 10
+    B_MOM_N = 60; B_IND_N = 3; B_PER_IND = 3; B_PER_IND_MIX = 2; B_REBAL = 10
 
 
 def initialize(context):
@@ -74,6 +86,7 @@ def initialize(context):
     # 板块块
     g.b_on = False; g.b_inds = []; g.b_stocks = {}
     g.last_alloc = None
+    g.l2_mem = {}; g.l2_mem_day = -999; g.l2_logged = False   # 二级行业成分股缓存
     run_daily(trade, time=Cfg.TRADE_TIME)
     run_daily(after_close, time="after_close")
     log.info(VERSION)
@@ -107,7 +120,13 @@ def place(context, cd, s, target_value):
         return
     delta = tgt - cur
     if delta >= 100 and can_buy(cd, s):
-        order(s, delta, MarketOrderStyle(min(price * 1.02, d.high_limit)))
+        lim = min(price * 1.02, d.high_limit)
+        afford = int(context.portfolio.available_cash * 0.995 / (lim * 1.0003) / 100) * 100   # 按可用资金封顶（含佣金余量）
+        delta = min(delta, afford)
+        if s.startswith("688") and cur == 0 and delta < 200:
+            return
+        if delta >= 100:
+            order(s, delta, MarketOrderStyle(lim))
     elif delta <= -100 and can_sell(cd, s):
         sell = min(-delta, pos[s].closeable_amount)
         sell = sell if sell == cur else int(sell / 100) * 100
@@ -145,6 +164,23 @@ def base_stocks(context, cd, list_days):
     secs = secs[secs.start_date <= day - pd.Timedelta(days=list_days)]
     ss = [s for s in secs.index if not s.startswith(("4", "8", "92")) and not s.endswith(".BJ")]
     return [s for s in ss if (not cd[s].is_st) and (not cd[s].paused) and "退" not in cd[s].name]
+
+
+def sell_cash_etf(context, cd, value):
+    """卖出约 value 元的货币 ETF：按 100 份向上取整；卖完剩余不足 100 份就全部卖出"""
+    e = Cfg.CASH_ETF
+    pos = context.portfolio.positions
+    if e not in pos or pos[e].closeable_amount <= 0 or cd[e].paused:
+        return
+    price = cd[e].last_price
+    if price is None or price <= 0:
+        return
+    have = pos[e].closeable_amount
+    n = int(np.ceil(value / price / 100.0)) * 100
+    if have - n < 100:
+        n = have
+    if n > 0:
+        order(e, -min(n, have))
 
 
 # ================= 开关 =================
@@ -254,7 +290,7 @@ def a_update(context, cd, share):
 
 
 # ================= 个股块 =================
-def s_select(context, cd):
+def s_select(context, cd, n):
     day = context.previous_date
     stocks = base_stocks(context, cd, Cfg.S_LIST_DAYS)
     amt = get_price(stocks, end_date=day, count=Cfg.S_AMT_N, fields=["money"], panel=False
@@ -270,32 +306,77 @@ def s_select(context, cd):
     df = pd.DataFrame({"cap": cap, "ret": ret}).dropna()
     sc = ((-np.log(df["cap"])).rank(pct=True) + (-df["ret"]).rank(pct=True)).sort_values(ascending=False)
     codes = list(sc.index); rank = {s: i for i, s in enumerate(codes)}
-    pick = [s for s in sorted(g.s_picks, key=lambda x: rank.get(x, 10 ** 9)) if rank.get(s, 10 ** 9) < Cfg.S_BUFFER][:Cfg.S_HOLD]
+    pick = [s for s in sorted(g.s_picks, key=lambda x: rank.get(x, 10 ** 9)) if rank.get(s, 10 ** 9) < Cfg.S_BUFFER][:n]
     for s in codes:
-        if len(pick) >= Cfg.S_HOLD:
+        if len(pick) >= n:
             break
         if s not in pick:
             pick.append(s)
     return pick
 
 
-def s_update(context, cd, share):
+def s_update(context, cd, share, n):
     if share <= 0:
         g.s_on = False; g.s_picks = []
         return {}
-    if (not g.s_on) or g.day % Cfg.S_REBAL == 0 or not g.s_picks:
-        g.s_picks = s_select(context, cd)
+    if (not g.s_on) or g.day % Cfg.S_REBAL == 0 or not g.s_picks or len(g.s_picks) != n:
+        g.s_picks = s_select(context, cd, n)
     g.s_on = True
-    tv = context.portfolio.total_value * (1 - Cfg.CASH_BUFFER) * share / Cfg.S_HOLD
+    tv = context.portfolio.total_value * (1 - Cfg.CASH_BUFFER) * share / n
     return {s: tv for s in g.s_picks}
 
 
 # ================= 板块块 =================
+def l2_close(context, codes):
+    """申万二级行业指数日收盘（截至前一交易日，约 81 个交易日）。
+    V1.2：聚宽 finance.SW1_DAILY_PRICE 实测只有一级行业行情，二级行业查不到数据，V1.0/V1.1 的板块块因此从未下单。
+    这里先查表；查不到的行业，用成分股按流通市值加权的日收益自己合成行业指数（成分股每 20 个交易日更新一次）。"""
+    day = context.previous_date
+    need = Cfg.B_MOM_N + 21
+    px = sw_close(codes, day, 130)
+    have = [c for c in px.columns if px[c].notna().sum() >= Cfg.B_MOM_N + 1] if len(px) else []
+    miss = [c for c in codes if c not in have]
+    if not miss:
+        return px[have]
+    if g.day - g.l2_mem_day >= 20 or not g.l2_mem:
+        g.l2_mem = {c: list(get_industry_stocks(c, date=day)) for c in codes}
+        g.l2_mem_day = g.day
+    mem = {c: [s for s in g.l2_mem.get(c, []) if not s.startswith(("4", "8", "92")) and not s.endswith(".BJ")] for c in miss}
+    allst = sorted(set(s for v in mem.values() for s in v))
+    if not allst:
+        return px[have] if have else pd.DataFrame()
+    p = get_price(allst, end_date=day, count=need, fields=["close"], fq="pre", panel=False
+                  ).pivot(index="time", columns="code", values="close")
+    r = p.pct_change()
+    cap = get_fundamentals(query(valuation.code, valuation.circulating_market_cap).filter(valuation.code.in_(allst)),
+                           date=day).dropna().set_index("code")["circulating_market_cap"]
+    syn = {}
+    for c, ss in mem.items():
+        ss = [s for s in ss if s in r.columns and s in cap.index]
+        if len(ss) < 3:
+            continue
+        w = cap[ss]; rr = r[ss]
+        ww = rr.notna().mul(w, axis=1)
+        ret = (rr.fillna(0) * ww).sum(axis=1) / ww.sum(axis=1).replace(0, np.nan)
+        syn[c] = (1 + ret.fillna(0)).cumprod()
+    out = pd.DataFrame(syn)
+    if not g.l2_logged:
+        log.info("二级行业行情：表内可用 %d 个，成分股合成 %d 个" % (len(have), out.shape[1]))
+        g.l2_logged = True
+    if have:
+        a = px[have]; a.index = pd.to_datetime(a.index); out.index = pd.to_datetime(out.index)
+        out = pd.concat([a, out], axis=1).sort_index().ffill()
+    return out
+
+
 def b_rank(context):
     day = context.previous_date
     inds = get_industries("sw_l2", date=day); inds = inds[inds.start_date <= day]
-    px = sw_close(list(inds.index), day, 130)
+    px = l2_close(context, list(inds.index))
     ok, mom = set(), {}
+    if px is None or len(px) == 0:
+        log.warn("二级行业行情为空，板块块今天不选行业")
+        return [], ok
     for code in px.columns:
         s = px[code].dropna()
         if len(s) >= Cfg.B_MOM_N + 1 and er_ma_ok(s.values):
@@ -303,7 +384,7 @@ def b_rank(context):
     return sorted(mom, key=lambda k: -mom[k]), ok
 
 
-def b_stocks_of(context, cd, ind):
+def b_stocks_of(context, cd, ind, k):
     day = context.previous_date
     ss = [s for s in get_industry_stocks(ind, date=day)
           if not s.startswith(("4", "8", "92")) and not s.endswith(".BJ") and (not cd[s].is_st) and (not cd[s].paused)
@@ -312,10 +393,10 @@ def b_stocks_of(context, cd, ind):
         return []
     df = get_fundamentals(query(valuation.code, valuation.circulating_market_cap).filter(valuation.code.in_(ss)),
                           date=day).dropna().sort_values("circulating_market_cap", ascending=False)
-    return list(df.code[:Cfg.B_PER_IND])
+    return list(df.code[:k])
 
 
-def b_update(context, cd, share):
+def b_update(context, cd, share, k):
     if share <= 0:
         g.b_on = False; g.b_inds = []; g.b_stocks = {}
         return {}
@@ -323,6 +404,8 @@ def b_update(context, cd, share):
     for ind in list(g.b_inds):                 # 行业自身趋势失效当天卖出
         if ind not in ok:
             g.b_inds.remove(ind); g.b_stocks.pop(ind, None)
+    if any(len(v) > k for v in g.b_stocks.values()):          # 每行业只数变少时立即截断
+        g.b_stocks = {i: v[:k] for i, v in g.b_stocks.items()}
     if (not g.b_on) or g.day % Cfg.B_REBAL == 0:
         new = order_[:Cfg.B_IND_N]
         for ind in list(g.b_inds):
@@ -330,9 +413,9 @@ def b_update(context, cd, share):
                 g.b_inds.remove(ind); g.b_stocks.pop(ind, None)
         for ind in new:
             if ind not in g.b_inds:
-                g.b_inds.append(ind); g.b_stocks[ind] = b_stocks_of(context, cd, ind)
+                g.b_inds.append(ind); g.b_stocks[ind] = b_stocks_of(context, cd, ind, k)
     g.b_on = True
-    tv = context.portfolio.total_value * (1 - Cfg.CASH_BUFFER) * share / (Cfg.B_IND_N * Cfg.B_PER_IND)
+    tv = context.portfolio.total_value * (1 - Cfg.CASH_BUFFER) * share / (Cfg.B_IND_N * k)
     return {s: tv for i in g.b_inds for s in g.b_stocks.get(i, [])}
 
 
@@ -348,7 +431,10 @@ def trade(context):
                  % (a_sh * 100, s_sh * 100, b_sh * 100, g1, g2))
         g.last_alloc = (a_sh, s_sh, b_sh)
     tgt = {}
-    for part in (s_update(context, cd, s_sh), b_update(context, cd, b_sh), a_update(context, cd, a_sh)):
+    mix = s_sh > 0 and b_sh > 0                     # 个股、板块同时持有时各自减少只数，合计 ≤ 10
+    n_s = Cfg.S_HOLD_MIX if mix else Cfg.S_HOLD
+    k_b = Cfg.B_PER_IND_MIX if mix else Cfg.B_PER_IND
+    for part in (s_update(context, cd, s_sh, n_s), b_update(context, cd, b_sh, k_b), a_update(context, cd, a_sh)):
         for s, v in part.items():
             tgt[s] = tgt.get(s, 0.0) + v
     # 1. 卖：不在目标里的清仓，超出目标太多的减仓
@@ -366,7 +452,7 @@ def trade(context):
     if need > 0 and e in pos and pos[e].total_amount > 0 and not cd[e].paused:
         pf = context.portfolio
         if need > pf.available_cash:
-            order_target_value(e, max(0.0, pos[e].value - (need - pf.available_cash) * 1.02))
+            sell_cash_etf(context, cd, (need - pf.available_cash) * 1.02)
     # 3. 买
     for s, v in tgt.items():
         cur = pos[s].value if s in pos else 0

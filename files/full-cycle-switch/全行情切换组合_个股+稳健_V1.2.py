@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-全行情切换组合 · 板块+稳健 V1.1 —— 聚宽回测代码
+全行情切换组合 · 个股+稳健 V1.2 —— 聚宽回测代码
+
+V1.2 修改（相对 V1.1）：
+    修复板块块从未下单：聚宽 finance.SW1_DAILY_PRICE 只有申万一级行业行情，查不到二级行业，V1.0/V1.1 里板块块
+    分到资金的日子全部空仓（诊断回测「仅板块」0 笔交易）。现在查不到的二级行业改用成分股按流通市值加权合成行业指数。
 
 V1.1 修改（相对 V1.0）：
     1. 同时持股不超过 10 只：稳健块 30 → 10 只（缓冲 60 → 20，同一行业最多 5 → 3 只）；个股块 20 → 10 只（缓冲 20）；
@@ -17,17 +21,19 @@ V1.1 修改（相对 V1.0）：
     开关1「中证1000趋势」：中证1000 ER20 > 0.2 且 当前价 > MA20
            ER20 = (当前价 − 20 日前收盘) ÷ 20 天每日涨跌绝对值之和
     开关2「上行期」：开关1 成立，且 沪深300 > MA120、MA120 高于 20 日前、申万一级站上 60 日线 ≥ 50%（后三项用前一日收盘）
-本版本资金分配（MODE = "板块+稳健"）：
-    开关2 成立 → 100% 板块块（3 个行业各 3 只）；否则 → 100% 稳健块（10 只）（2023 年以来开关2 约 12% 的交易日成立）
+本版本资金分配（MODE = "个股+稳健"）：
+    开关1 成立 → 100% 个股块（10 只）；否则 → 100% 稳健块（10 只）（2023 年以来开关1 约 24% 的交易日成立）
 
 本地测算（后复权日线，单边 0.15%，当日收盘成交；切换时稳健块另计 0.15%；主要看 2023 起）：
-    V1.1（持股 ≤10）2023 起：年化 +33.9%、最大回撤 -22.1%、夏普 1.54；上行期日子 +75% · 震荡期 +27% · 下行期 +13%
-    逐年：2023 +28.2%、2024 +50.7%、2025 +11.4%、2026 至今 +37.3%；2015 起（参考）+19.8% / -22.4%
-    V1.0（稳健 30 只）：2023 起 +34.8% / -19.5%；本地板块块按行业指数测算，聚宽每行业 3 只的跟踪误差未计入
+    （以下为 V1.1 本地测算；V1.2 规则相同，只修复板块块下单）
+    V1.1（持股 ≤10）2023 起：年化 +40.1%、最大回撤 -13.6%、夏普 1.66；上行期日子 +38% · 震荡期 +60% · 下行期 +10%
+    逐年：2023 +24.9%、2024 +118.7%、2025 +8.4%、2026 至今 +18.2%；2015 起（参考）+19.1% / -33.6%
+    V1.0（稳健 30 只 + 个股 20 只）：2023 起 +35.1% / -13.1%；稳健块单独 10 只 +16.6% / -18.5%（30 只 +19.0% / -10.5%）
 与本地口径的差异：
     本地三块各自满额回测再按当日资金比例拼接；这里在一个账户里按目标市值合并下单，同一只股票两块都要时合并持有
     板块块本地直接持有行业指数，这里用每个行业流通市值前 3 只（与个股块同时持有时 2 只）；行业排名用前一日收盘
     稳健块在两次调仓之间只在总仓位变动 ≥10% 或开关切换时调整
+聚宽实测（2023-01 至 2026-11-15，V1.0/V1.1 板块块未生效）：V1.1 个股+板块+稳健 累计 +149.5%、年化 27.7%、回撤 -16.3%；V1.0 同版本累计 +108.3%
 建议回测：2019-01-01 起（看 2023 起为主），分钟频率，初始资金 ≥ 100 万（同时持股不超过 10 只，切换当天新旧两块交接、跌停卖不出时可能短暂多于 10 只）
 """
 import builtins
@@ -37,8 +43,8 @@ import pandas as pd
 sum, min, max, abs, any, all, round = (builtins.sum, builtins.min, builtins.max, builtins.abs,
                                        builtins.any, builtins.all, builtins.round)
 
-VERSION = "全行情切换组合·板块+稳健 V1.1"
-MODE = "板块+稳健"     # "个股+稳健" / "板块+稳健" / "个股+板块+稳健"
+VERSION = "全行情切换组合·个股+稳健 V1.2"
+MODE = "个股+稳健"     # "个股+稳健" / "板块+稳健" / "个股+板块+稳健"
 
 
 class Cfg:
@@ -80,6 +86,7 @@ def initialize(context):
     # 板块块
     g.b_on = False; g.b_inds = []; g.b_stocks = {}
     g.last_alloc = None
+    g.l2_mem = {}; g.l2_mem_day = -999; g.l2_logged = False   # 二级行业成分股缓存
     run_daily(trade, time=Cfg.TRADE_TIME)
     run_daily(after_close, time="after_close")
     log.info(VERSION)
@@ -320,11 +327,56 @@ def s_update(context, cd, share, n):
 
 
 # ================= 板块块 =================
+def l2_close(context, codes):
+    """申万二级行业指数日收盘（截至前一交易日，约 81 个交易日）。
+    V1.2：聚宽 finance.SW1_DAILY_PRICE 实测只有一级行业行情，二级行业查不到数据，V1.0/V1.1 的板块块因此从未下单。
+    这里先查表；查不到的行业，用成分股按流通市值加权的日收益自己合成行业指数（成分股每 20 个交易日更新一次）。"""
+    day = context.previous_date
+    need = Cfg.B_MOM_N + 21
+    px = sw_close(codes, day, 130)
+    have = [c for c in px.columns if px[c].notna().sum() >= Cfg.B_MOM_N + 1] if len(px) else []
+    miss = [c for c in codes if c not in have]
+    if not miss:
+        return px[have]
+    if g.day - g.l2_mem_day >= 20 or not g.l2_mem:
+        g.l2_mem = {c: list(get_industry_stocks(c, date=day)) for c in codes}
+        g.l2_mem_day = g.day
+    mem = {c: [s for s in g.l2_mem.get(c, []) if not s.startswith(("4", "8", "92")) and not s.endswith(".BJ")] for c in miss}
+    allst = sorted(set(s for v in mem.values() for s in v))
+    if not allst:
+        return px[have] if have else pd.DataFrame()
+    p = get_price(allst, end_date=day, count=need, fields=["close"], fq="pre", panel=False
+                  ).pivot(index="time", columns="code", values="close")
+    r = p.pct_change()
+    cap = get_fundamentals(query(valuation.code, valuation.circulating_market_cap).filter(valuation.code.in_(allst)),
+                           date=day).dropna().set_index("code")["circulating_market_cap"]
+    syn = {}
+    for c, ss in mem.items():
+        ss = [s for s in ss if s in r.columns and s in cap.index]
+        if len(ss) < 3:
+            continue
+        w = cap[ss]; rr = r[ss]
+        ww = rr.notna().mul(w, axis=1)
+        ret = (rr.fillna(0) * ww).sum(axis=1) / ww.sum(axis=1).replace(0, np.nan)
+        syn[c] = (1 + ret.fillna(0)).cumprod()
+    out = pd.DataFrame(syn)
+    if not g.l2_logged:
+        log.info("二级行业行情：表内可用 %d 个，成分股合成 %d 个" % (len(have), out.shape[1]))
+        g.l2_logged = True
+    if have:
+        a = px[have]; a.index = pd.to_datetime(a.index); out.index = pd.to_datetime(out.index)
+        out = pd.concat([a, out], axis=1).sort_index().ffill()
+    return out
+
+
 def b_rank(context):
     day = context.previous_date
     inds = get_industries("sw_l2", date=day); inds = inds[inds.start_date <= day]
-    px = sw_close(list(inds.index), day, 130)
+    px = l2_close(context, list(inds.index))
     ok, mom = set(), {}
+    if px is None or len(px) == 0:
+        log.warn("二级行业行情为空，板块块今天不选行业")
+        return [], ok
     for code in px.columns:
         s = px[code].dropna()
         if len(s) >= Cfg.B_MOM_N + 1 and er_ma_ok(s.values):

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>全行情切换组合策略 个股+板块+稳健 V1.1 代码</title>
-<meta name="description" content="全行情切换组合 · 个股+板块+稳健 V1.1 —— 聚宽回测代码">
+<title>全行情切换组合策略 个股+板块+稳健 V1.2 代码</title>
+<meta name="description" content="全行情切换组合 · 个股+板块+稳健 V1.2 —— 聚宽回测代码">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="../../assets/site.css">
@@ -15,10 +15,10 @@
 <nav><a href="../../index.html#dividend">股息率策略</a><a href="../../index.html#trend">趋势策略</a><a href="../../index.html#news">消息股策略</a></nav></div></header>
 <main class="wrap">
 <nav class="crumb"><a class="back" href="../../s/full-cycle-switch.html" data-back>返回</a></nav>
-<section class="codehead"><h1>全行情切换组合策略 · 个股+板块+稳健 V1.1</h1><p class="sub">全行情切换组合 · 个股+板块+稳健 V1.1 —— 聚宽回测代码</p><p class="sub2">持股 ≤10；修复货币 ETF 减仓不足 100 份、资金不足下单报错</p>
-<div class="vers"><a class="vchip on" href="1.html">个股+板块+稳健 V1.1</a><a class="vchip" href="2.html">个股+稳健 V1.1</a><a class="vchip" href="3.html">板块+稳健 V1.1</a><a class="vchip" href="4.html">个股+板块+稳健 V1.0</a><a class="vchip" href="5.html">个股+稳健 V1.0</a><a class="vchip" href="6.html">板块+稳健 V1.0</a><a class="vchip" href="7.html">个股块单独 V1.0</a><a class="vchip" href="8.html">板块块单独 V1.0</a></div>
-<div class="tools"><span class="mono">全行情切换组合_个股+板块+稳健_V1.1.py · 429 行 · 20 KB</span><span class="grow"></span>
-<button class="btn" id="copy" type="button">复制代码</button><a class="btn" href="../../files/full-cycle-switch/%E5%85%A8%E8%A1%8C%E6%83%85%E5%88%87%E6%8D%A2%E7%BB%84%E5%90%88_%E4%B8%AA%E8%82%A1%2B%E6%9D%BF%E5%9D%97%2B%E7%A8%B3%E5%81%A5_V1.1.py" download>下载 .py</a></div></section>
+<section class="codehead"><h1>全行情切换组合策略 · 个股+板块+稳健 V1.2</h1><p class="sub">全行情切换组合 · 个股+板块+稳健 V1.2 —— 聚宽回测代码</p><p class="sub2">最多 10 只；板块块仍用股票代替行业（聚宽实测效果差），ETF 版代码待写</p>
+<div class="vers"><a class="vchip on" href="1.html">个股+板块+稳健 V1.2</a><a class="vchip" href="2.html">个股+稳健 V1.2</a><a class="vchip" href="3.html">板块+稳健 V1.2</a><a class="vchip" href="4.html">个股+板块+稳健 V1.1</a><a class="vchip" href="5.html">个股+板块+稳健 V1.0</a></div>
+<div class="tools"><span class="mono">全行情切换组合_个股+板块+稳健_V1.2.py · 481 行 · 23 KB</span><span class="grow"></span>
+<button class="btn" id="copy" type="button">复制代码</button><a class="btn" href="../../files/full-cycle-switch/%E5%85%A8%E8%A1%8C%E6%83%85%E5%88%87%E6%8D%A2%E7%BB%84%E5%90%88_%E4%B8%AA%E8%82%A1%2B%E6%9D%BF%E5%9D%97%2B%E7%A8%B3%E5%81%A5_V1.2.py" download>下载 .py</a></div></section>
 <div class="codebox"><div class="hl"><table class="hltable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">  1</span>
 <span class="normal">  2</span>
 <span class="normal">  3</span>
@@ -446,9 +446,65 @@
 <span class="normal">425</span>
 <span class="normal">426</span>
 <span class="normal">427</span>
-<span class="normal">428</span></pre></div></td><td class="code"><div><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span>
+<span class="normal">454</span>
+<span class="normal">455</span>
+<span class="normal">456</span>
+<span class="normal">457</span>
+<span class="normal">458</span>
+<span class="normal">459</span>
+<span class="normal">460</span>
+<span class="normal">461</span>
+<span class="normal">462</span>
+<span class="normal">463</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span>
+<span class="normal">471</span>
+<span class="normal">472</span>
+<span class="normal">473</span>
+<span class="normal">474</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span></pre></div></td><td class="code"><div><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">全行情切换组合 · 个股+板块+稳健 V1.1 —— 聚宽回测代码</span>
+<span class="sd">全行情切换组合 · 个股+板块+稳健 V1.2 —— 聚宽回测代码</span>
+
+<span class="sd">V1.2 修改（相对 V1.1）：</span>
+<span class="sd">    修复板块块从未下单：聚宽 finance.SW1_DAILY_PRICE 只有申万一级行业行情，查不到二级行业，V1.0/V1.1 里板块块</span>
+<span class="sd">    分到资金的日子全部空仓（诊断回测「仅板块」0 笔交易）。现在查不到的二级行业改用成分股按流通市值加权合成行业指数。</span>
 
 <span class="sd">V1.1 修改（相对 V1.0）：</span>
 <span class="sd">    1. 同时持股不超过 10 只：稳健块 30 → 10 只（缓冲 60 → 20，同一行业最多 5 → 3 只）；个股块 20 → 10 只（缓冲 20）；</span>
@@ -469,6 +525,7 @@
 <span class="sd">    开关2 成立 → 50% 个股块（4 只）+ 50% 板块块（3 个行业各 2 只）；只有开关1 成立 → 100% 个股块（10 只）；都不成立 → 100% 稳健块（10 只）</span>
 
 <span class="sd">本地测算（后复权日线，单边 0.15%，当日收盘成交；切换时稳健块另计 0.15%；主要看 2023 起）：</span>
+<span class="sd">    （以下为 V1.1 本地测算；V1.2 规则相同，只修复板块块下单）</span>
 <span class="sd">    V1.1（持股 ≤10）2023 起：年化 +44.8%、最大回撤 -14.5%、夏普 1.81；上行期日子 +58% · 震荡期 +60% · 下行期 +10%</span>
 <span class="sd">    逐年：2023 +26.3%、2024 +100.7%、2025 +21.2%、2026 至今 +28.9%；2015 起（参考）+19.2% / -30.9%</span>
 <span class="sd">    V1.0（稳健 30 只 + 个股 20 只 + 每行业 5 只）：2023 起 +39.6% / -14.5%；本地上行期个股按 5 只、板块按行业指数测算</span>
@@ -476,6 +533,7 @@
 <span class="sd">    本地三块各自满额回测再按当日资金比例拼接；这里在一个账户里按目标市值合并下单，同一只股票两块都要时合并持有</span>
 <span class="sd">    板块块本地直接持有行业指数，这里用每个行业流通市值前 3 只（与个股块同时持有时 2 只）；行业排名用前一日收盘</span>
 <span class="sd">    稳健块在两次调仓之间只在总仓位变动 ≥10% 或开关切换时调整</span>
+<span class="sd">聚宽实测（2023-01 至 2026-11-15，V1.0/V1.1 板块块未生效）：V1.1 个股+板块+稳健 累计 +149.5%、年化 27.7%、回撤 -16.3%；V1.0 同版本累计 +108.3%</span>
 <span class="sd">建议回测：2019-01-01 起（看 2023 起为主），分钟频率，初始资金 ≥ 100 万（同时持股不超过 10 只，切换当天新旧两块交接、跌停卖不出时可能短暂多于 10 只）</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">builtins</span>
@@ -485,7 +543,7 @@
 <span class="nb">sum</span><span class="p">,</span> <span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="nb">abs</span><span class="p">,</span> <span class="nb">any</span><span class="p">,</span> <span class="nb">all</span><span class="p">,</span> <span class="nb">round</span> <span class="o">=</span> <span class="p">(</span><span class="n">builtins</span><span class="o">.</span><span class="n">sum</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">abs</span><span class="p">,</span>
                                        <span class="n">builtins</span><span class="o">.</span><span class="n">any</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">all</span><span class="p">,</span> <span class="n">builtins</span><span class="o">.</span><span class="n">round</span><span class="p">)</span>
 
-<span class="n">VERSION</span> <span class="o">=</span> <span class="s2">&quot;全行情切换组合·个股+板块+稳健 V1.1&quot;</span>
+<span class="n">VERSION</span> <span class="o">=</span> <span class="s2">&quot;全行情切换组合·个股+板块+稳健 V1.2&quot;</span>
 <span class="n">MODE</span> <span class="o">=</span> <span class="s2">&quot;个股+板块+稳健&quot;</span>     <span class="c1"># &quot;个股+稳健&quot; / &quot;板块+稳健&quot; / &quot;个股+板块+稳健&quot;</span>
 
 
@@ -528,6 +586,7 @@
     <span class="c1"># 板块块</span>
     <span class="n">g</span><span class="o">.</span><span class="n">b_on</span> <span class="o">=</span> <span class="kc">False</span><span class="p">;</span> <span class="n">g</span><span class="o">.</span><span class="n">b_inds</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">g</span><span class="o">.</span><span class="n">b_stocks</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">g</span><span class="o">.</span><span class="n">last_alloc</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">l2_mem</span> <span class="o">=</span> <span class="p">{};</span> <span class="n">g</span><span class="o">.</span><span class="n">l2_mem_day</span> <span class="o">=</span> <span class="o">-</span><span class="mi">999</span><span class="p">;</span> <span class="n">g</span><span class="o">.</span><span class="n">l2_logged</span> <span class="o">=</span> <span class="kc">False</span>   <span class="c1"># 二级行业成分股缓存</span>
     <span class="n">run_daily</span><span class="p">(</span><span class="n">trade</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">Cfg</span><span class="o">.</span><span class="n">TRADE_TIME</span><span class="p">)</span>
     <span class="n">run_daily</span><span class="p">(</span><span class="n">after_close</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="s2">&quot;after_close&quot;</span><span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">VERSION</span><span class="p">)</span>
@@ -768,11 +827,56 @@
 
 
 <span class="c1"># ================= 板块块 =================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">l2_close</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">codes</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;申万二级行业指数日收盘（截至前一交易日，约 81 个交易日）。</span>
+<span class="sd">    V1.2：聚宽 finance.SW1_DAILY_PRICE 实测只有一级行业行情，二级行业查不到数据，V1.0/V1.1 的板块块因此从未下单。</span>
+<span class="sd">    这里先查表；查不到的行业，用成分股按流通市值加权的日收益自己合成行业指数（成分股每 20 个交易日更新一次）。&quot;&quot;&quot;</span>
+    <span class="n">day</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">previous_date</span>
+    <span class="n">need</span> <span class="o">=</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">B_MOM_N</span> <span class="o">+</span> <span class="mi">21</span>
+    <span class="n">px</span> <span class="o">=</span> <span class="n">sw_close</span><span class="p">(</span><span class="n">codes</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="mi">130</span><span class="p">)</span>
+    <span class="n">have</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">px</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">px</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">B_MOM_N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">px</span><span class="p">)</span> <span class="k">else</span> <span class="p">[]</span>
+    <span class="n">miss</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">codes</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">have</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">miss</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">px</span><span class="p">[</span><span class="n">have</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">day</span> <span class="o">-</span> <span class="n">g</span><span class="o">.</span><span class="n">l2_mem_day</span> <span class="o">&gt;=</span> <span class="mi">20</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">g</span><span class="o">.</span><span class="n">l2_mem</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">l2_mem</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">get_industry_stocks</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">day</span><span class="p">))</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">codes</span><span class="p">}</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">l2_mem_day</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">day</span>
+    <span class="n">mem</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">l2_mem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="p">[])</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">s</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;92&quot;</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">s</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.BJ&quot;</span><span class="p">)]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">miss</span><span class="p">}</span>
+    <span class="n">allst</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mem</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">v</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">allst</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">px</span><span class="p">[</span><span class="n">have</span><span class="p">]</span> <span class="k">if</span> <span class="n">have</span> <span class="k">else</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">get_price</span><span class="p">(</span><span class="n">allst</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">day</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">need</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;close&quot;</span><span class="p">],</span> <span class="n">fq</span><span class="o">=</span><span class="s2">&quot;pre&quot;</span><span class="p">,</span> <span class="n">panel</span><span class="o">=</span><span class="kc">False</span>
+                  <span class="p">)</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="s2">&quot;code&quot;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="s2">&quot;close&quot;</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">pct_change</span><span class="p">()</span>
+    <span class="n">cap</span> <span class="o">=</span> <span class="n">get_fundamentals</span><span class="p">(</span><span class="n">query</span><span class="p">(</span><span class="n">valuation</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">valuation</span><span class="o">.</span><span class="n">circulating_market_cap</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">valuation</span><span class="o">.</span><span class="n">code</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">allst</span><span class="p">)),</span>
+                           <span class="n">date</span><span class="o">=</span><span class="n">day</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;code&quot;</span><span class="p">)[</span><span class="s2">&quot;circulating_market_cap&quot;</span><span class="p">]</span>
+    <span class="n">syn</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">ss</span> <span class="ow">in</span> <span class="n">mem</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">ss</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">cap</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">cap</span><span class="p">[</span><span class="n">ss</span><span class="p">];</span> <span class="n">rr</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">ss</span><span class="p">]</span>
+        <span class="n">ww</span> <span class="o">=</span> <span class="n">rr</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">(</span><span class="n">rr</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">ww</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">ww</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="n">syn</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">ret</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">cumprod</span><span class="p">()</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">syn</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">g</span><span class="o">.</span><span class="n">l2_logged</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;二级行业行情：表内可用 </span><span class="si">%d</span><span class="s2"> 个，成分股合成 </span><span class="si">%d</span><span class="s2"> 个&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">have</span><span class="p">),</span> <span class="n">out</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">l2_logged</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">have</span><span class="p">:</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">px</span><span class="p">[</span><span class="n">have</span><span class="p">];</span> <span class="n">a</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">index</span><span class="p">);</span> <span class="n">out</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">out</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span><span class="o">.</span><span class="n">ffill</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">b_rank</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
     <span class="n">day</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">previous_date</span>
     <span class="n">inds</span> <span class="o">=</span> <span class="n">get_industries</span><span class="p">(</span><span class="s2">&quot;sw_l2&quot;</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">day</span><span class="p">);</span> <span class="n">inds</span> <span class="o">=</span> <span class="n">inds</span><span class="p">[</span><span class="n">inds</span><span class="o">.</span><span class="n">start_date</span> <span class="o">&lt;=</span> <span class="n">day</span><span class="p">]</span>
-    <span class="n">px</span> <span class="o">=</span> <span class="n">sw_close</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">inds</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="n">day</span><span class="p">,</span> <span class="mi">130</span><span class="p">)</span>
+    <span class="n">px</span> <span class="o">=</span> <span class="n">l2_close</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">inds</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
     <span class="n">ok</span><span class="p">,</span> <span class="n">mom</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(),</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">px</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">px</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;二级行业行情为空，板块块今天不选行业&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[],</span> <span class="n">ok</span>
     <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">px</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
         <span class="n">s</span> <span class="o">=</span> <span class="n">px</span><span class="p">[</span><span class="n">code</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">Cfg</span><span class="o">.</span><span class="n">B_MOM_N</span> <span class="o">+</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">er_ma_ok</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">values</span><span class="p">):</span>
@@ -878,7 +982,11 @@
 </div>
 <textarea id="raw" hidden># -*- coding: utf-8 -*-
 &quot;&quot;&quot;
-全行情切换组合 · 个股+板块+稳健 V1.1 —— 聚宽回测代码
+全行情切换组合 · 个股+板块+稳健 V1.2 —— 聚宽回测代码
+
+V1.2 修改（相对 V1.1）：
+    修复板块块从未下单：聚宽 finance.SW1_DAILY_PRICE 只有申万一级行业行情，查不到二级行业，V1.0/V1.1 里板块块
+    分到资金的日子全部空仓（诊断回测「仅板块」0 笔交易）。现在查不到的二级行业改用成分股按流通市值加权合成行业指数。
 
 V1.1 修改（相对 V1.0）：
     1. 同时持股不超过 10 只：稳健块 30 → 10 只（缓冲 60 → 20，同一行业最多 5 → 3 只）；个股块 20 → 10 只（缓冲 20）；
@@ -899,6 +1007,7 @@ V1.1 修改（相对 V1.0）：
     开关2 成立 → 50% 个股块（4 只）+ 50% 板块块（3 个行业各 2 只）；只有开关1 成立 → 100% 个股块（10 只）；都不成立 → 100% 稳健块（10 只）
 
 本地测算（后复权日线，单边 0.15%，当日收盘成交；切换时稳健块另计 0.15%；主要看 2023 起）：
+    （以下为 V1.1 本地测算；V1.2 规则相同，只修复板块块下单）
     V1.1（持股 ≤10）2023 起：年化 +44.8%、最大回撤 -14.5%、夏普 1.81；上行期日子 +58% · 震荡期 +60% · 下行期 +10%
     逐年：2023 +26.3%、2024 +100.7%、2025 +21.2%、2026 至今 +28.9%；2015 起（参考）+19.2% / -30.9%
     V1.0（稳健 30 只 + 个股 20 只 + 每行业 5 只）：2023 起 +39.6% / -14.5%；本地上行期个股按 5 只、板块按行业指数测算
@@ -906,6 +1015,7 @@ V1.1 修改（相对 V1.0）：
     本地三块各自满额回测再按当日资金比例拼接；这里在一个账户里按目标市值合并下单，同一只股票两块都要时合并持有
     板块块本地直接持有行业指数，这里用每个行业流通市值前 3 只（与个股块同时持有时 2 只）；行业排名用前一日收盘
     稳健块在两次调仓之间只在总仓位变动 ≥10% 或开关切换时调整
+聚宽实测（2023-01 至 2026-11-15，V1.0/V1.1 板块块未生效）：V1.1 个股+板块+稳健 累计 +149.5%、年化 27.7%、回撤 -16.3%；V1.0 同版本累计 +108.3%
 建议回测：2019-01-01 起（看 2023 起为主），分钟频率，初始资金 ≥ 100 万（同时持股不超过 10 只，切换当天新旧两块交接、跌停卖不出时可能短暂多于 10 只）
 &quot;&quot;&quot;
 import builtins
@@ -915,7 +1025,7 @@ import pandas as pd
 sum, min, max, abs, any, all, round = (builtins.sum, builtins.min, builtins.max, builtins.abs,
                                        builtins.any, builtins.all, builtins.round)
 
-VERSION = &quot;全行情切换组合·个股+板块+稳健 V1.1&quot;
+VERSION = &quot;全行情切换组合·个股+板块+稳健 V1.2&quot;
 MODE = &quot;个股+板块+稳健&quot;     # &quot;个股+稳健&quot; / &quot;板块+稳健&quot; / &quot;个股+板块+稳健&quot;
 
 
@@ -958,6 +1068,7 @@ def initialize(context):
     # 板块块
     g.b_on = False; g.b_inds = []; g.b_stocks = {}
     g.last_alloc = None
+    g.l2_mem = {}; g.l2_mem_day = -999; g.l2_logged = False   # 二级行业成分股缓存
     run_daily(trade, time=Cfg.TRADE_TIME)
     run_daily(after_close, time=&quot;after_close&quot;)
     log.info(VERSION)
@@ -1198,11 +1309,56 @@ def s_update(context, cd, share, n):
 
 
 # ================= 板块块 =================
+def l2_close(context, codes):
+    &quot;&quot;&quot;申万二级行业指数日收盘（截至前一交易日，约 81 个交易日）。
+    V1.2：聚宽 finance.SW1_DAILY_PRICE 实测只有一级行业行情，二级行业查不到数据，V1.0/V1.1 的板块块因此从未下单。
+    这里先查表；查不到的行业，用成分股按流通市值加权的日收益自己合成行业指数（成分股每 20 个交易日更新一次）。&quot;&quot;&quot;
+    day = context.previous_date
+    need = Cfg.B_MOM_N + 21
+    px = sw_close(codes, day, 130)
+    have = [c for c in px.columns if px[c].notna().sum() &gt;= Cfg.B_MOM_N + 1] if len(px) else []
+    miss = [c for c in codes if c not in have]
+    if not miss:
+        return px[have]
+    if g.day - g.l2_mem_day &gt;= 20 or not g.l2_mem:
+        g.l2_mem = {c: list(get_industry_stocks(c, date=day)) for c in codes}
+        g.l2_mem_day = g.day
+    mem = {c: [s for s in g.l2_mem.get(c, []) if not s.startswith((&quot;4&quot;, &quot;8&quot;, &quot;92&quot;)) and not s.endswith(&quot;.BJ&quot;)] for c in miss}
+    allst = sorted(set(s for v in mem.values() for s in v))
+    if not allst:
+        return px[have] if have else pd.DataFrame()
+    p = get_price(allst, end_date=day, count=need, fields=[&quot;close&quot;], fq=&quot;pre&quot;, panel=False
+                  ).pivot(index=&quot;time&quot;, columns=&quot;code&quot;, values=&quot;close&quot;)
+    r = p.pct_change()
+    cap = get_fundamentals(query(valuation.code, valuation.circulating_market_cap).filter(valuation.code.in_(allst)),
+                           date=day).dropna().set_index(&quot;code&quot;)[&quot;circulating_market_cap&quot;]
+    syn = {}
+    for c, ss in mem.items():
+        ss = [s for s in ss if s in r.columns and s in cap.index]
+        if len(ss) &lt; 3:
+            continue
+        w = cap[ss]; rr = r[ss]
+        ww = rr.notna().mul(w, axis=1)
+        ret = (rr.fillna(0) * ww).sum(axis=1) / ww.sum(axis=1).replace(0, np.nan)
+        syn[c] = (1 + ret.fillna(0)).cumprod()
+    out = pd.DataFrame(syn)
+    if not g.l2_logged:
+        log.info(&quot;二级行业行情：表内可用 %d 个，成分股合成 %d 个&quot; % (len(have), out.shape[1]))
+        g.l2_logged = True
+    if have:
+        a = px[have]; a.index = pd.to_datetime(a.index); out.index = pd.to_datetime(out.index)
+        out = pd.concat([a, out], axis=1).sort_index().ffill()
+    return out
+
+
 def b_rank(context):
     day = context.previous_date
     inds = get_industries(&quot;sw_l2&quot;, date=day); inds = inds[inds.start_date &lt;= day]
-    px = sw_close(list(inds.index), day, 130)
+    px = l2_close(context, list(inds.index))
     ok, mom = set(), {}
+    if px is None or len(px) == 0:
+        log.warn(&quot;二级行业行情为空，板块块今天不选行业&quot;)
+        return [], ok
     for code in px.columns:
         s = px[code].dropna()
         if len(s) &gt;= Cfg.B_MOM_N + 1 and er_ma_ok(s.values):
@@ -1317,6 +1473,6 @@ document.querySelectorAll("[data-back]").forEach(a => a.addEventListener("click"
   try { if (document.referrer && new URL(document.referrer).origin === location.origin && history.length > 1) { e.preventDefault(); history.back(); } } catch (err) {}
 }));
 </script>
-<footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-22</div></footer>
+<footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-23</div></footer>
 </body>
 </html>
