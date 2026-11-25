@@ -179,7 +179,7 @@ def page(title, body, depth=0, desc="", extra_head=""):
 </head>
 <body>
 <header class="top"><div class="bar"><a class="brand" href="{pre}index.html">量化策略库</a>
-<nav>{"".join(f'<a href="{pre}index.html#{k}">{n}</a>' for k, n, _ in CATS)}</nav></div></header>
+<nav>{"".join(f'<a href="{pre}index.html#{k}">{n}</a>' for k, n, _ in CATS)}<a href="{pre}index.html#mine">我的组合策略</a><a href="{pre}combo.html">组合配置</a></nav></div></header>
 <main class="wrap">
 {body}
 </main>
@@ -308,13 +308,18 @@ document.getElementById("copy").addEventListener("click", async e => {{ const b 
     for k, n, d in CATS:
         secs += f"""<section class="cat" id="{k}"><div class="cathead"><h2><span class="dot c-{k}"></span>{n} <small>{len(cards[k])}</small></h2><p>{E(d)}</p></div>
 <div class="cards">{''.join(cards[k]) or '<p class="empty">暂无</p>'}</div></section>"""
+    ver = datetime.datetime.now().strftime("%Y%m%d%H%M")
     body = f"""<header class="hero"><h1>量化策略库</h1>
 <p class="lede">我做过的 A 股策略：每个策略有规则说明、回测报告和可以直接复制到聚宽（JoinQuant）运行的代码。</p>
 <div class="stats"><span><b>{stats['s']}</b> 个策略</span><span><b>{stats['r']}</b> 份报告</span><span><b>{stats['c']}</b> 个代码文件</span><span><b>{stats['d']}</b> 份说明文档</span></div>
-<nav class="catnav">{"".join(f'<a href="#{k}"><span class="dot c-{k}"></span>{n}<small>{len(cards[k])}</small></a>' for k, n, _ in CATS)}<a class="combo-link" href="combo.html">组合配置 · 自己搭全行情切换组合 →</a></nav></header>
-{secs}"""
+<nav class="catnav">{"".join(f'<a href="#{k}"><span class="dot c-{k}"></span>{n}<small>{len(cards[k])}</small></a>' for k, n, _ in CATS)}<a href="#mine"><span class="dot c-mine"></span>我的组合策略<small id="mineNav">…</small></a><a class="combo-link" href="combo.html">组合配置 →</a></nav></header>
+{secs}
+<section class="cat" id="mine"><div class="cathead"><h2><span class="dot c-mine"></span>我的组合策略 <small id="mineCnt">…</small></h2><p>在「组合配置」页自己搭的组合：切换规则、三个位置放哪些策略、比例都由自己定。收益率优先显示聚宽实测，没有就显示本地测算。</p></div>
+<div class="cards" id="mineCards"><p class="empty">加载中…</p></div></section>
+<script src="assets/mine.js?v={ver}"></script>"""
+    open(os.path.join(ROOT, "combo-view.html"), "w", encoding="utf8").write(page("我的组合策略 · 量化策略库",
+        '<nav class="crumb"><a class="back" href="index.html#mine" data-back>返回</a></nav><div id="mineView" style="display:grid;gap:28px"><p class="empty">加载中…</p></div>' + f'<script src="assets/mine.js?v={ver}"></script>', 0, "我的组合策略"))
     cb = open(os.path.join(ROOT, "build", "combo_body.html"), encoding="utf8").read()
-    ver = datetime.datetime.now().strftime("%Y%m%d%H%M")
     open(os.path.join(ROOT, "combo.html"), "w", encoding="utf8").write(page("组合配置 · 量化策略库", cb + f'<script src="assets/combo.js?v={ver}"></script>', 0,
         "自己搭全行情切换组合：切换规则、三个位置放哪些策略、比例", f'<link rel="stylesheet" href="assets/combo.css?v={ver}"><meta name="build" content="{ver}">'))
     open(os.path.join(ROOT, "index.html"), "w", encoding="utf8").write(page("量化策略库", body, 0, "A 股量化策略：股息率、趋势、消息股策略的报告与聚宽代码"))

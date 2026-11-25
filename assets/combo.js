@@ -304,7 +304,7 @@ async function save(asNew) {
     const cfg = toCfg(); cfg.name = name;
     const id = await rpc("save_combo", { p_pass: pass, p_id: asNew ? null : CUR.id, p_name: name, p_config: cfg, p_note: $("fNote").value.trim() });
     CUR = { id, name, note: $("fNote").value.trim() }; DIRTY = false; renderEditing();
-    $("saveMsg").textContent = "已保存，卡片在页面最上方「我的组合」。本地电脑当晚跑 2023 年以来的回测，第二天 14:30 起出现在信号监控里。"; toast("已保存，见页面最上方「我的组合」");
+    $("saveMsg").textContent = "已保存，见页面最上方「已保存的组合」；收益率和操作提示在首页「我的组合策略」。本地电脑当晚跑 2023 年以来的回测，第二天 14:30 起出现在信号监控里。"; toast("已保存");
     await loadList();
     const card = document.querySelector(".mc.cur"); if (card) { scrollTo({ top: $("mine").offsetTop - 70, behavior: "smooth" }); card.classList.add("flash"); setTimeout(() => card.classList.remove("flash"), 2400); }
   } catch (e) {
@@ -319,16 +319,11 @@ $("btnSaveAs").onclick = () => save(true);
 async function loadList() {
   try {
     LIST = await sb("combos?select=id,name,note,config,jq,created_at,updated_at&order=updated_at.desc");
-    let res = {};
-    try { res = await (await fetch(SIG + "data/combos/results.json", { cache: "no-store" })).json(); } catch (e) {}
     $("mineList").innerHTML = LIST.length ? LIST.map(c => {
-      const r = res[c.id], j = c.jq;
       return `<div class="mc ${c.id === CUR.id ? "cur" : ""}"><div class="mc-t"><b>${E(c.name)}</b><span class="hint">${E(c.updated_at.slice(0, 10))}</span></div>
         ${c.note ? `<p class="hint">${E(c.note)}</p>` : ""}
-        <div class="mc-m"><span>本地 2023 起：${r ? `<b class="num">${(r.ann * 100).toFixed(1)}%</b> 年化 · 最多跌 ${(r.mdd * 100).toFixed(1)}%` : "待测算（当晚）"}</span>
-          <span>聚宽：${j && j.ann != null ? `<b class="num">${(+j.ann).toFixed(1)}%</b> 年化` + (j.dd != null ? ` · 最多跌 ${(+j.dd).toFixed(1)}%` : "") : "未填"}</span></div>
-        <div class="mc-a"><button class="btn sm" data-open="${c.id}">打开编辑</button><button class="btn sm" data-copy="${c.id}">复制一份</button><button class="btn sm" data-jq="${c.id}">填聚宽成绩</button><button class="btn sm ghost danger" data-rm="${c.id}">删除</button></div></div>`;
-    }).join("") : `<p class="empty">还没有保存的组合。下面默认打开的是「原方案（V1.4 三合一）」，改完起个名字保存即可。</p>`;
+        <div class="mc-a"><button class="btn sm" data-open="${c.id}">打开编辑</button><button class="btn sm" data-copy="${c.id}">复制一份</button><button class="btn sm" data-jq="${c.id}">填聚宽成绩</button><a class="btn sm ghost" href="combo-view.html?id=${c.id}">看成绩</a><button class="btn sm ghost danger" data-rm="${c.id}">删除</button></div></div>`;
+    }).join("") : `<p class="empty">还没有保存的组合。下面默认打开的是「原方案（V1.4 三合一）」，改完起个名字保存即可。保存后的组合和收益率显示在首页「我的组合策略」。</p>`;
   } catch (e) { $("mineList").innerHTML = `<p class="empty">读取失败：${E(e.message)}　<button class="btn sm" onclick="location.reload()">重试</button></p>`; }
 }
 $("mineList").addEventListener("click", async e => {
@@ -367,6 +362,9 @@ $("mineList").addEventListener("click", async e => {
   for (const p of P.plugins) PL[p.id] = p;
   window.__combo = { toCfg: () => toCfg(), model: () => M };
   openModel(defaultModel(), { id: null, name: "", note: "" });
-  loadList();
+  await loadList();
+  const want = new URLSearchParams(location.search).get("id");
+  const hit = want && LIST.find(x => x.id === want);
+  if (hit) { openModel(hit.config.ui ? clone(hit.config.ui) : defaultModel(), { id: hit.id, name: hit.name, note: hit.note }); loadList(); }
 })();
 })();

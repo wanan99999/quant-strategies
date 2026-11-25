@@ -12,12 +12,12 @@
 </head>
 <body>
 <header class="top"><div class="bar"><a class="brand" href="index.html">量化策略库</a>
-<nav><a href="index.html#dividend">股息率策略</a><a href="index.html#trend">趋势策略</a><a href="index.html#news">消息股策略</a></nav></div></header>
+<nav><a href="index.html#dividend">股息率策略</a><a href="index.html#trend">趋势策略</a><a href="index.html#news">消息股策略</a><a href="index.html#mine">我的组合策略</a><a href="combo.html">组合配置</a></nav></div></header>
 <main class="wrap">
 <header class="hero"><h1>量化策略库</h1>
 <p class="lede">我做过的 A 股策略：每个策略有规则说明、回测报告和可以直接复制到聚宽（JoinQuant）运行的代码。</p>
 <div class="stats"><span><b>15</b> 个策略</span><span><b>16</b> 份报告</span><span><b>64</b> 个代码文件</span><span><b>8</b> 份说明文档</span></div>
-<nav class="catnav"><a href="#dividend"><span class="dot c-dividend"></span>股息率策略<small>5</small></a><a href="#trend"><span class="dot c-trend"></span>趋势策略<small>7</small></a><a href="#news"><span class="dot c-news"></span>消息股策略<small>3</small></a><a class="combo-link" href="combo.html">组合配置 · 自己搭全行情切换组合 →</a></nav></header>
+<nav class="catnav"><a href="#dividend"><span class="dot c-dividend"></span>股息率策略<small>5</small></a><a href="#trend"><span class="dot c-trend"></span>趋势策略<small>7</small></a><a href="#news"><span class="dot c-news"></span>消息股策略<small>3</small></a><a href="#mine"><span class="dot c-mine"></span>我的组合策略<small id="mineNav">…</small></a><a class="combo-link" href="combo.html">组合配置 →</a></nav></header>
 <section class="cat" id="dividend"><div class="cathead"><h2><span class="dot c-dividend"></span>股息率策略 <small>5</small></h2><p>主要用于银行、煤炭、石油石化等高股息股。</p></div>
 <div class="cards"><a class="card" href="s/bank-momentum.html"><div class="chips"><span class="chip">本地测算 · 最终版</span></div>
 <h3>银行股顺势策略</h3><p>银行股里强者恒强：持有离一年高点最近的 4 只，掉出前 6 名才卖，不追近期已大涨的。</p>
@@ -67,6 +67,9 @@
 <h3>热点板块交易策略</h3><p>在中短线策略基础上加入热点板块环境：判断热点处于启动、扩散、高潮还是退潮，退潮信号出现就分批撤退。</p>
 <div class="cm"><span class="cmk">2023 年至今年化收益率</span><span class="cmv">无</span></div>
 <div class="cnt">代码 1 · 文档 1</div></a></div></section>
+<section class="cat" id="mine"><div class="cathead"><h2><span class="dot c-mine"></span>我的组合策略 <small id="mineCnt">…</small></h2><p>在「组合配置」页自己搭的组合：切换规则、三个位置放哪些策略、比例都由自己定。收益率优先显示聚宽实测，没有就显示本地测算。</p></div>
+<div class="cards" id="mineCards"><p class="empty">加载中…</p></div></section>
+<script src="assets/mine.js?v=202611242315"></script>
 </main>
 <script>
 /* 返回键：从本站页面进来就回到上一页（保留原来的滚动位置），直接打开时跳到 href */
