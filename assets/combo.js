@@ -304,8 +304,9 @@ async function save(asNew) {
     const cfg = toCfg(); cfg.name = name;
     const id = await rpc("save_combo", { p_pass: pass, p_id: asNew ? null : CUR.id, p_name: name, p_config: cfg, p_note: $("fNote").value.trim() });
     CUR = { id, name, note: $("fNote").value.trim() }; DIRTY = false; renderEditing();
-    $("saveMsg").textContent = "已保存。本地电脑当晚跑 2023 年以来的回测，第二天 14:30 起出现在信号监控里。"; toast("已保存");
-    loadList();
+    $("saveMsg").textContent = "已保存，卡片在页面最上方「我的组合」。本地电脑当晚跑 2023 年以来的回测，第二天 14:30 起出现在信号监控里。"; toast("已保存，见页面最上方「我的组合」");
+    await loadList();
+    const card = document.querySelector(".mc.cur"); if (card) { scrollTo({ top: $("mine").offsetTop - 70, behavior: "smooth" }); card.classList.add("flash"); setTimeout(() => card.classList.remove("flash"), 2400); }
   } catch (e) {
     if (/口令/.test(e.message)) { PASS = null; try { sessionStorage.removeItem("combo-pass"); } catch (x) {} }
     $("saveMsg").textContent = "保存失败：" + e.message; toast("保存失败：" + e.message);

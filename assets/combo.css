@@ -71,3 +71,6 @@ details summary { cursor: pointer; font-size: 13.5px; color: var(--accent) }
 .dlg::backdrop { background: rgba(0, 0, 0, .35) } .dlg form { display: grid; gap: 10px } .dlg h3 { margin: 0 } .dlg input[type=password] { width: 100% }
 .cb-jq { display: grid; grid-template-columns: 1fr 1fr; gap: 8px } .cb-jq input { width: 100% }
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-size: 14px; z-index: 50; max-width: calc(100vw - 32px) }
+.panel > * { min-width: 0 }
+@media (max-width: 560px) { .alloc input[type=number] { width: 3.4em } .tb td, .tb th { padding: 6px 4px } .tb.alloc th:first-child, .tb.alloc td:first-child { white-space: normal; min-width: 6.5em } }
+@keyframes flash { 0%, 60% { background: var(--accent-bg) } 100% { background: var(--surface) } } .mc.flash { animation: flash 2.4s ease-out }
