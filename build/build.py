@@ -163,7 +163,7 @@ def code_detail(t):
     return ls[1] if len(ls) > 1 else ""
 
 # ---------------------------------------------------------------- 页面框架
-def page(title, body, depth=0, desc=""):
+def page(title, body, depth=0, desc="", extra_head=""):
     pre = "../" * depth
     return f"""<!doctype html>
 <html lang="zh-CN">
@@ -174,7 +174,7 @@ def page(title, body, depth=0, desc=""):
 <meta name="description" content="{E(desc)}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="{pre}assets/site.css">
+<link rel="stylesheet" href="{pre}assets/site.css">{extra_head}
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 22l6-7 5 4 9-11' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 </head>
 <body>
@@ -311,8 +311,12 @@ document.getElementById("copy").addEventListener("click", async e => {{ const b 
     body = f"""<header class="hero"><h1>量化策略库</h1>
 <p class="lede">我做过的 A 股策略：每个策略有规则说明、回测报告和可以直接复制到聚宽（JoinQuant）运行的代码。</p>
 <div class="stats"><span><b>{stats['s']}</b> 个策略</span><span><b>{stats['r']}</b> 份报告</span><span><b>{stats['c']}</b> 个代码文件</span><span><b>{stats['d']}</b> 份说明文档</span></div>
-<nav class="catnav">{"".join(f'<a href="#{k}"><span class="dot c-{k}"></span>{n}<small>{len(cards[k])}</small></a>' for k, n, _ in CATS)}</nav></header>
+<nav class="catnav">{"".join(f'<a href="#{k}"><span class="dot c-{k}"></span>{n}<small>{len(cards[k])}</small></a>' for k, n, _ in CATS)}<a class="combo-link" href="combo.html">组合配置 · 自己搭全行情切换组合 →</a></nav></header>
 {secs}"""
+    cb = open(os.path.join(ROOT, "build", "combo_body.html"), encoding="utf8").read()
+    ver = datetime.datetime.now().strftime("%Y%m%d%H%M")
+    open(os.path.join(ROOT, "combo.html"), "w", encoding="utf8").write(page("组合配置 · 量化策略库", cb + f'<script src="assets/combo.js?v={ver}"></script>', 0,
+        "自己搭全行情切换组合：切换规则、三个位置放哪些策略、比例", f'<link rel="stylesheet" href="assets/combo.css?v={ver}"><meta name="build" content="{ver}">'))
     open(os.path.join(ROOT, "index.html"), "w", encoding="utf8").write(page("量化策略库", body, 0, "A 股量化策略：股息率、趋势、消息股策略的报告与聚宽代码"))
     order = {k: i for i, (k, _, _) in enumerate(CATS)}
     feed.sort(key=lambda x: (order[x["cat"]], -(float(x["ret"].replace("%", "")) if x["ret"] else float("-inf"))))

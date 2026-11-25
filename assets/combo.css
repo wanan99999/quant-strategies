@@ -1,0 +1,73 @@
+/* 组合配置页（沿用 site.css 的 token） */
+:root { --s-normal: #7b828c; --s-small: #2a78d6; --s-both: #c2571a; --bad: #c63b3b; --good: #1f8a5b; --warn-bg: #fff4df; --warn: #9a5b00 }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --s-normal: #8a919b; --s-small: #4b93ea; --s-both: #ec8a4f; --bad: #ef6b6b; --good: #3cb983; --warn-bg: #3a2c12; --warn: #f0b450 } }
+:root[data-theme="dark"] { --s-normal: #8a919b; --s-small: #4b93ea; --s-both: #ec8a4f; --bad: #ef6b6b; --good: #3cb983; --warn-bg: #3a2c12; --warn: #f0b450 }
+
+.shead { display: grid; gap: 10px }
+.cb-sec { display: grid; gap: 12px; min-width: 0 }
+.cb-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap }
+.cb-h h2 { display: flex; align-items: center; gap: 10px }
+.step { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font: 600 14px var(--f-mono) }
+.cb-grid2 { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 12px }
+@media (max-width: 820px) { .cb-grid2 { grid-template-columns: minmax(0, 1fr) } }
+.panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 16px 18px; display: grid; gap: 12px; align-content: start; min-width: 0 }
+.panel h3 { margin: 0; font-size: 16px } .panel h4 { margin: 0 0 4px; font-size: 14px; color: var(--ink-2); font-weight: 500 }
+.hint { margin: 0; color: var(--ink-3); font-size: 13px; line-height: 1.6 } .hint em { font-style: normal; color: var(--warn) }
+.err { color: var(--bad); margin: 0; font-size: 13px }
+.btn { font: inherit; font-size: 14px; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); cursor: pointer; white-space: nowrap }
+.btn:hover:not(:disabled) { border-color: var(--accent) } .btn:disabled { opacity: .45; cursor: not-allowed }
+.btn.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent) }
+.btn.ghost { background: transparent } .btn.sm { font-size: 13px; padding: 3px 10px } .btn.danger { color: var(--bad) }
+.btn.add { justify-self: start; border-style: dashed; color: var(--ink-2) }
+input, select { font: inherit; font-size: 14px; color: var(--ink); background: var(--bg); border: 1px solid var(--rule); border-radius: 7px; padding: 4px 8px; min-width: 0 }
+input:focus, select:focus { outline: 2px solid var(--accent-bg); border-color: var(--accent) }
+input[type=number] { width: 4.6em; font-family: var(--f-mono); text-align: right }
+.sent input[type=number] { width: 4.2em; margin: 2px 0 } .sent select { margin: 2px 0 }
+.sent { margin: 0; line-height: 2.1 }
+.rg { border-top: 1px dashed var(--rule); padding-top: 10px }
+.seg { display: flex; flex-wrap: wrap; gap: 0; border: 1px solid var(--rule); border-radius: 9px; overflow: hidden; justify-self: start }
+.seg button { font: inherit; font-size: 13.5px; padding: 6px 12px; border: 0; background: var(--surface); color: var(--ink-2); cursor: pointer; border-right: 1px solid var(--rule) }
+.seg button:last-child { border-right: 0 } .seg button.on { background: var(--accent); color: var(--on-accent) }
+/* 统计 */
+.sbar { display: flex; height: 10px; border-radius: 5px; overflow: hidden; gap: 2px; background: var(--surface) }
+.s-normal { background: var(--s-normal) } .s-small { background: var(--s-small) } .s-both { background: var(--s-both) }
+.sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 7px; vertical-align: -1px }
+.tb { width: 100%; border-collapse: collapse; font-size: 14px } .tb td, .tb th { padding: 6px 8px; border-bottom: 1px solid var(--rule); text-align: left; white-space: nowrap }
+.tb th { font-weight: 500; color: var(--ink-3); font-size: 13px } .tb td.num { text-align: right }
+.tbw { overflow-x: auto } .alloc .pct { display: inline-flex; align-items: center; gap: 3px } .bad { color: var(--bad) }
+.kv { margin: 0; font-size: 13.5px; color: var(--ink-2) } .kv b { color: var(--ink) }
+.strip { display: flex; height: 18px; border-radius: 4px; overflow: hidden } .strip i { flex: 1 1 0; min-width: 0 }
+.strip-ax { display: flex; justify-content: space-between; font: 11.5px var(--f-mono); color: var(--ink-3); margin-top: -8px }
+/* 位置 */
+.cb-slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; align-items: start }
+.slot.off { opacity: .62 } .slot-h { display: grid; gap: 2px }
+.item { border: 1px solid var(--rule); border-radius: 10px; padding: 10px 12px; display: grid; gap: 8px; background: var(--bg) }
+.item-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap } .item-top select { flex: 1 1 160px }
+.item .pct { display: inline-flex; align-items: center; gap: 4px; font-size: 13.5px; color: var(--ink-2) }
+.x { border: 0; background: none; color: var(--ink-3); cursor: pointer; font-size: 14px; padding: 2px 6px; border-radius: 6px } .x:hover { color: var(--bad); background: var(--chip) }
+.kv-row { display: flex; gap: 12px; flex-wrap: wrap }
+.fld { display: grid; gap: 3px; font-size: 13px; color: var(--ink-2) } .fld.wide { grid-column: 1 / -1 } .fld.wide input { width: 100% }
+.fld.chk { display: flex; align-items: center; gap: 6px }
+details summary { cursor: pointer; font-size: 13.5px; color: var(--accent) }
+.rules { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; margin: 8px 0; font-size: 13px } .rules dt { color: var(--ink-3) } .rules dd { margin: 0; color: var(--ink-2) }
+.params { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: end }
+/* 检查 / 摘要 */
+.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; font-size: 14px }
+.checks li { display: flex; gap: 8px } .checks li span { font-weight: 700; width: 1em; flex: none } .checks .ok span { color: var(--good) } .checks .no { color: var(--bad) } .checks .no span { color: var(--bad) }
+.summary p { margin: 0 0 6px; font-size: 14px; color: var(--ink-2) } .summary b { color: var(--ink) }
+.cb-save { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) } .cb-save .hint, .cb-btns { grid-column: 1 / -1 }
+.cb-btns { display: flex; gap: 8px; flex-wrap: wrap }
+/* 我的组合 */
+.cb-mine { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px }
+.mc { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 12px 14px; display: grid; gap: 6px }
+.mc.cur { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset }
+.mc-t { display: flex; justify-content: space-between; gap: 8px; align-items: baseline } .mc-m { display: grid; gap: 2px; font-size: 13px; color: var(--ink-2) }
+.mc-a { display: flex; gap: 6px; flex-wrap: wrap }
+.edbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 16px; position: sticky; top: 58px; z-index: 5; font-size: 14px }
+.chip.warn { background: var(--warn-bg); color: var(--warn) }
+.cb-editing { margin: -14px 0 }
+/* 对话框 / 提示 */
+.dlg { border: 1px solid var(--rule); border-radius: 14px; background: var(--surface); color: var(--ink); padding: 18px 20px; width: min(420px, calc(100vw - 32px)) }
+.dlg::backdrop { background: rgba(0, 0, 0, .35) } .dlg form { display: grid; gap: 10px } .dlg h3 { margin: 0 } .dlg input[type=password] { width: 100% }
+.cb-jq { display: grid; grid-template-columns: 1fr 1fr; gap: 8px } .cb-jq input { width: 100% }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-size: 14px; z-index: 50; max-width: calc(100vw - 32px) }

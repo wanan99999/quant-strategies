@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>组合配置 · 量化策略库</title>
+<meta name="description" content="自己搭全行情切换组合：切换规则、三个位置放哪些策略、比例">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/site.css"><link rel="stylesheet" href="assets/combo.css?v=202611242258"><meta name="build" content="202611242258">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 22l6-7 5 4 9-11' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="top"><div class="bar"><a class="brand" href="index.html">量化策略库</a>
+<nav><a href="index.html#dividend">股息率策略</a><a href="index.html#trend">趋势策略</a><a href="index.html#news">消息股策略</a></nav></div></header>
+<main class="wrap">
+<nav class="crumb"><a class="back" href="index.html" data-back>返回</a></nav>
+<header class="shead">
+  <div class="chips"><span class="chip c-trend">组合配置</span><span class="chip">可配置组合 V2</span></div>
+  <h1>组合配置</h1>
+  <p class="lede">先定「什么时候切换」，再给三个位置挑策略、分比例。每个策略在自己的模拟账户里按自己的规则买卖，组合只负责分钱，所以各策略的风控、轮换、仓位控制互不干扰。</p>
+</header>
+
+<section class="cb-sec" id="mine">
+  <div class="cb-h"><h2>我的组合</h2><div class="cb-acts"><button class="btn" id="btnNew">＋ 新建（从原方案开始）</button></div></div>
+  <div id="mineList" class="cb-mine"><p class="empty">加载中…</p></div>
+</section>
+
+<div class="cb-editing" id="editing"></div>
+
+<section class="cb-sec">
+  <div class="cb-h"><h2><span class="step">1</span>切换规则</h2><button class="btn ghost sm" id="btnRuleReset">恢复原方案</button></div>
+  <div class="cb-grid2">
+    <div class="panel" id="ruleForm"></div>
+    <div class="panel" id="ruleStats"></div>
+  </div>
+</section>
+
+<section class="cb-sec">
+  <div class="cb-h"><h2><span class="step">2</span>每种行情下钱怎么分</h2></div>
+  <div class="panel"><div id="allocTable"></div>
+    <p class="hint">按三个位置分百分比；一行合计不到 100% 的部分买货币基金 ETF。位置里放了几个策略，再按下面各策略的比例细分。</p></div>
+</section>
+
+<section class="cb-sec">
+  <div class="cb-h"><h2><span class="step">3</span>三个位置放哪些策略</h2></div>
+  <div class="cb-slots" id="slots"></div>
+</section>
+
+<section class="cb-sec">
+  <div class="cb-h"><h2><span class="step">4</span>检查和摘要</h2></div>
+  <div class="cb-grid2">
+    <div class="panel"><h3>检查</h3><ul class="checks" id="checks"></ul></div>
+    <div class="panel"><h3>用大白话说一遍</h3><div id="summary" class="summary"></div></div>
+  </div>
+</section>
+
+<section class="cb-sec">
+  <div class="cb-h"><h2><span class="step">5</span>保存</h2></div>
+  <div class="panel cb-save">
+    <label class="fld wide"><span>组合名字</span><input id="fName" maxlength="40" placeholder="例如：稳健位加银行顺势"></label>
+    <label class="fld wide"><span>备注（可不填）</span><input id="fNote" maxlength="200" placeholder="想法、改了什么"></label>
+    <label class="fld"><span>总持股上限</span><input id="fMax" type="number" min="1" max="50" step="1"></label>
+    <div class="cb-btns">
+      <button class="btn primary" id="btnSave">保存</button>
+      <button class="btn" id="btnSaveAs">另存为新组合</button>
+      <button class="btn" id="btnJq" disabled title="下一步上线">生成聚宽代码（即将上线）</button>
+    </div>
+    <p class="hint" id="saveMsg">保存后：本地电脑当晚跑 2023 年以来的回测，第二天 14:30 起出现在信号监控里。保存要输入口令。</p>
+  </div>
+</section>
+
+<dialog id="passDlg" class="dlg">
+  <form method="dialog">
+    <h3>输入口令</h3>
+    <p class="hint">保存、删除、填聚宽成绩要口令。只在这个浏览器标签页里记住，关掉就忘。</p>
+    <input id="passIn" type="password" autocomplete="current-password" minlength="6">
+    <p class="err" id="passErr"></p>
+    <div class="cb-btns"><button class="btn primary" value="ok" id="passOk">确定</button><button class="btn" value="cancel" formnovalidate>取消</button></div>
+  </form>
+</dialog>
+
+<dialog id="jqDlg" class="dlg">
+  <form method="dialog">
+    <h3>填聚宽实测成绩</h3>
+    <div class="cb-jq">
+      <label class="fld"><span>年化收益 %</span><input id="jqAnn" type="number" step="0.01"></label>
+      <label class="fld"><span>累计收益 %</span><input id="jqCum" type="number" step="0.01"></label>
+      <label class="fld"><span>最大回撤 %</span><input id="jqDd" type="number" step="0.01"></label>
+      <label class="fld"><span>夏普</span><input id="jqSh" type="number" step="0.001"></label>
+      <label class="fld wide"><span>回测区间</span><input id="jqRange" placeholder="2023-01-01 至 2026-11-15"></label>
+    </div>
+    <div class="cb-btns"><button class="btn primary" value="ok">保存成绩</button><button class="btn" value="cancel" formnovalidate>取消</button></div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" hidden></div>
+<script src="assets/combo.js?v=202611242258"></script>
+</main>
+<script>
+/* 返回键：从本站页面进来就回到上一页（保留原来的滚动位置），直接打开时跳到 href */
+document.querySelectorAll("[data-back]").forEach(a => a.addEventListener("click", e => {
+  try { if (document.referrer && new URL(document.referrer).origin === location.origin && history.length > 1) { e.preventDefault(); history.back(); } } catch (err) {}
+}));
+</script>
+<footer class="foot"><div class="wrap-f">本地测算与聚宽回测结果仅供研究参考，不构成投资建议。更新于 2026-11-24</div></footer>
+</body>
+</html>
