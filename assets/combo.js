@@ -2,8 +2,7 @@
 (() => {
 const SB = { url: "https://vsojozoqbyvxszgfxaop.supabase.co", key: "sb_publishable_ykBgwF4pxNq7hSnuYASSqw_AXEIF346" };
 const SIG = "https://wanan99999.github.io/signal-monitor/";
-const SLOTS = [["steady", "稳健位", "市场没起色时用"], ["stock", "个股位", "中小盘涨起来时用"], ["sector", "板块位", "大盘也在上涨期时用"]];
-const SLOTN = Object.fromEntries(SLOTS.map(s => [s[0], s[1]]));
+let SLOTS = [], SLOTN = {};                             // 三个位置 [id, 名称, 什么时候用]：读引擎导出的 meta.json
 let STATES = [];                                       // 行情名：读引擎导出的 meta.json
 const $ = id => document.getElementById(id);
 const E = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -410,6 +409,7 @@ $("mineList").addEventListener("click", async e => {
   } catch (e) { document.querySelector(".wrap").insertAdjacentHTML("afterbegin", `<p class="err">页面数据加载失败：${E(e.message)}</p>`); return; }
   for (const p of P.plugins) PL[p.id] = p;
   STATES = Object.entries(P.states);
+  SLOTS = P.slots.map(x => [x.id, x.name, x.desc]); SLOTN = Object.fromEntries(SLOTS.map(x => [x[0], x[1]]));
   openModel(defaultModel(), { id: null, name: "", note: "" });
   await loadList();
   const want = new URLSearchParams(location.search).get("id");
