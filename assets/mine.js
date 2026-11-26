@@ -71,6 +71,20 @@ function btBlock(name, r, ref) {
       <tbody>${yrow(r, name, "me")}${ref ? yrow(ref, "原方案 V1.4", "ref") : ""}</tbody></table></div>
     <p class="hint">* 当年至今。本地电脑每晚收盘后重算。用当前上市公司名单和当前行业分类回看，会略高估；以聚宽实测为准。</p></section>`;
 }
+/* 每个子策略单独全程跑的成绩（夜间回测 r.parts） */
+function partsBlock(r) {
+  const ps = (r && r.parts) || [];
+  if (!ps.length) return "";
+  const years = Object.keys(r.years), lastY = years[years.length - 1];
+  const stName = st => (ST.find(x => x[0] === st) || [st, st])[1];
+  const use = u => Object.entries(u).map(([st, v]) => `${stName(st)} ${Math.round(v * 100)}%`).join("<br>");
+  const row = (nm, x, u, cls) => `<tr class="${cls || ""}"><td>${nm}</td><td class="use">${u}</td>${years.map(y => `<td class="num ${x.years[y] < 0 ? "neg" : ""}">${pc(x.years[y])}</td>`).join("")}<td class="num"><b>${pc(x.ann)}</b></td><td class="num">${pc(x.mdd)}</td></tr>`;
+  return `<section class="blk"><h2>每个策略单独跑 <small>${E(r.start)} 起 · 一直满仓用它，不切换</small></h2>
+    <div class="tblwrap"><table class="ctbl bt-tbl parts-tbl"><thead><tr><th>策略</th><th>在组合里什么时候用</th>${years.map(y => `<th>${y}${y === lastY ? "*" : ""}</th>`).join("")}<th>年化</th><th>最大回撤</th></tr></thead>
+    <tbody>${ps.map(p => row(`${E(short(p.name))}${p.hold ? `<small>（${p.hold} 只）</small>` : ""}`, p, use(p.use))).join("")}
+    ${row("<b>组合（按行情切换）</b>", r, "—", "tot")}</tbody></table></div>
+    <p class="hint">单独跑 = 整个期间都满仓交给这一个策略。组合只在对应行情时才用它，所以组合收益不等于这几行的平均。* 当年至今。</p></section>`;
+}
 function btHover(root, r, ref) {
   const svg = root.querySelector(".bt-chart svg"), tip = root.querySelector(".bt-tip"), cx = svg && svg.querySelector(".cx");
   if (!svg) return;
@@ -128,6 +142,7 @@ async function view(el) {
         <div class="kpi"><div class="k">今天（${E(sig ? sig.date : "")}）</div><div class="v">${E(x[0] || "—")}</div><div class="s">${s ? `买 ${x[1] || 0} · 卖 ${x[2] || 0} · 持有 ${x[3] || 0} 只（从 ${E(s.default_start)} 起跟）` : "保存后下一个交易日 14:30 起出提示"}</div></div>
       </section>
       ${r && r.curve ? btBlock(c.name, r, res[V14]) : ""}
+      ${partsBlock(r)}
       <section class="blk"><h2>什么时候切换</h2><ul class="bul">${ruleText(cfg).map(t => `<li>${E(t)}</li>`).join("")}</ul></section>
       <section class="blk"><h2>每种行情下钱怎么分</h2>
         <div class="tblwrap"><table class="ctbl"><thead><tr><th>行情</th><th>交给哪些策略</th></tr></thead><tbody>

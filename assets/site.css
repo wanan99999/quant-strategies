@@ -137,6 +137,7 @@ h2 { font-family: var(--f-display); font-size: 21px; line-height: 1.4; margin: 0
 .bt-tip b { font-family: var(--f-mono); color: var(--ink); font-weight: 500 } .bt-tip .tt-d { color: var(--ink); margin-bottom: 2px }
 .bt-tbl { min-width: 0 } .bt-tbl td.num { font: 13px var(--f-mono); color: var(--ink); text-align: right } .bt-tbl th:not(:first-child) { text-align: right } .bt-tbl td:first-child { white-space: nowrap } .bt-tbl th, .bt-tbl td { padding: 8px 10px }
 .blk .hint { margin: 0; color: var(--ink-3); font-size: 12.5px; line-height: 1.6 }
+.parts-tbl th:nth-child(2) { text-align: left !important } .parts-tbl td.use { font-size: 12.5px; color: var(--ink-2); line-height: 1.5; white-space: nowrap } .parts-tbl td small { color: var(--ink-3); font-size: 12px } .parts-tbl tr.tot td { border-top: 2px solid var(--rule, #ddd) }
 
 /* 代码高亮：浅色 */
 pre { line-height: 125%; }
