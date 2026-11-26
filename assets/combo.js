@@ -4,7 +4,7 @@ const SB = { url: "https://vsojozoqbyvxszgfxaop.supabase.co", key: "sb_publishab
 const SIG = "https://wanan99999.github.io/signal-monitor/";
 const SLOTS = [["steady", "稳健位", "市场没起色时用"], ["stock", "个股位", "中小盘涨起来时用"], ["sector", "板块位", "大盘也在上涨期时用"]];
 const SLOTN = Object.fromEntries(SLOTS.map(s => [s[0], s[1]]));
-const STATES = [["normal", "平常"], ["small", "中小盘走强"], ["both", "中小盘走强 + 大盘上涨期"]];
+let STATES = [];                                       // 行情名：读引擎导出的 meta.json
 const $ = id => document.getElementById(id);
 const E = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const clone = o => JSON.parse(JSON.stringify(o));
@@ -406,9 +406,10 @@ $("mineList").addEventListener("click", async e => {
 (async () => {
   try {
     const v = "?v=" + (document.querySelector("meta[name=build]")?.content || Date.now());
-    [P, MK] = await Promise.all([fetch("combo/data/plugins.json" + v).then(r => r.json()), fetch("combo/data/mkt.json" + v).then(r => r.json())]);
+    [P, MK] = await Promise.all([fetch(SIG + "data/meta.json?t=" + Date.now(), { cache: "no-store" }).then(r => r.json()), fetch("combo/data/mkt.json" + v).then(r => r.json())]);
   } catch (e) { document.querySelector(".wrap").insertAdjacentHTML("afterbegin", `<p class="err">页面数据加载失败：${E(e.message)}</p>`); return; }
   for (const p of P.plugins) PL[p.id] = p;
+  STATES = Object.entries(P.states);
   openModel(defaultModel(), { id: null, name: "", note: "" });
   await loadList();
   const want = new URLSearchParams(location.search).get("id");

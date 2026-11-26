@@ -2,8 +2,9 @@
 (() => {
 const SB = { url: "https://vsojozoqbyvxszgfxaop.supabase.co", key: "sb_publishable_ykBgwF4pxNq7hSnuYASSqw_AXEIF346" };
 const SIG = "https://wanan99999.github.io/signal-monitor/";
-const IDX = { sh000852: "中证1000", sh000905: "中证500", sz399006: "创业板指", sz399303: "国证2000", sh000300: "沪深300", sh000016: "上证50", sh000001: "上证指数" };
-const ST = [["normal", "平常"], ["small", "中小盘走强"], ["both", "中小盘走强 + 大盘上涨期"]];
+let IDX = {}, ST = [];                 // 指数名、行情名：读引擎导出的 meta.json（setMeta）
+function setMeta(m) { if (m) { IDX = m.index_names || {}; ST = Object.entries(m.states || {}); } }
+const stName = st => (ST.find(x => x[0] === st) || [st, st])[1];   // meta.json 没读到时直接显示代号，不报错
 const E = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 async function sb(path) {
   let last;
@@ -22,7 +23,7 @@ function rows(cfg) {
     const tot = row.reduce((a, [, v]) => a + v, 0);
     const parts = row.map(([k, v]) => ({ name: cfg.sleeves[k].name, hold: cfg.sleeves[k].params.hold, v }));
     if (tot < 0.9999) parts.push({ name: "货币基金", hold: null, v: 1 - tot });
-    return { st, label: ST.find(x => x[0] === st)[1], parts };
+    return { st, label: stName(st), parts };
   });
 }
 function oneLine(cfg) { return rows(cfg).map(r => r.label + "：" + r.parts.map(p => short(p.name) + (r.parts.length > 1 ? " " + Math.round(p.v * 100) + "%" : "")).join(" + ")).join("；"); }
@@ -76,7 +77,6 @@ function partsBlock(r) {
   const ps = (r && r.parts) || [];
   if (!ps.length) return "";
   const years = Object.keys(r.years), lastY = years[years.length - 1];
-  const stName = st => (ST.find(x => x[0] === st) || [st, st])[1];
   const use = u => Object.entries(u).map(([st, v]) => `${stName(st)} ${Math.round(v * 100)}%`).join("<br>");
   const row = (nm, x, u, cls) => `<tr class="${cls || ""}"><td>${nm}</td><td class="use">${u}</td>${years.map(y => `<td class="num ${x.years[y] < 0 ? "neg" : ""}">${pc(x.years[y])}</td>`).join("")}<td class="num"><b>${pc(x.ann)}</b></td><td class="num">${pc(x.mdd)}</td></tr>`;
   return `<section class="blk"><h2>每个策略单独跑 <small>${E(r.start)} 起 · 一直满仓用它，不切换</small></h2>
@@ -106,7 +106,8 @@ function btHover(root, r, ref) {
 /* 首页卡片 */
 async function home(el) {
   try {
-    const [list, res, sig] = await Promise.all([sb("combos?select=id,name,note,config,jq,updated_at&order=created_at.asc"), getJ(SIG + "data/combos/results.json"), getJ(SIG + "data/signals.json")]);
+    const [list, res, sig, meta] = await Promise.all([sb("combos?select=id,name,note,config,jq,updated_at&order=created_at.asc"), getJ(SIG + "data/combos/results.json"), getJ(SIG + "data/signals.json"), getJ(SIG + "data/meta.json")]);
+    setMeta(meta);
     const cnt = document.getElementById("mineCnt"); if (cnt) cnt.textContent = list.length;
     const nav = document.getElementById("mineNav"); if (nav) nav.textContent = list.length;
     const today = {}; for (const s of (sig && sig.strategies) || []) if (s.combo_id) { const x = s.starts[s.default_start] || []; today[s.combo_id] = x[0]; }
@@ -125,7 +126,8 @@ async function view(el) {
   const id = new URLSearchParams(location.search).get("id");
   if (!id) { el.innerHTML = `<p class="empty">缺少组合编号。</p>`; return; }
   try {
-    const [list, res, sig] = await Promise.all([sb("combos?select=id,name,note,config,jq,created_at,updated_at&id=eq." + id), getJ(SIG + "data/combos/results.json"), getJ(SIG + "data/signals.json")]);
+    const [list, res, sig, meta] = await Promise.all([sb("combos?select=id,name,note,config,jq,created_at,updated_at&id=eq." + id), getJ(SIG + "data/combos/results.json"), getJ(SIG + "data/signals.json"), getJ(SIG + "data/meta.json")]);
+    setMeta(meta);
     const c = list[0];
     if (!c) { el.innerHTML = `<p class="empty">这个组合不存在或已删除。</p>`; return; }
     document.title = c.name + " · 我的组合策略";
