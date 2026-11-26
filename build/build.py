@@ -163,6 +163,10 @@ def code_detail(t):
     return ls[1] if len(ls) > 1 else ""
 
 # ---------------------------------------------------------------- 页面框架
+import hashlib as _hl
+CSSV = _hl.md5(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "site.css"), "rb").read()).hexdigest()[:8]   # 样式改了才换版本号，手机不用旧缓存
+
+
 def page(title, body, depth=0, desc="", extra_head=""):
     pre = "../" * depth
     return f"""<!doctype html>
@@ -174,7 +178,7 @@ def page(title, body, depth=0, desc="", extra_head=""):
 <meta name="description" content="{E(desc)}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="{pre}assets/site.css">{extra_head}
+<link rel="stylesheet" href="{pre}assets/site.css?v={CSSV}">{extra_head}
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 22l6-7 5 4 9-11' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 </head>
 <body>

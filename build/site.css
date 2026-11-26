@@ -2,7 +2,7 @@
 :root {
   --bg: #f6f7f9; --surface: #ffffff; --ink: #14171c; --ink-2: #4d535c; --ink-3: #7b828c;
   --rule: #e3e6ea; --chip: #edf1f6; --accent: #2a78d6; --accent-bg: rgba(42,120,214,.10); --on-accent: #fff;
-  --c-dividend: #1f8a5b; --c-trend: #2a78d6; --c-news: #c2571a;
+  --c-dividend: #1f8a5b; --c-trend: #2a78d6; --c-news: #c2571a; --c-mine: #8a5cd1; --act-buy: #c63b3b; --act-sell: #1f8a5b;
   --code-bg: #fbfbfc;
   --f-display: "Noto Serif SC", "Songti SC", "SimSun", serif;
   --f-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
@@ -11,11 +11,11 @@
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #121417; --surface: #1a1d21; --ink: #eef0f2; --ink-2: #b9bec6; --ink-3: #8a919b;
   --rule: #2c3036; --chip: #23282e; --accent: #4b93ea; --accent-bg: rgba(75,147,234,.14); --on-accent: #fff;
-  --c-dividend: #3cb983; --c-trend: #4b93ea; --c-news: #ec8a4f; --code-bg: #16191c; color-scheme: dark } }
+  --c-dividend: #3cb983; --c-trend: #4b93ea; --c-news: #ec8a4f; --c-mine: #a984e6; --act-buy: #ef6b6b; --act-sell: #3cb983; --code-bg: #16191c; color-scheme: dark } }
 :root[data-theme="dark"] {
   --bg: #121417; --surface: #1a1d21; --ink: #eef0f2; --ink-2: #b9bec6; --ink-3: #8a919b;
   --rule: #2c3036; --chip: #23282e; --accent: #4b93ea; --accent-bg: rgba(75,147,234,.14); --on-accent: #fff;
-  --c-dividend: #3cb983; --c-trend: #4b93ea; --c-news: #ec8a4f; --code-bg: #16191c; color-scheme: dark }
+  --c-dividend: #3cb983; --c-trend: #4b93ea; --c-news: #ec8a4f; --c-mine: #a984e6; --act-buy: #ef6b6b; --act-sell: #3cb983; --code-bg: #16191c; color-scheme: dark }
 * { box-sizing: border-box }
 html { scroll-padding-top: 64px }
 body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.7 }
@@ -106,3 +106,34 @@ h2 { font-family: var(--f-display); font-size: 21px; line-height: 1.4; margin: 0
 .doc th, .doc td { border: 1px solid var(--rule); padding: 6px 10px; text-align: left; vertical-align: top } .doc th { background: var(--chip); font-weight: 500 }
 @media (max-width: 560px) { .wrap { padding-top: 20px; gap: 28px } .files { grid-template-columns: minmax(0, 1fr) } .cards { grid-template-columns: minmax(0, 1fr) } .cols { grid-template-columns: minmax(0, 1fr) } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important } }
+
+/* 我的组合策略 */
+.dot.c-mine { background: var(--c-mine) }
+.chip.c-mine { color: var(--c-mine); background: color-mix(in srgb, var(--c-mine) 12%, transparent) }
+.chip.act-buy { color: var(--act-buy); background: color-mix(in srgb, var(--act-buy) 12%, transparent) }
+.chip.act-sell { color: var(--act-sell); background: color-mix(in srgb, var(--act-sell) 12%, transparent) }
+.chip.act-mix { color: var(--accent); background: var(--accent-bg) }
+.card-new { border-style: dashed; background: transparent; align-content: center; justify-items: start }
+.card-new h3 { color: var(--accent) }
+.vbtns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px }
+.vbtn { display: inline-block; font-size: 14px; padding: 7px 16px; border-radius: 8px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); text-decoration: none; white-space: nowrap }
+.vbtn:hover { border-color: var(--accent); text-decoration: none }
+.vbtn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent) }
+
+/* 组合详情：本地回测 */
+:root { --s-me: #8a5cd1; --s-ref: #9aa1ab } :root[data-theme="dark"] { --s-me: #a984e6; --s-ref: #6f7782 }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --s-me: #a984e6; --s-ref: #6f7782 } }
+.blk h2 small { font-size: 12.5px; font-weight: 400; color: var(--ink-3); margin-left: 6px }
+.bt-leg { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13.5px; color: var(--ink-2) } .bt-leg b { font-family: var(--f-mono); color: var(--ink); font-weight: 500 }
+.sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px } .sw-me { background: var(--s-me) } .sw-ref { background: var(--s-ref) }
+.bt-chart { position: relative; background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 10px 8px 4px }
+.bt-chart svg { width: 100%; height: auto; display: block; touch-action: pan-y }
+.bt-chart .g { stroke: var(--rule); stroke-width: 1 } .bt-chart .g1 { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 3 3 }
+.bt-chart .ax { font: 13px var(--f-mono); fill: var(--ink-3) } @media (max-width: 560px) { .bt-chart .ax { font-size: 19px } }
+.bt-chart .ln { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round } .ln-me { stroke: var(--s-me) } .ln-ref { stroke: var(--s-ref) }
+.bt-chart .dt { stroke: var(--surface); stroke-width: 2 } .dt-me { fill: var(--s-me) } .dt-ref { fill: var(--s-ref) }
+.bt-chart .cx { stroke: var(--ink-3); stroke-width: 1 }
+.bt-tip { position: absolute; top: 8px; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 6px 10px; font-size: 12.5px; color: var(--ink-2); pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,.08); white-space: nowrap }
+.bt-tip b { font-family: var(--f-mono); color: var(--ink); font-weight: 500 } .bt-tip .tt-d { color: var(--ink); margin-bottom: 2px }
+.bt-tbl { min-width: 0 } .bt-tbl td.num { font: 13px var(--f-mono); color: var(--ink); text-align: right } .bt-tbl th:not(:first-child) { text-align: right } .bt-tbl td:first-child { white-space: nowrap } .bt-tbl th, .bt-tbl td { padding: 8px 10px }
+.blk .hint { margin: 0; color: var(--ink-3); font-size: 12.5px; line-height: 1.6 }
