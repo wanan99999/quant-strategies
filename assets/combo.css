@@ -75,3 +75,6 @@ details summary { cursor: pointer; font-size: 13.5px; color: var(--accent) }
 @media (max-width: 560px) { .alloc input[type=number] { width: 3.4em } .tb td, .tb th { padding: 6px 4px } .tb.alloc th:first-child, .tb.alloc td:first-child { white-space: normal; min-width: 6.5em } }
 @keyframes flash { 0%, 60% { background: var(--accent-bg) } 100% { background: var(--surface) } } .mc.flash { animation: flash 2.4s ease-out }
 a.btn { display: inline-block; text-decoration: none }
+.dlg.dlg-wide { width: min(860px, calc(100vw - 24px)) }
+.code-pre { margin: 0; max-height: 46vh; overflow: auto; background: var(--code-bg, var(--bg)); border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; font: 12px/1.55 var(--f-mono); white-space: pre; tab-size: 4 }
+.code-meta { margin: 0; padding-left: 1.2em; display: grid; gap: 2px }

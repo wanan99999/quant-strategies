@@ -315,6 +315,54 @@ async function save(asNew) {
 $("btnSave").onclick = () => save(false);
 $("btnSaveAs").onclick = () => save(true);
 
+/* ---------------- 聚宽代码 ---------------- */
+let TPL = null;
+function cfgLines(cfg) {
+  const r = cfg.rule, out = [], idx = c => P.index_names[c] || c;
+  if (r.type === "fixed") out.push("切换规则：不切换，一直按「平常」的分法。");
+  else {
+    out.push(`中小盘走强：${idx(r.small.index)} 最近 ${r.small.er_n} 天净涨幅占来回波动 > ${Math.round(r.small.er_min * 100)}%，且在 ${r.small.ma_n} 天均价上方（14:50 现价）。`);
+    if (r.type === "three_state") out.push(`大盘上涨期：${idx(r.big.index)} 在 ${r.big.ma_n} 天均价上方、均价比 ${r.big.slope_lag} 天前高、${Math.round(r.big.breadth_min * 100)}% 以上申万一级行业站上 ${r.big.breadth_ma} 天均价（前一日收盘）。`);
+    if (+r.confirm_days > 0) out.push(`新行情要连续 ${r.confirm_days} 天成立才切换。`);
+  }
+  const SN = { normal: "平常", small: "中小盘走强", both: "中小盘走强 + 大盘上涨期" };
+  const sts = r.type === "fixed" ? ["normal"] : r.type === "two_state" ? ["normal", "small"] : ["normal", "small", "both"];
+  for (const st of sts) {
+    const row = Object.entries(cfg.alloc[st] || {}).filter(([, v]) => v > 0);
+    const tot = row.reduce((a, [, v]) => a + v, 0);
+    const parts = row.map(([k, v]) => { const sl = cfg.sleeves[k]; const pm = Object.entries(sl.params || {}).map(([a, b]) => `${a}=${b}`).join(", ");
+      return `${sl.name || PL[sl.plugin].name} ${Math.round(v * 100)}%（${pm}）`; });
+    if (tot < 0.9999) parts.push(`货币 ETF ${Math.round((1 - tot) * 100)}%`);
+    out.push(`「${SN[st]}」：${parts.join(" + ")}`);
+  }
+  out.push(`总持股上限 ${cfg.max_hold} 只；真实账户偏离目标 ${Math.round((cfg.tol ?? 0.25) * 100)}% 才调整。`);
+  return out;
+}
+async function genCode(cfg, name) {
+  if (!TPL) TPL = await fetch("combo/jq_template.py?v=" + (document.querySelector("meta[name=build]")?.content || Date.now())).then(r => { if (!r.ok) throw new Error(r.status); return r.text(); });
+  const c = clone(cfg); delete c.ui; c.name = name;
+  const today = new Date().toISOString().slice(0, 10);
+  const lines = cfgLines(c);
+  const head = [`可配置组合「${name}」—— 聚宽回测代码（${today} 由量化策略库「组合配置」页生成）`, "", ...lines.map(l => "    " + l)].join("\n").replace(/\\/g, "\\\\").replace(/"""/g, '\\"\\"\\"');
+  const code = TPL.replace("__HEADER__", head).replace("__CONFIG_JSON__", JSON.stringify(JSON.stringify(c)));
+  return { code, lines };
+}
+async function showCode(cfg, name) {
+  let r;
+  try { r = await genCode(cfg, name); } catch (e) { toast("生成失败：" + e.message); return; }
+  $("codeName").textContent = name; $("codePre").textContent = r.code;
+  $("codeMeta").innerHTML = r.lines.map(l => `<li>${E(l)}</li>`).join("");
+  const fn = "可配置组合_" + name.replace(/[\/:*?"<>|\s]+/g, "_") + "_聚宽.py";
+  $("codeDl").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([r.code], { type: "text/x-python;charset=utf-8" })); a.download = fn; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); };
+  $("codeCopy").onclick = async () => { try { await navigator.clipboard.writeText(r.code); toast("已复制，贴到聚宽新建策略里"); } catch (e) { const t = document.createRange(); t.selectNodeContents($("codePre")); const s = getSelection(); s.removeAllRanges(); s.addRange(t); toast("请按 Ctrl+C 复制已选中的代码"); } };
+  $("codeDlg").showModal();
+}
+$("btnJq").onclick = () => {
+  if (checks().some(x => !x[0])) { toast("先把「检查」里打 ✗ 的项改好"); return; }
+  const name = $("fName").value.trim() || (CUR.id ? CUR.name : "未命名组合");
+  showCode(toCfg(), name);
+};
+
 /* ---------------- 我的组合 ---------------- */
 async function loadList() {
   try {
@@ -322,13 +370,14 @@ async function loadList() {
     $("mineList").innerHTML = LIST.length ? LIST.map(c => {
       return `<div class="mc ${c.id === CUR.id ? "cur" : ""}"><div class="mc-t"><b>${E(c.name)}</b><span class="hint">${E(c.updated_at.slice(0, 10))}</span></div>
         ${c.note ? `<p class="hint">${E(c.note)}</p>` : ""}
-        <div class="mc-a"><button class="btn sm" data-open="${c.id}">打开编辑</button><button class="btn sm" data-copy="${c.id}">复制一份</button><button class="btn sm" data-jq="${c.id}">填聚宽成绩</button><a class="btn sm ghost" href="combo-view.html?id=${c.id}">看成绩</a><button class="btn sm ghost danger" data-rm="${c.id}">删除</button></div></div>`;
+        <div class="mc-a"><button class="btn sm" data-open="${c.id}">打开编辑</button><button class="btn sm" data-copy="${c.id}">复制一份</button><button class="btn sm" data-code="${c.id}">聚宽代码</button><button class="btn sm" data-jq="${c.id}">填聚宽成绩</button><a class="btn sm ghost" href="combo-view.html?id=${c.id}">看成绩</a><button class="btn sm ghost danger" data-rm="${c.id}">删除</button></div></div>`;
     }).join("") : `<p class="empty">还没有保存的组合。下面默认打开的是「原方案（V1.4 三合一）」，改完起个名字保存即可。保存后的组合和收益率显示在首页「我的组合策略」。</p>`;
   } catch (e) { $("mineList").innerHTML = `<p class="empty">读取失败：${E(e.message)}　<button class="btn sm" onclick="location.reload()">重试</button></p>`; }
 }
 $("mineList").addEventListener("click", async e => {
   const b = e.target.closest("button"); if (!b) return;
-  const id = b.dataset.open || b.dataset.copy || b.dataset.jq || b.dataset.rm; const c = LIST.find(x => x.id === id); if (!c) return;
+  const id = b.dataset.open || b.dataset.copy || b.dataset.jq || b.dataset.rm || b.dataset.code; const c = LIST.find(x => x.id === id); if (!c) return;
+  if (b.dataset.code) { showCode(c.config, c.name); return; }
   if (b.dataset.open || b.dataset.copy) {
     if (!confirmLeave()) return;
     const model = c.config.ui ? clone(c.config.ui) : defaultModel();
@@ -360,7 +409,6 @@ $("mineList").addEventListener("click", async e => {
     [P, MK] = await Promise.all([fetch("combo/data/plugins.json" + v).then(r => r.json()), fetch("combo/data/mkt.json" + v).then(r => r.json())]);
   } catch (e) { document.querySelector(".wrap").insertAdjacentHTML("afterbegin", `<p class="err">页面数据加载失败：${E(e.message)}</p>`); return; }
   for (const p of P.plugins) PL[p.id] = p;
-  window.__combo = { toCfg: () => toCfg(), model: () => M };
   openModel(defaultModel(), { id: null, name: "", note: "" });
   await loadList();
   const want = new URLSearchParams(location.search).get("id");

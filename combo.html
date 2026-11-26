@@ -7,7 +7,7 @@
 <meta name="description" content="自己搭全行情切换组合：切换规则、三个位置放哪些策略、比例">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=816e7302"><link rel="stylesheet" href="assets/combo.css?v=202611251845"><meta name="build" content="202611251845">
+<link rel="stylesheet" href="assets/site.css?v=816e7302"><link rel="stylesheet" href="assets/combo.css?v=202611251946"><meta name="build" content="202611251946">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 22l6-7 5 4 9-11' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 </head>
 <body>
@@ -64,7 +64,7 @@
     <div class="cb-btns">
       <button class="btn primary" id="btnSave">保存</button>
       <button class="btn" id="btnSaveAs">另存为新组合</button>
-      <button class="btn" id="btnJq" disabled title="下一步上线">生成聚宽代码（即将上线）</button>
+      <button class="btn" id="btnJq">生成聚宽代码</button>
     </div>
     <p class="hint" id="saveMsg">保存后：本地电脑当晚跑 2023 年以来的回测，第二天 14:30 起出现在信号监控里。保存要输入口令。</p>
   </div>
@@ -94,8 +94,20 @@
   </form>
 </dialog>
 
+<dialog id="codeDlg" class="dlg dlg-wide">
+  <form method="dialog">
+    <h3>聚宽代码：<span id="codeName"></span></h3>
+    <p class="hint">把代码整段贴到聚宽「策略研究 → 新建策略」里运行。回测设置：<b>频率选「分钟」</b>、开始日期 2023-01-01、初始资金 100 万以上。
+      和本地信号监控用同一套规则（每个策略在自己的模拟账户里跑，行情切换那天才重新分钱），结果会和本地测算差几个点。</p>
+    <ul class="hint code-meta" id="codeMeta"></ul>
+    <pre class="code-pre" id="codePre"></pre>
+    <div class="cb-btns"><button class="btn primary" type="button" id="codeDl">下载 .py 文件</button><button class="btn" type="button" id="codeCopy">复制全部代码</button><button class="btn" value="close">关闭</button></div>
+    <p class="hint">跑完后点「已保存的组合」里的「填聚宽成绩」，首页卡片就会改成聚宽实测收益。</p>
+  </form>
+</dialog>
+
 <div class="toast" id="toast" hidden></div>
-<script src="assets/combo.js?v=202611251845"></script>
+<script src="assets/combo.js?v=202611251946"></script>
 </main>
 <script>
 /* 返回键：从本站页面进来就回到上一页（保留原来的滚动位置），直接打开时跳到 href */
